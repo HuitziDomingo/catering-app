@@ -1,0 +1,75 @@
+# Catering App
+
+Plataforma de pedidos para un negocio de catering: los clientes ordenan
+desayunos, comidas y cenas desde una app móvil, y el negocio gestiona menú,
+precios y pedidos desde un dashboard web — con un chatbot de soporte
+integrado vía MCP (Model Context Protocol) para consultar pedidos en
+lenguaje natural.
+
+Proyecto construido con arquitectura *agent-native* desde el día uno:
+decisiones documentadas como ADRs, `ARCHITECTURE.md` como fuente de verdad
+para agentes de IA, y un servidor MCP propio como pieza central del backend.
+
+## Stack
+
+- **Backend:** NestJS (REST API + WebSocket Gateway + servidor MCP), TypeORM, PostgreSQL (Supabase)
+- **Dashboard:** Angular + PrimeNG
+- **App móvil:** React Native (Expo) + gluestack, Zustand, axios
+- **Notificaciones:** WhatsApp vía Twilio
+- **PDF:** pdfkit
+- **Monorepo:** Nx + pnpm
+- **Testing:** Jest (unitarias e integración), Cypress (E2E dashboard)
+- **CI/CD:** GitHub Actions + Snyk (auditoría de dependencias)
+- **Deploy:** GCP Cloud Run (API) + Firebase Hosting (dashboard)
+
+## Estructura
+
+```
+apps/
+  dashboard/     # Angular + PrimeNG — panel de operación y super usuario
+  mobile/        # React Native (Expo) + gluestack — app de clientes
+  api/           # NestJS: REST API + WebSocket Gateway + servidor MCP + PdfModule
+libs/
+  shared-types/  # DTOs e interfaces TypeScript compartidas entre apps
+docs/
+  adr/           # Decisiones de arquitectura (ADR-001 a ADR-008)
+  ARCHITECTURE.md
+  database-design.pdf
+```
+
+## Documentación de arquitectura
+
+Antes de tocar código, lee:
+
+1. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — panorama completo del sistema.
+2. [`docs/adr/`](docs/adr/) — el razonamiento detrás de cada decisión técnica.
+
+## Funcionalidad — versión alfa
+
+- Catálogo de menú (desayuno/comida/cena) con precios editables.
+- Pedidos desde la app móvil.
+- Dashboard con vista de pedidos en tiempo real y gestión de precios.
+- Autenticación de usuarios.
+- Notificación por WhatsApp a los administradores cuando llega un pedido.
+- Notificación por WhatsApp al cliente con PDF de su compra.
+- Página de super usuario: historial de clientes, gasto total, generación de
+  PDF de clientes por semana/mes.
+- Chatbot de soporte en la app, usando un servidor MCP propio para consultar
+  pedidos.
+
+## Desarrollo
+
+```bash
+pnpm install
+pnpm nx serve api          # backend NestJS
+pnpm nx serve dashboard    # dashboard Angular
+pnpm nx start mobile       # app React Native (Expo)
+```
+
+## Tests
+
+```bash
+pnpm nx test api           # unitarias/integración backend
+pnpm nx test dashboard     # unitarias dashboard
+pnpm nx e2e dashboard-e2e  # E2E con Cypress
+```
