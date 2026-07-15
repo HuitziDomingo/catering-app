@@ -1,0 +1,41 @@
+{
+  "name": "mobile",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "eas-build-post-install": "cd ../../ && node tools/scripts/eas-build-post-install.mjs . apps/mobile"
+  },
+  "dependencies": {
+    "@expo/html-elements": "^0.12.5",
+    "@expo/metro": "*",
+    "@expo/vector-icons": "*",
+    "@gluestack-ui/core": "4.0.0-alpha.0",
+    "@gluestack-ui/utils": "4.0.0-alpha.0",
+    "@gluestack/ui-next-adapter": "4.0.0-alpha.0",
+    "@legendapp/motion": "^2.5.3",
+    "@testing-library/react-native": "*",
+    "dom-helpers": "^5.2.1",
+    "expo": "*",
+    "expo-splash-screen": "*",
+    "expo-status-bar": "*",
+    "expo-system-ui": "*",
+    "jest-expo": "*",
+    "nativewind": "^4.2.6",
+    "react": "*",
+    "react-aria": "^3.50.0",
+    "react-native": "*",
+    "react-native-safe-area-context": "^5.8.0",
+    "react-native-svg": "^15.15.5",
+    "react-native-svg-transformer": "*",
+    "react-native-web": "^0.19.13",
+    "react-stately": "^3.48.0",
+    "tailwind-variants": "^0.1.20"
+  },
+  "devDependencies": {
+    "@react-native/assets-registry": "^0.79.7",
+    "@types/react-native": "0.72.8",
+    "autoprefixer": "^10.5.3",
+    "postcss": "^8.5.19",
+    "tailwindcss": "^3.4.19"
+  }
+}

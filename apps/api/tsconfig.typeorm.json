@@ -1,0 +1,16 @@
+{
+  "//": "tsconfig dedicado al CLI de TypeORM bajo ts-node (migraciones).",
+  "//2": "Fuerza CommonJS + resolución node para evitar el modo ESM que rompe",
+  "//3": "los imports relativos sin extensión (ver data-source.ts).",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node10",
+    "target": "es2021",
+    "types": ["node"],
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": ["src/**/*.ts"]
+}
