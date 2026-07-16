@@ -22,7 +22,6 @@
           }
         ],
         "styles": [
-          "node_modules/primeicons/primeicons.css",
           "apps/dashboard/src/styles.scss"
         ]
       },

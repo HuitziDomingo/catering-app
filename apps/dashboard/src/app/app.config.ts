@@ -4,8 +4,7 @@ import {
   provideZonelessChangeDetection,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeng/themes/aura';
+import { provideTaiga } from '@taiga-ui/core';
 import { appRoutes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -13,7 +12,6 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(appRoutes),
-    // PrimeNG fijado en 21.1.x con preset Aura (ADR-003, ADR-009).
-    providePrimeNG({ theme: { preset: Aura } }),
+    provideTaiga(),
   ],
 };

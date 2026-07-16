@@ -14,9 +14,7 @@
     "declaration": true
   },
   "files": [],
-  "include": [
-    "nativewind-env.d.ts"
-  ],
+  "include": [],
   "references": [
     {
       "path": "./tsconfig.app.json"

@@ -3,7 +3,6 @@ const { withNxMetro } = require('@nx/expo');
 // `mergeConfig` must come from the Expo-provided Metro instance.
 const { getDefaultConfig } = require('expo/metro-config');
 const { mergeConfig } = require('@expo/metro/metro-config');
-const { withNativeWind } = require('nativewind/metro');
 
 const defaultConfig = getDefaultConfig(__dirname);
 const { assetExts, sourceExts } = defaultConfig.resolver;
@@ -25,14 +24,7 @@ const customConfig = {
   },
 };
 
-// NativeWind (gluestack-ui v2 — ADR-003) procesa `globals.css` (Tailwind) y
-// habilita `className` en componentes React Native.
-const nativeWindConfig = withNativeWind(
-  mergeConfig(defaultConfig, customConfig),
-  { input: './globals.css', inlineRem: 16 },
-);
-
-module.exports = withNxMetro(nativeWindConfig, {
+module.exports = withNxMetro(mergeConfig(defaultConfig, customConfig), {
   // Change this to true to see debugging info.
   // Useful if you have issues resolving modules
   debug: false,

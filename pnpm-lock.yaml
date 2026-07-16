@@ -62,9 +62,15 @@ importers:
       '@nestjs/typeorm':
         specifier: ^11.0.3
         version: 11.0.3(@nestjs/common@11.1.28(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@11.1.28)(reflect-metadata@0.2.2)(rxjs@7.8.1)(typeorm@1.1.0(babel-plugin-macros@3.1.0)(pg@8.22.0)(ts-node@10.9.2(@types/node@22.20.1)(typescript@5.9.3)))
-      '@primeng/themes':
-        specifier: ~21.0.0
-        version: 21.0.4
+      '@taiga-ui/cdk':
+        specifier: ^5.15.0
+        version: 5.15.0(21f0fab4e05a295f3d7c65581305aa68)
+      '@taiga-ui/core':
+        specifier: ^5.15.0
+        version: 5.15.0(96479ddf3def3d667b0c58ba8eacf56b)
+      '@taiga-ui/kit':
+        specifier: ^5.15.0
+        version: 5.15.0(b77f0f83a26a9187faf5ff560bdb6e7f)
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
@@ -98,12 +104,6 @@ importers:
       pg:
         specifier: ^8.22.0
         version: 8.22.0
-      primeicons:
-        specifier: ^7.0.0
-        version: 7.0.0
-      primeng:
-        specifier: ~21.1.0
-        version: 21.1.9(7fdeea9edb8c439b64cf84be1866cd39)
       react:
         specifier: ^19.2.0
         version: 19.2.7
@@ -128,6 +128,9 @@ importers:
       rxjs:
         specifier: ^7.8.0
         version: 7.8.1
+      taiga-ui:
+        specifier: ^5.15.0
+        version: 5.15.0(21f0fab4e05a295f3d7c65581305aa68)
       typeorm:
         specifier: ^1.1.0
         version: 1.1.0(babel-plugin-macros@3.1.0)(pg@8.22.0)(ts-node@10.9.2(@types/node@22.20.1)(typescript@5.9.3))
@@ -2655,6 +2658,28 @@ packages:
     resolution: {integrity: sha512-Z7C/xXCiGWsg0KuKsHTKJxbWhpI3Vs5GwLfOean7MGyVFGqdRgBbAjOCh6u4bbjPc/8MJ2pZmK/0DLdCbivLDA==}
     engines: {node: '>=8'}
 
+  '@maskito/angular@5.3.1':
+    resolution: {integrity: sha512-uVBoA55GdwdwzKlur2UNq4kNSbrCA3wHT8aWfH/S9bNH6HGK9oBPykowBMQQYikn903BKv2scin19hyt9tjlMQ==}
+    peerDependencies:
+      '@angular/core': '>=19.0.0'
+      '@angular/forms': '>=19.0.0'
+      '@maskito/core': ^5.3.1
+
+  '@maskito/core@5.3.1':
+    resolution: {integrity: sha512-4imRPDKsV9zQwCUt5pR+XOQNgYTO99dzH2MZgyMFfK6npHart6kiNM1CEWLsMUj4BER2s+97uHGDS0eOER+PeQ==}
+
+  '@maskito/kit@5.3.1':
+    resolution: {integrity: sha512-GSYJgEJalqXPLq2XcKu8yYNCVfR5neQ1kae8jZr2bTCPwYktUxU9sWC2qs6KCtjg7lU6Kh4p7bZ+eM2cvqnWow==}
+    peerDependencies:
+      '@maskito/core': ^5.3.1
+
+  '@maskito/phone@5.3.1':
+    resolution: {integrity: sha512-UxIJCwwPyqPMEQ6Mu7W4tOw3cNm5fTPY5PxHD8N4ggoi8fcQxv0f/X1Un1oUSUxRMzhsLQwNl1Iv9uy3tt0f4w==}
+    peerDependencies:
+      '@maskito/core': ^5.3.1
+      '@maskito/kit': ^5.3.1
+      libphonenumber-js: '>=1.0.0'
+
   '@modelcontextprotocol/sdk@1.25.2':
     resolution: {integrity: sha512-LZFeo4F9M5qOhC/Uc1aQSrBHxMrvxett+9KLHt7OhcExtoiRN9DKgbZffMP/nxjutWDQpfMDfP3nkHI4X9ijww==}
     engines: {node: '>=18'}
@@ -2894,6 +2919,42 @@ packages:
       reflect-metadata: ^0.1.13 || ^0.2.0
       rxjs: ^7.2.0
       typeorm: ^0.3.0 || ^1.0.0-dev
+
+  '@ng-web-apis/common@5.3.0':
+    resolution: {integrity: sha512-b83gIhb7Kk8O8QoZU6wiwXWx9pzBYLlrxb/XndDgHqKDAJKf4/BoM4QwB0xCRPSK0IYnBATgmuGg332YmYeLCA==}
+    peerDependencies:
+      '@angular/common': '>=19.0.0'
+      '@angular/core': '>=19.0.0'
+      '@types/dom-speech-recognition': ^0.0.10
+      rxjs: '>=7.0.0'
+
+  '@ng-web-apis/intersection-observer@5.3.0':
+    resolution: {integrity: sha512-9mX8qUBjVwIHopecDZlGtnJS6hqWRVg5eKBkZRNd8vDa5NYE3sVdX4IsM7Fcq+v4Msqby7p0P7Od6zuanNRbXA==}
+    peerDependencies:
+      '@angular/core': '>=19.0.0'
+      '@ng-web-apis/common': ^5.3.0
+
+  '@ng-web-apis/mutation-observer@5.3.0':
+    resolution: {integrity: sha512-+OwGJ1XIWXZ+fBcH6RAJ5HTj1kYNkhLSku199E7jwRSUAzXbpjRg+Y1/iqSIS++nFzcs/juzRLNZAZlBZBnbSQ==}
+    peerDependencies:
+      '@angular/core': '>=19.0.0'
+      '@ng-web-apis/common': ^5.3.0
+
+  '@ng-web-apis/platform@5.3.0':
+    resolution: {integrity: sha512-+f+/ANQ3U8cX6oK3HqeoJlmjAjTGXBRODc982Bz1mAGg8Wtg53Lq50GMkU7VNVqzH/hF0oTjSRKXzgVqm3NGmA==}
+
+  '@ng-web-apis/resize-observer@5.3.0':
+    resolution: {integrity: sha512-etyLgim3u4Uq4KW33JVPHXQZUP7tXoBUil1oHJNJlWjqKyOSQjehn0iwGZ+fuI78sDhvNywRvJSQn8pVIqzlJw==}
+    peerDependencies:
+      '@angular/core': '>=19.0.0'
+      '@ng-web-apis/common': ^5.3.0
+
+  '@ng-web-apis/screen-orientation@5.3.0':
+    resolution: {integrity: sha512-bdBL4sLRNEfG5PjEO/no3mhSf/dFnIYlT/RFJ27Y08kEtSFIGetW/mGjJGLj86EMSeIhmoyins5IkTqJUqYhrA==}
+    peerDependencies:
+      '@angular/core': '>=19.0.0'
+      '@ng-web-apis/common': ^5.3.0
+      rxjs: '>=7.0.0'
 
   '@noble/hashes@1.4.0':
     resolution: {integrity: sha512-V1JJ1WTRUqHHrOSh597hURcMqVKVGL/ea3kv0gSnEdsEZ0/+VyPghM1lMNGc00z7CIQorSvbKpuJkxvuHbvdbg==}
@@ -3368,32 +3429,6 @@ packages:
   '@pkgr/core@0.3.6':
     resolution: {integrity: sha512-SEeaJLb3qBNF/OaXnaR1NmmBbFYk1zC0ZH/52fATcRPLFg/p791YrcyFFy44Bo9sLaGuSuLp5Q6axbb/O+v/RA==}
     engines: {node: ^14.18.0 || >=16.0.0}
-
-  '@primeng/themes@21.0.4':
-    resolution: {integrity: sha512-WDF8pj91K3ItGmUJB91T1mRj6ut3dCMz4/5rb1sZR6sjxP7jX06PT/uXkKF8sz60ewEEBbh3yK98Js/mKxev3A==}
-    deprecated: 'Deprecated. This package is no longer maintained. Please migrate to @primeuix/themes: https://www.npmjs.com/package/@primeuix/themes'
-
-  '@primeuix/motion@0.0.10':
-    resolution: {integrity: sha512-PsZwOPq79Scp7/ionshRcQ5xKVf9+zuLcyY5mf6onK8chHT5C9JGphmcIZ4CzcqxuGEpsm8AIbTGy+zS3RtzLA==}
-    engines: {node: '>=12.11.0'}
-
-  '@primeuix/styled@0.7.4':
-    resolution: {integrity: sha512-QSO/NpOQg8e9BONWRBx9y8VGMCMYz0J/uKfNJEya/RGEu7ARx0oYW0ugI1N3/KB1AAvyGxzKBzGImbwg0KUiOQ==}
-    engines: {node: '>=12.11.0'}
-
-  '@primeuix/styles@2.0.3':
-    resolution: {integrity: sha512-2ykAB6BaHzR/6TwF8ShpJTsZrid6cVIEBVlookSdvOdmlWuevGu5vWOScgIwqWwlZcvkFYAGR/SUV3OHCTBMdw==}
-
-  '@primeuix/themes@2.0.3':
-    resolution: {integrity: sha512-3fS1883mtCWhgUgNf/feiaaDSOND4EBIOu9tZnzJlJ8QtYyL6eFLcA6V3ymCWqLVXQ1+lTVEZv1gl47FIdXReg==}
-
-  '@primeuix/utils@0.6.4':
-    resolution: {integrity: sha512-pZ5f+vj7wSzRhC7KoEQRU5fvYAe+RP9+m39CTscZ3UywCD1Y2o6Fe1rRgklMPSkzUcty2jzkA0zMYkiJBD1hgg==}
-    engines: {node: '>=12.11.0'}
-
-  '@primeuix/utils@0.7.2':
-    resolution: {integrity: sha512-pmEbSfP0Phf9W9RweiM66zXnkn73ZeKyYINElbX3uZ2+stzzaba2svLAl3B1pHVcRw5t43O0VciaGe4ye2EXKw==}
-    engines: {node: '>=12.11.0'}
 
   '@react-native/assets-registry@0.85.3':
     resolution: {integrity: sha512-u9ZiYP23vA2IFtdFQFmetzSmk6SM0xgKIoiOsr1hXNHjHaLhOm+/Ph1ud57wX6+Dbwdzx8coJgnzSKL3W21PCg==}
@@ -3969,6 +4004,96 @@ packages:
   '@swc/helpers@0.5.23':
     resolution: {integrity: sha512-5lSsMOTXURePglDfvuAQUqkGek9Hg2kksOYay2m0+XR++b2NWYL/4sWyuvVBIs8oKnJaxkdi9whaL/sqN13afw==}
 
+  '@taiga-ui/cdk@5.15.0':
+    resolution: {integrity: sha512-095k27z9REEPO3WgfTufb6D4Q+S0ADL0gy6Fz6hfH4inVuGKiPyX//1cWV4v0jVYKiwXgz8iMetooQp44SH9sQ==}
+    peerDependencies:
+      '@angular/cdk': '>=19.0.0'
+      '@angular/common': '>=19.0.0'
+      '@angular/core': '>=19.0.0'
+      '@angular/forms': '>=19.0.0'
+      '@ng-web-apis/common': ^5.3.0
+      '@ng-web-apis/mutation-observer': ^5.3.0
+      '@ng-web-apis/platform': ^5.3.0
+      '@ng-web-apis/resize-observer': ^5.3.0
+      '@ng-web-apis/screen-orientation': ^5.3.0
+      '@taiga-ui/event-plugins': ^5.0.0
+      '@taiga-ui/font-watcher': ~0.6.0
+      '@taiga-ui/polymorpheus': ^5.0.1
+      rxjs: '>=7.0.0'
+
+  '@taiga-ui/core@5.15.0':
+    resolution: {integrity: sha512-Qjrkhu6xbWLwu7I0y1H6BanEfGKibNV5neXcGiiJdsSfjiqch2X7TI36kvHXBVzcxGZ0iCYm1bhAud0Oh15ezg==}
+    peerDependencies:
+      '@angular/common': '>=19.0.0'
+      '@angular/core': '>=19.0.0'
+      '@angular/forms': '>=19.0.0'
+      '@angular/platform-browser': '>=19.0.0'
+      '@angular/router': '>=19.0.0'
+      '@ng-web-apis/common': ^5.3.0
+      '@ng-web-apis/intersection-observer': ^5.3.0
+      '@ng-web-apis/mutation-observer': ^5.3.0
+      '@ng-web-apis/platform': ^5.3.0
+      '@taiga-ui/cdk': 5.15.0
+      '@taiga-ui/event-plugins': ^5.0.0
+      '@taiga-ui/i18n': 5.15.0
+      '@taiga-ui/polymorpheus': ^5.0.1
+      '@taiga-ui/styles': 5.15.0
+      rxjs: '>=7.0.0'
+
+  '@taiga-ui/design-tokens@0.310.0':
+    resolution: {integrity: sha512-DT/hHVi+p6ubOClF01SXCWduB1UMQo/dEvw5RJrOstktQuXRnBQRKN7w6boK+GlteLWvxNc0l13UPWPrRATkWQ==}
+
+  '@taiga-ui/event-plugins@5.0.0':
+    resolution: {integrity: sha512-8AxIUn/lX4kwuDlIFmhElgBNtGDgQVC9/F+3O2A29IcMSt9693KRi8qKwToe9p3UuUsT9nnj5YeE11BtJMG0wA==}
+    peerDependencies:
+      '@angular/core': '>=16.0.0'
+      '@angular/platform-browser': '>=16.0.0'
+      rxjs: '>=7.0.0'
+
+  '@taiga-ui/font-watcher@0.6.0':
+    resolution: {integrity: sha512-TqDKkzFJhTLEcvlEQkQoUnD+kVZaCh0MRq2I1AFY8/XKTuVa+/P+Il/m2uC4xVg3v04X17160gcTLRaQMUV0Uw==}
+
+  '@taiga-ui/i18n@5.15.0':
+    resolution: {integrity: sha512-3KOH94/7osWRgtnWIjrvBTYmSIzySjZObkX7IzcPrx74sNAVN1Oxtg5gq2d4+MzdCV/l+tjEOUo7ehy8SZCoAw==}
+    peerDependencies:
+      '@angular/core': '>=19.0.0'
+      '@ng-web-apis/common': ^5.3.0
+      rxjs: '>=7.0.0'
+
+  '@taiga-ui/kit@5.15.0':
+    resolution: {integrity: sha512-u8UChfLlG585v+l6BqDQqh3DjpdasT+Vbl9utJoA3VY/RaM0yL/9Gv6j2pSROzUJGmCkeuD7OJPPdQpDFe3fhQ==}
+    peerDependencies:
+      '@angular/common': '>=19.0.0'
+      '@angular/core': '>=19.0.0'
+      '@angular/forms': '>=19.0.0'
+      '@angular/router': '>=19.0.0'
+      '@maskito/angular': ^5.3.1
+      '@maskito/core': ^5.3.1
+      '@maskito/kit': ^5.3.1
+      '@maskito/phone': ^5.3.1
+      '@ng-web-apis/common': ^5.3.0
+      '@ng-web-apis/intersection-observer': ^5.3.0
+      '@ng-web-apis/mutation-observer': ^5.3.0
+      '@ng-web-apis/platform': ^5.3.0
+      '@ng-web-apis/resize-observer': ^5.3.0
+      '@taiga-ui/cdk': 5.15.0
+      '@taiga-ui/core': 5.15.0
+      '@taiga-ui/i18n': 5.15.0
+      '@taiga-ui/polymorpheus': ^5.0.1
+      '@taiga-ui/styles': 5.15.0
+      rxjs: '>=7.0.0'
+
+  '@taiga-ui/polymorpheus@5.0.1':
+    resolution: {integrity: sha512-OpPuPjkfwZDZmLIBrjWRpSCSCjqIS8y2/ntACe8ySe17Fz8zTAj6gXP5TKqsrfla0mzWpN1A6Hz8YR6jDhV8qw==}
+    peerDependencies:
+      '@angular/core': '>=19.0.0'
+      '@angular/platform-browser': '>=19.0.0'
+
+  '@taiga-ui/styles@5.15.0':
+    resolution: {integrity: sha512-jjT1qwF1y2PeoimbRsz304d9/beCMxpyc5shV9Lx90qHOFN9Wt3jDe2wDgBOY6mclH3W5kHPYMDt/nF/+vUpAA==}
+    peerDependencies:
+      '@taiga-ui/design-tokens': ~0.310.0
+
   '@testing-library/react-native@13.2.2':
     resolution: {integrity: sha512-QALF+nZ4BSXBOtUs5ljLnaHKuyR+ykakYB3RYwciSrllhgZkbUjXeGkugCxrmEtQ2BUZnYVRY7AEGboMP/hucg==}
     engines: {node: '>=18'}
@@ -3991,6 +4116,9 @@ packages:
   '@tootallnate/once@2.0.1':
     resolution: {integrity: sha512-HqmEUIGRJ5fSXchkVgR5F7qn48bDBzv0kWj/Kfu5e6uci4UlEeng4331LnBkWffb++Ei3FOVLxo8JJWMFBDMeQ==}
     engines: {node: '>= 10'}
+
+  '@ts-morph/common@0.28.1':
+    resolution: {integrity: sha512-W74iWf7ILp1ZKNYXY5qbddNaml7e9Sedv5lvU1V8lftlitkc9Pq1A+jlH23ltDgWYeZFFEqGCD1Ies9hqu3O+g==}
 
   '@tsconfig/node10@1.0.12':
     resolution: {integrity: sha512-UCYBaeFvM11aU2y3YPZ//O5Rhj+xKyzy7mvcIoAjASbigy8mHMryP5cK7dgjlz2hWxh1g5pLw084E0a/wlUSFQ==}
@@ -4041,6 +4169,9 @@ packages:
 
   '@types/connect@3.4.38':
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
+
+  '@types/dom-speech-recognition@0.0.10':
+    resolution: {integrity: sha512-KFET6ha+OhsWU74Oz8NCjOLAkN0gbHyGjQK6CEtRVeO6635tuuvxGjGh9IbLVhfp0DR52djv1fFbr/9thS1dUA==}
 
   '@types/eslint-scope@3.7.7':
     resolution: {integrity: sha512-MzMFlSLBqNF2gcHWO0G1vP/YQyfvrxZ0bF+u7mzUdZ1/xK4A4sru+nraZz5i3iEIk1l1uyicaDVTB4QbbEkAYg==}
@@ -4143,6 +4274,9 @@ packages:
 
   '@types/retry@0.12.2':
     resolution: {integrity: sha512-XISRgDJ2Tc5q4TRqvgJtzsRkFYNJzZrhTdtMoGVBttwzzQJkPnS3WWTFc7kuDRoPtPakl+T+OfdEUjYJj7Jbow==}
+
+  '@types/semver@7.7.1':
+    resolution: {integrity: sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==}
 
   '@types/send@0.17.6':
     resolution: {integrity: sha512-Uqt8rPBE8SY0RK8JB1EzVOIZ32uqy8HwdxCnoCOsYrvnswqmFZ/k+9Ikidlk/ImhsdvBsloHbAlewb2IEBV/Og==}
@@ -4616,11 +4750,19 @@ packages:
     resolution: {integrity: sha512-COROpnaoap1E2F000S62r6A60uHZnmlvomhfyT2DlTcrY1OrBKn2UhH7qn5wTC9zMvD0AY7csdPSNwKP+7WiQw==}
     engines: {node: '>= 0.4'}
 
+  array-differ@4.0.0:
+    resolution: {integrity: sha512-Q6VPTLMsmXZ47ENG3V+wQyZS1ZxXMxFyYzA+Z/GMrJ6yIutAIEf9wTyroTzmGjNfox9/h3GdGBCVh43GVFx4Uw==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
   array-flatten@1.1.1:
     resolution: {integrity: sha512-PCVAQswWemu6UdxsDFFX/+gVeYqKAod3D3UVm91jHwynguOwAvYPhx8nNlM++NqRcK6CxxpUafjmhIdKiHibqg==}
 
   array-timsort@1.0.3:
     resolution: {integrity: sha512-/+3GRL7dDAGEfM6TseQk/U+mi18TU2Ms9I3UlLdUMhz2hbvGNTKdj9xniwXfUqgYhHxRx0+8UnKkvlNwVU+cWQ==}
+
+  array-union@3.0.1:
+    resolution: {integrity: sha512-1OvF9IbWwaeiM9VhzYXVQacMibxpXOMYVNIvMtKRyX9SImBXpKcFr8XvFDeEslCyuH/t6KRt7HEO94AlP8Iatw==}
+    engines: {node: '>=12'}
 
   asap@2.0.6:
     resolution: {integrity: sha512-BSHWgDSAiKs50o2Re8ppvp3seVHXSRM44cdSsT9FfNEUUZLOGWVCsiWaRPWM1Znn+mqZ1OfVZ3z3DWEzSp7hRA==}
@@ -5058,6 +5200,9 @@ packages:
   co@4.6.0:
     resolution: {integrity: sha512-QVb0dM5HvG+uaxitm8wONl7jltx8dqhfU33DcqtOZcLSVIKSDDLDi7+0LbAKiyI8hD9u42m2YxXSkMGWThaecQ==}
     engines: {iojs: '>= 1.0.0', node: '>= 0.12.0'}
+
+  code-block-writer@13.0.3:
+    resolution: {integrity: sha512-Oofo0pq3IKnsFtuHqSF7TqBfr71aeyZDVJ0HpmqB7FBM2qEigL0iPONSCZSO9pE9dZTAxANe5XHG9Uy0YMv8cg==}
 
   collect-v8-coverage@1.0.3:
     resolution: {integrity: sha512-1L5aqIkwPfiodaMgQunkF1zRhNqifHBmtbbbxcr6yVxxBnliw4TDOW6NxpO8DJLgJ16OT+Y4ztZqP6p/FtXnAw==}
@@ -7625,6 +7770,10 @@ packages:
     resolution: {integrity: sha512-2eznPJP8z2BFLX50tf0LuODrpINqP1RVIm/CObbTcBRITQgmC/TjcREF1NeTBzIcR5XO/ukWo+YHOjBbFwIupg==}
     hasBin: true
 
+  multimatch@8.0.0:
+    resolution: {integrity: sha512-0D10M2/MnEyvoog7tmozlpSqL3HEU1evxUFa3v1dsKYmBDFSP1dLSX4CH2rNjpQ+4Fps8GKmUkCwiKryaKqd9A==}
+    engines: {node: '>=20'}
+
   multitars@1.0.0:
     resolution: {integrity: sha512-H/J4fMLedtudftaYMOg7ajzLYgT3/rwbWVJbqr/iUgB8DQztn38ys5HOqI1CzSxx8QhXXwOOnnBvd4v3jG5+Mg==}
 
@@ -7667,6 +7816,14 @@ packages:
 
   neo-async@2.6.2:
     resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==}
+
+  ng-morph@5.0.1:
+    resolution: {integrity: sha512-SuFs17QnETHg5xsDGBZ7424YzdN9fWww6tTMe0H/UZSVy4j2izCoBKr0NEZ3MrPmMcQwhXdE41DUvk2FKuBv6w==}
+    peerDependencies:
+      '@angular-devkit/core': '>=19.0.0'
+      '@angular-devkit/schematics': '>=19.0.0'
+      '@types/semver': ^7.7.1
+      tslib: ^2.8.1
 
   no-case@3.0.4:
     resolution: {integrity: sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg==}
@@ -7953,6 +8110,9 @@ packages:
   passport@0.7.0:
     resolution: {integrity: sha512-cPLl+qZpSc+ireUvt+IzqbED1cHHkDoVYMo30jbJIdOOjQ1MQYZBPiNvmi8UM6lJuOpTPXJGZQk0DtC4y61MYQ==}
     engines: {node: '>= 0.4.0'}
+
+  path-browserify@1.0.1:
+    resolution: {integrity: sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==}
 
   path-dirname@1.0.2:
     resolution: {integrity: sha512-ALzNPpyNq9AqXMBjeymIjFDAkAFH06mHJH/cSBHAgU0s4vfpBn6b2nf8tiRLvagKD8RbTpq2FKTBg7cl9l3c7Q==}
@@ -8394,20 +8554,6 @@ packages:
   pretty-format@30.4.1:
     resolution: {integrity: sha512-K6KiKMHTL4jjX4u3Kir2EW07nRfcqVTXIImx50wbjHQTcZPgg+gjVeNTIT3l3L1Rd4UefxfogquC9J37SoFyyw==}
     engines: {node: ^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0}
-
-  primeicons@7.0.0:
-    resolution: {integrity: sha512-jK3Et9UzwzTsd6tzl2RmwrVY/b8raJ3QZLzoDACj+oTJ0oX7L9Hy+XnVwgo4QVKlKpnP/Ur13SXV/pVh4LzaDw==}
-
-  primeng@21.1.9:
-    resolution: {integrity: sha512-Z76PtF08X0PNSTCNMobao8Qm71vC56mtZSdUtX/gsn4+q4x0NbUUtkeK1pc33a+kxVm2zkmOwzUIEGmb9VdoIA==}
-    peerDependencies:
-      '@angular/cdk': ^21.0.0
-      '@angular/common': ^21.0.0
-      '@angular/core': ^21.0.7
-      '@angular/forms': ^21.0.0
-      '@angular/platform-browser': ^21.0.0
-      '@angular/router': ^21.0.0
-      rxjs: ^6.0.0 || ^7.8.1
 
   proc-log@4.2.0:
     resolution: {integrity: sha512-g8+OnU/L2v+wyiVK+D5fA34J7EH8jZ8DDlvwhRCMxmMj7UCBvxiO1mGeN+36JXIKF4zevU4kRBd8lVgG9vLelA==}
@@ -9318,6 +9464,9 @@ packages:
     resolution: {integrity: sha512-eNRKgb3z66Yp3D2CixVujOUvXLFUTij/zVnV8KRyvFdQwpz7I5DS8UfRkTeLzb64u+dkzDSdelE24izu+zSSUg==}
     engines: {node: ^14.18.0 || >=16.0.0}
 
+  taiga-ui@5.15.0:
+    resolution: {integrity: sha512-9nAlS+/b4/cGBD6IGZkaRh/cH6ncxBZeSnaSWjrXHR2wjRzcoQAUk1SowGbRKy2lDwkVcFU6latbdM8Wku2ERw==}
+
   tailwindcss@3.4.19:
     resolution: {integrity: sha512-3ofp+LL8E+pK/JuPLPggVAIaEuhvIz4qNcf3nA1Xn2o/7fb7s/TYpHhwGDv1ZU3PkBluUVaF8PyCHcm48cKLWQ==}
     engines: {node: '>=14.0.0'}
@@ -9533,6 +9682,9 @@ packages:
     peerDependenciesMeta:
       loader-utils:
         optional: true
+
+  ts-morph@27.0.2:
+    resolution: {integrity: sha512-fhUhgeljcrdZ+9DZND1De1029PrE+cMkIP7ooqkLRTrRLTqcki2AstsyJm0vRNbTbVCNJ0idGlbBrfqc7/nA8w==}
 
   ts-node@10.9.2:
     resolution: {integrity: sha512-f0FFpIdcHgn8zcPSbf1dRevwt047YMnaiJM3u2w2RewrB+fob/zePZcrOyQoLMMO7aBIddLcQIEK5dYjkLnGrQ==}
@@ -13035,6 +13187,25 @@ snapshots:
 
   '@lukeed/csprng@1.1.0': {}
 
+  '@maskito/angular@5.3.1(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/forms@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/platform-browser@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)))(rxjs@7.8.1))(@maskito/core@5.3.1)':
+    dependencies:
+      '@angular/core': 21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)
+      '@angular/forms': 21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/platform-browser@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)))(rxjs@7.8.1)
+      '@maskito/core': 5.3.1
+      tslib: 2.8.1
+
+  '@maskito/core@5.3.1': {}
+
+  '@maskito/kit@5.3.1(@maskito/core@5.3.1)':
+    dependencies:
+      '@maskito/core': 5.3.1
+
+  '@maskito/phone@5.3.1(@maskito/core@5.3.1)(@maskito/kit@5.3.1(@maskito/core@5.3.1))(libphonenumber-js@1.13.8)':
+    dependencies:
+      '@maskito/core': 5.3.1
+      '@maskito/kit': 5.3.1(@maskito/core@5.3.1)
+      libphonenumber-js: 1.13.8
+
   '@modelcontextprotocol/sdk@1.25.2(hono@4.12.30)(zod@4.1.13)':
     dependencies:
       '@hono/node-server': 1.19.14(hono@4.12.30)
@@ -13254,6 +13425,43 @@ snapshots:
       reflect-metadata: 0.2.2
       rxjs: 7.8.1
       typeorm: 1.1.0(babel-plugin-macros@3.1.0)(pg@8.22.0)(ts-node@10.9.2(@types/node@22.20.1)(typescript@5.9.3))
+
+  '@ng-web-apis/common@5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1)':
+    dependencies:
+      '@angular/common': 21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1)
+      '@angular/core': 21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)
+      '@types/dom-speech-recognition': 0.0.10
+      rxjs: 7.8.1
+      tslib: 2.8.1
+
+  '@ng-web-apis/intersection-observer@5.3.0(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@ng-web-apis/common@5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1))':
+    dependencies:
+      '@angular/core': 21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)
+      '@ng-web-apis/common': 5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1)
+      tslib: 2.8.1
+
+  '@ng-web-apis/mutation-observer@5.3.0(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@ng-web-apis/common@5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1))':
+    dependencies:
+      '@angular/core': 21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)
+      '@ng-web-apis/common': 5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1)
+      tslib: 2.8.1
+
+  '@ng-web-apis/platform@5.3.0':
+    dependencies:
+      tslib: 2.8.1
+
+  '@ng-web-apis/resize-observer@5.3.0(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@ng-web-apis/common@5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1))':
+    dependencies:
+      '@angular/core': 21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)
+      '@ng-web-apis/common': 5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1)
+      tslib: 2.8.1
+
+  '@ng-web-apis/screen-orientation@5.3.0(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@ng-web-apis/common@5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1))(rxjs@7.8.1)':
+    dependencies:
+      '@angular/core': 21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)
+      '@ng-web-apis/common': 5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1)
+      rxjs: 7.8.1
+      tslib: 2.8.1
 
   '@noble/hashes@1.4.0': {}
 
@@ -14278,31 +14486,6 @@ snapshots:
 
   '@pkgr/core@0.3.6': {}
 
-  '@primeng/themes@21.0.4':
-    dependencies:
-      '@primeuix/styled': 0.7.4
-      '@primeuix/themes': 2.0.3
-
-  '@primeuix/motion@0.0.10':
-    dependencies:
-      '@primeuix/utils': 0.6.4
-
-  '@primeuix/styled@0.7.4':
-    dependencies:
-      '@primeuix/utils': 0.6.4
-
-  '@primeuix/styles@2.0.3':
-    dependencies:
-      '@primeuix/styled': 0.7.4
-
-  '@primeuix/themes@2.0.3':
-    dependencies:
-      '@primeuix/styled': 0.7.4
-
-  '@primeuix/utils@0.6.4': {}
-
-  '@primeuix/utils@0.7.2': {}
-
   '@react-native/assets-registry@0.85.3': {}
 
   '@react-native/babel-plugin-codegen@0.85.3(@babel/core@7.29.7)':
@@ -14863,6 +15046,104 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
+  '@taiga-ui/cdk@5.15.0(21f0fab4e05a295f3d7c65581305aa68)':
+    dependencies:
+      '@angular/cdk': 21.0.6(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1)
+      '@angular/common': 21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1)
+      '@angular/core': 21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)
+      '@angular/forms': 21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/platform-browser@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)))(rxjs@7.8.1)
+      '@ng-web-apis/common': 5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1)
+      '@ng-web-apis/mutation-observer': 5.3.0(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@ng-web-apis/common@5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1))
+      '@ng-web-apis/platform': 5.3.0
+      '@ng-web-apis/resize-observer': 5.3.0(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@ng-web-apis/common@5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1))
+      '@ng-web-apis/screen-orientation': 5.3.0(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@ng-web-apis/common@5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1))(rxjs@7.8.1)
+      '@taiga-ui/event-plugins': 5.0.0(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/platform-browser@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)))(rxjs@7.8.1)
+      '@taiga-ui/font-watcher': 0.6.0
+      '@taiga-ui/polymorpheus': 5.0.1(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/platform-browser@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)))
+      rxjs: 7.8.1
+      tslib: 2.8.1
+    optionalDependencies:
+      '@angular-devkit/core': 21.0.6(chokidar@4.0.3)
+      '@angular-devkit/schematics': 21.0.6(chokidar@4.0.3)
+      '@schematics/angular': 21.0.6(chokidar@4.0.3)
+      ng-morph: 5.0.1(@angular-devkit/core@21.0.6(chokidar@4.0.3))(@angular-devkit/schematics@21.0.6(chokidar@4.0.3))(@types/semver@7.7.1)(tslib@2.8.1)
+      parse5: 7.3.0
+    transitivePeerDependencies:
+      - '@types/semver'
+      - chokidar
+
+  '@taiga-ui/core@5.15.0(96479ddf3def3d667b0c58ba8eacf56b)':
+    dependencies:
+      '@angular/common': 21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1)
+      '@angular/core': 21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)
+      '@angular/forms': 21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/platform-browser@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)))(rxjs@7.8.1)
+      '@angular/platform-browser': 21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))
+      '@angular/router': 21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/platform-browser@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)))(rxjs@7.8.1)
+      '@ng-web-apis/common': 5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1)
+      '@ng-web-apis/intersection-observer': 5.3.0(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@ng-web-apis/common@5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1))
+      '@ng-web-apis/mutation-observer': 5.3.0(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@ng-web-apis/common@5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1))
+      '@ng-web-apis/platform': 5.3.0
+      '@taiga-ui/cdk': 5.15.0(21f0fab4e05a295f3d7c65581305aa68)
+      '@taiga-ui/event-plugins': 5.0.0(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/platform-browser@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)))(rxjs@7.8.1)
+      '@taiga-ui/i18n': 5.15.0(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@ng-web-apis/common@5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1))(rxjs@7.8.1)
+      '@taiga-ui/polymorpheus': 5.0.1(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/platform-browser@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)))
+      '@taiga-ui/styles': 5.15.0(@taiga-ui/design-tokens@0.310.0)
+      rxjs: 7.8.1
+      tslib: 2.8.1
+
+  '@taiga-ui/design-tokens@0.310.0':
+    dependencies:
+      tslib: 2.8.1
+
+  '@taiga-ui/event-plugins@5.0.0(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/platform-browser@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)))(rxjs@7.8.1)':
+    dependencies:
+      '@angular/core': 21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)
+      '@angular/platform-browser': 21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))
+      rxjs: 7.8.1
+      tslib: 2.8.1
+
+  '@taiga-ui/font-watcher@0.6.0': {}
+
+  '@taiga-ui/i18n@5.15.0(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@ng-web-apis/common@5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1))(rxjs@7.8.1)':
+    dependencies:
+      '@angular/core': 21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)
+      '@ng-web-apis/common': 5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1)
+      rxjs: 7.8.1
+      tslib: 2.8.1
+
+  '@taiga-ui/kit@5.15.0(b77f0f83a26a9187faf5ff560bdb6e7f)':
+    dependencies:
+      '@angular/common': 21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1)
+      '@angular/core': 21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)
+      '@angular/forms': 21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/platform-browser@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)))(rxjs@7.8.1)
+      '@angular/router': 21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/platform-browser@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)))(rxjs@7.8.1)
+      '@maskito/angular': 5.3.1(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/forms@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/platform-browser@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)))(rxjs@7.8.1))(@maskito/core@5.3.1)
+      '@maskito/core': 5.3.1
+      '@maskito/kit': 5.3.1(@maskito/core@5.3.1)
+      '@maskito/phone': 5.3.1(@maskito/core@5.3.1)(@maskito/kit@5.3.1(@maskito/core@5.3.1))(libphonenumber-js@1.13.8)
+      '@ng-web-apis/common': 5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1)
+      '@ng-web-apis/intersection-observer': 5.3.0(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@ng-web-apis/common@5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1))
+      '@ng-web-apis/mutation-observer': 5.3.0(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@ng-web-apis/common@5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1))
+      '@ng-web-apis/platform': 5.3.0
+      '@ng-web-apis/resize-observer': 5.3.0(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@ng-web-apis/common@5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1))
+      '@taiga-ui/cdk': 5.15.0(21f0fab4e05a295f3d7c65581305aa68)
+      '@taiga-ui/core': 5.15.0(96479ddf3def3d667b0c58ba8eacf56b)
+      '@taiga-ui/i18n': 5.15.0(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@ng-web-apis/common@5.3.0(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@types/dom-speech-recognition@0.0.10)(rxjs@7.8.1))(rxjs@7.8.1)
+      '@taiga-ui/polymorpheus': 5.0.1(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/platform-browser@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)))
+      '@taiga-ui/styles': 5.15.0(@taiga-ui/design-tokens@0.310.0)
+      rxjs: 7.8.1
+      tslib: 2.8.1
+
+  '@taiga-ui/polymorpheus@5.0.1(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/platform-browser@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)))':
+    dependencies:
+      '@angular/core': 21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)
+      '@angular/platform-browser': 21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))
+      tslib: 2.8.1
+
+  '@taiga-ui/styles@5.15.0(@taiga-ui/design-tokens@0.310.0)':
+    dependencies:
+      '@taiga-ui/design-tokens': 0.310.0
+
   '@testing-library/react-native@13.2.2(jest@30.3.0(@types/node@22.20.1)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@22.20.1)(typescript@5.9.3)))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/jest-preset@0.85.3(@babel/core@7.29.7)(react@19.2.7))(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.7))(react-test-renderer@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
       chalk: 4.1.2
@@ -14885,6 +15166,13 @@ snapshots:
   '@tokenizer/token@0.3.0': {}
 
   '@tootallnate/once@2.0.1': {}
+
+  '@ts-morph/common@0.28.1':
+    dependencies:
+      minimatch: 10.2.5
+      path-browserify: 1.0.1
+      tinyglobby: 0.2.17
+    optional: true
 
   '@tsconfig/node10@1.0.12': {}
 
@@ -14948,6 +15236,8 @@ snapshots:
   '@types/connect@3.4.38':
     dependencies:
       '@types/node': 22.20.1
+
+  '@types/dom-speech-recognition@0.0.10': {}
 
   '@types/eslint-scope@3.7.7':
     dependencies:
@@ -15081,6 +15371,9 @@ snapshots:
   '@types/resolve@1.20.2': {}
 
   '@types/retry@0.12.2': {}
+
+  '@types/semver@7.7.1':
+    optional: true
 
   '@types/send@0.17.6':
     dependencies:
@@ -15579,9 +15872,15 @@ snapshots:
 
   aria-query@5.3.2: {}
 
+  array-differ@4.0.0:
+    optional: true
+
   array-flatten@1.1.1: {}
 
   array-timsort@1.0.3: {}
+
+  array-union@3.0.1:
+    optional: true
 
   asap@2.0.6: {}
 
@@ -16167,6 +16466,9 @@ snapshots:
   clone@1.0.4: {}
 
   co@4.6.0: {}
+
+  code-block-writer@13.0.3:
+    optional: true
 
   collect-v8-coverage@1.0.3: {}
 
@@ -19481,6 +19783,13 @@ snapshots:
       dns-packet: 5.6.1
       thunky: 1.1.0
 
+  multimatch@8.0.0:
+    dependencies:
+      array-differ: 4.0.0
+      array-union: 3.0.1
+      minimatch: 10.2.5
+    optional: true
+
   multitars@1.0.0: {}
 
   mute-stream@2.0.0: {}
@@ -19511,6 +19820,18 @@ snapshots:
   negotiator@1.0.0: {}
 
   neo-async@2.6.2: {}
+
+  ng-morph@5.0.1(@angular-devkit/core@21.0.6(chokidar@4.0.3))(@angular-devkit/schematics@21.0.6(chokidar@4.0.3))(@types/semver@7.7.1)(tslib@2.8.1):
+    dependencies:
+      '@angular-devkit/core': 21.0.6(chokidar@4.0.3)
+      '@angular-devkit/schematics': 21.0.6(chokidar@4.0.3)
+      '@types/semver': 7.7.1
+      jsonc-parser: 3.3.1
+      minimatch: 10.2.5
+      multimatch: 8.0.0
+      ts-morph: 27.0.2
+      tslib: 2.8.1
+    optional: true
 
   no-case@3.0.4:
     dependencies:
@@ -19972,6 +20293,9 @@ snapshots:
       pause: 0.0.1
       utils-merge: 1.0.1
 
+  path-browserify@1.0.1:
+    optional: true
+
   path-dirname@1.0.2: {}
 
   path-exists@4.0.0: {}
@@ -20387,23 +20711,6 @@ snapshots:
       ansi-styles: 5.2.0
       react-is-18: react-is@18.3.1
       react-is-19: react-is@19.2.7
-
-  primeicons@7.0.0: {}
-
-  primeng@21.1.9(7fdeea9edb8c439b64cf84be1866cd39):
-    dependencies:
-      '@angular/cdk': 21.0.6(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1)
-      '@angular/common': 21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1)
-      '@angular/core': 21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)
-      '@angular/forms': 21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/platform-browser@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)))(rxjs@7.8.1)
-      '@angular/platform-browser': 21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))
-      '@angular/router': 21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/platform-browser@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)))(rxjs@7.8.1)
-      '@primeuix/motion': 0.0.10
-      '@primeuix/styled': 0.7.4
-      '@primeuix/styles': 2.0.3
-      '@primeuix/utils': 0.7.2
-      rxjs: 7.8.1
-      tslib: 2.8.1
 
   proc-log@4.2.0: {}
 
@@ -21453,6 +21760,27 @@ snapshots:
     dependencies:
       '@pkgr/core': 0.3.6
 
+  taiga-ui@5.15.0(21f0fab4e05a295f3d7c65581305aa68):
+    dependencies:
+      '@taiga-ui/cdk': 5.15.0(21f0fab4e05a295f3d7c65581305aa68)
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - '@angular/cdk'
+      - '@angular/common'
+      - '@angular/core'
+      - '@angular/forms'
+      - '@ng-web-apis/common'
+      - '@ng-web-apis/mutation-observer'
+      - '@ng-web-apis/platform'
+      - '@ng-web-apis/resize-observer'
+      - '@ng-web-apis/screen-orientation'
+      - '@taiga-ui/event-plugins'
+      - '@taiga-ui/font-watcher'
+      - '@taiga-ui/polymorpheus'
+      - '@types/semver'
+      - chokidar
+      - rxjs
+
   tailwindcss@3.4.19(yaml@2.9.0):
     dependencies:
       '@alloc/quick-lru': 5.2.0
@@ -21671,6 +21999,12 @@ snapshots:
       webpack: 5.108.4(lightningcss@1.32.0)(postcss@8.5.19)(webpack-cli@7.2.1)
     optionalDependencies:
       loader-utils: 2.0.4
+
+  ts-morph@27.0.2:
+    dependencies:
+      '@ts-morph/common': 0.28.1
+      code-block-writer: 13.0.3
+    optional: true
 
   ts-node@10.9.2(@types/node@22.20.1)(typescript@5.9.3):
     dependencies:

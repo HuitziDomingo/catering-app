@@ -16,4 +16,13 @@ describe('App', () => {
       'Catering — Dashboard',
     );
   });
+
+  it('should render the Taiga UI button', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('button')?.textContent).toContain(
+      'Probar Taiga UI',
+    );
+  });
 });

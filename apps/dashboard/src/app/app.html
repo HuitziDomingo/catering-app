@@ -1,16 +1,17 @@
 <main style="font-family: sans-serif; padding: 2rem; max-width: 640px">
   <h1>Catering — Dashboard</h1>
   <p>
-    Esqueleto Angular {{ '21.0.x' }} + PrimeNG 21.1.x (ADR-003 / ADR-009).
-    Aún sin páginas: esto solo prueba que el pin de versiones instala y
-    renderiza.
+    Esqueleto Angular {{ '21.0.x' }} + Taiga UI (ADR-012).
+    Aún sin páginas: esto solo prueba que Taiga UI instala y renderiza.
   </p>
 
-  <p-button
-    label="Probar PrimeNG"
-    icon="pi pi-check"
-    (onClick)="clicks.set(clicks() + 1)"
-  />
+  <button
+    tuiButton
+    type="button"
+    (click)="clicks.set(clicks() + 1)"
+  >
+    Probar Taiga UI
+  </button>
 
   <p data-testid="click-count">Clicks: {{ clicks() }}</p>
 
