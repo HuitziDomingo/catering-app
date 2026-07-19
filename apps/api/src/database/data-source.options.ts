@@ -1,7 +1,11 @@
 import { DataSourceOptions } from 'typeorm';
 import { Role } from './entities/role.entity';
 import { User } from './entities/user.entity';
+import { McpToolLog } from './entities/mcp-tool-log.entity';
+import { Order } from './entities/order.entity';
 import { InitRolesAndUsers1752537600000 } from './migrations/1752537600000-InitRolesAndUsers';
+import { AddMcpToolLogs1752537600001 } from './migrations/1752537600001-AddMcpToolLogs';
+import { AddOrders1752537600002 } from './migrations/1752537600002-AddOrders';
 
 /**
  * Construye las opciones de conexión de TypeORM a partir de variables de
@@ -29,8 +33,12 @@ export function buildDataSourceOptions(
     type: 'postgres',
     url,
     ssl: env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : false,
-    entities: [Role, User],
-    migrations: [InitRolesAndUsers1752537600000],
+    entities: [Role, User, McpToolLog, Order],
+    migrations: [
+      InitRolesAndUsers1752537600000,
+      AddMcpToolLogs1752537600001,
+      AddOrders1752537600002,
+    ],
     synchronize: false,
     migrationsRun: false,
     logging: env.DATABASE_LOGGING === 'true',
