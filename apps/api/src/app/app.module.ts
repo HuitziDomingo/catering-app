@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
+import { McpModule } from '../mcp/mcp.module';
 import { buildDataSourceOptions } from '../database/data-source.options';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -21,6 +22,7 @@ import { AppService } from './app.service';
       }),
     }),
     AuthModule,
+    McpModule,
   ],
   controllers: [AppController],
   providers: [AppService],
