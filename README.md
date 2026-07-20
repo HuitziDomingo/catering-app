@@ -63,8 +63,26 @@ Antes de tocar código, lee:
 pnpm install
 pnpm nx serve api          # backend NestJS
 pnpm nx serve dashboard    # dashboard Angular
-pnpm nx start mobile       # app React Native (Expo)
 ```
+
+### Mobile (Expo)
+
+`apps/mobile` requiere el **Dev Client propio** (ADR-015), no el Expo Go
+genérico de las tiendas de aplicaciones: Moti/Reanimated necesita
+`react-native-worklets@0.10.x`, y el binario de Expo Go trae una versión
+distinta compilada nativamente (crash `NativeWorklets` al abrir).
+
+```bash
+cd apps/mobile
+npx expo prebuild           # una sola vez (o tras cambiar app.json/plugins)
+npx expo run:ios            # build + instala el Dev Client en el simulador (una sola vez)
+npx expo start --dev-client # itera contra el Dev Client ya instalado
+```
+
+No uses `pnpm nx start mobile`: el executor de Nx para Expo tiene un bug
+confirmado de passthrough de stdio (sin fix disponible) que rompe la
+interacción con la CLI de Expo. Corre `npx expo start` directamente desde
+`apps/mobile`.
 
 ## Tests
 

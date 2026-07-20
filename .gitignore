@@ -54,6 +54,11 @@ docs/database-design.pdf
 apps/mobile/.expo
 apps/mobile/.expo-shared
 
+# Generado por `expo prebuild` (Continuous Native Generation, ADR-015).
+# No se versiona: se regenera desde app.json/config plugins en cada máquina/CI.
+apps/mobile/ios
+apps/mobile/android
+
 .angular
 ####
 docs/database-design.pdf
