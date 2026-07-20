@@ -1,0 +1,14 @@
+node_modules
+dist
+tmp
+out-tsc
+.git
+.env
+.env.*
+!.env.example
+**/*.spec.ts
+coverage
+.nx
+docs
+apps/dashboard
+apps/mobile

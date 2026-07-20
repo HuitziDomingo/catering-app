@@ -72,4 +72,4 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
-cache/
+cache/.vscode/

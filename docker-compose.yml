@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: catering-app-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: catering
+      POSTGRES_PASSWORD: catering_dev_password
+      POSTGRES_DB: catering_app_dev
+    ports:
+      # Puerto no estándar (5433) para no chocar con cualquier Postgres que
+      # ya exista en el sistema (ver ADR-014).
+      - '5433:5432'
+    volumes:
+      - catering_postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U catering -d catering_app_dev']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  catering_postgres_dev_data:
