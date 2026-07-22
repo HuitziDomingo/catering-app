@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StatusBar, Text, View } from 'react-native';
+import { StatusBar, Text, View } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import * as eva from '@eva-design/eva';
 import { ApplicationProvider, Button, IconRegistry } from '@ui-kitten/components';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
@@ -11,7 +12,7 @@ export const App = () => {
   const [clicks, setClicks] = useState(0);
 
   return (
-    <>
+    <SafeAreaProvider>
       <IconRegistry icons={EvaIconsPack} />
       <ApplicationProvider {...eva} theme={eva.light}>
         <StatusBar barStyle="dark-content" />
@@ -47,7 +48,7 @@ export const App = () => {
           </View>
         </SafeAreaView>
       </ApplicationProvider>
-    </>
+    </SafeAreaProvider>
   );
 };
 
