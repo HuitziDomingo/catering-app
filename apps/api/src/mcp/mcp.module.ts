@@ -4,8 +4,7 @@ import { McpController } from './mcp.controller';
 import { McpTransport } from './mcp.transport';
 import { McpToolLogsService } from './mcp-tool-logs.service';
 import { McpToolLog } from '../database/entities/mcp-tool-log.entity';
-import { OrdersService } from '../orders/orders.service';
-import { Order } from '../database/entities/order.entity';
+import { OrdersModule } from '../orders/orders.module';
 import { AuthModule } from '../auth/auth.module';
 
 /**
@@ -14,16 +13,13 @@ import { AuthModule } from '../auth/auth.module';
  * Integra:
  * - Transporte MCP oficial con StreamableHTTPServerTransport
  * - Servicio de auditoría de invocaciones
- * - Servicio de pedidos para el tool consultar_pedidos_por_cliente
+ * - OrdersModule para el tool consultar_pedidos_por_cliente
  * - Autenticación JWT (reusa AuthModule)
  */
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([McpToolLog, Order]),
-    AuthModule,
-  ],
+  imports: [TypeOrmModule.forFeature([McpToolLog]), AuthModule, OrdersModule],
   controllers: [McpController],
-  providers: [McpTransport, McpToolLogsService, OrdersService],
-  exports: [McpTransport, McpToolLogsService, OrdersService],
+  providers: [McpTransport, McpToolLogsService],
+  exports: [McpTransport, McpToolLogsService],
 })
 export class McpModule {}

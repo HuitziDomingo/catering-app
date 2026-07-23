@@ -3,6 +3,7 @@ import { Role } from './entities/role.entity';
 import { User } from './entities/user.entity';
 import { McpToolLog } from './entities/mcp-tool-log.entity';
 import { Order } from './entities/order.entity';
+import { OrderItem } from './entities/order-item.entity';
 import { MenuCategory } from './entities/menu-category.entity';
 import { MenuItem } from './entities/menu-item.entity';
 import { MenuItemPriceHistory } from './entities/menu-item-price-history.entity';
@@ -10,6 +11,7 @@ import { InitRolesAndUsers1752537600000 } from './migrations/1752537600000-InitR
 import { AddMcpToolLogs1752537600001 } from './migrations/1752537600001-AddMcpToolLogs';
 import { AddOrders1752537600002 } from './migrations/1752537600002-AddOrders';
 import { AddMenu1752537600003 } from './migrations/1752537600003-AddMenu';
+import { AddOrderItems1752537600004 } from './migrations/1752537600004-AddOrderItems';
 
 /**
  * Construye las opciones de conexión de TypeORM a partir de variables de
@@ -42,6 +44,7 @@ export function buildDataSourceOptions(
       User,
       McpToolLog,
       Order,
+      OrderItem,
       MenuCategory,
       MenuItem,
       MenuItemPriceHistory,
@@ -51,6 +54,7 @@ export function buildDataSourceOptions(
       AddMcpToolLogs1752537600001,
       AddOrders1752537600002,
       AddMenu1752537600003,
+      AddOrderItems1752537600004,
     ],
     synchronize: false,
     migrationsRun: false,
