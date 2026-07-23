@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ThrottlerGuard, ThrottlerModule, minutes } from '@nestjs/throttler';
 import { AuthModule } from '../auth/auth.module';
 import { McpModule } from '../mcp/mcp.module';
 import { MenuModule } from '../menu/menu.module';
@@ -23,12 +25,18 @@ import { AppService } from './app.service';
         autoLoadEntities: true,
       }),
     }),
+    // Límite global por IP, laxo a propósito: no debe afectar navegación
+    // pública de catálogo (GET /menu/*). Los endpoints sensibles (auth)
+    // aplican un límite más estricto vía @Throttle en su propio controller.
+    ThrottlerModule.forRoot({
+      throttlers: [{ name: 'default', ttl: minutes(1), limit: 100 }],
+    }),
     AuthModule,
     McpModule,
     MenuModule,
     OrdersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}
