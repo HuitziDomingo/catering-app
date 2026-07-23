@@ -1,5 +1,6 @@
 packages:
   - apps/mobile
+  - apps/landing
 
 autoInstallPeers: true
 onlyBuiltDependencies:

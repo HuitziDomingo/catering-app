@@ -29,6 +29,7 @@ apps/
   dashboard/     # Angular + PrimeNG — panel de operación y super usuario
   mobile/        # React Native (Expo) + gluestack — app de clientes
   api/           # NestJS: REST API + WebSocket Gateway + servidor MCP + PdfModule
+  landing/       # Astro + Pico.css — landing page pública (dominio.com)
 libs/
   shared-types/  # DTOs e interfaces TypeScript compartidas entre apps
 docs/
@@ -63,6 +64,7 @@ Antes de tocar código, lee:
 pnpm install
 pnpm nx serve api          # backend NestJS
 pnpm nx serve dashboard    # dashboard Angular
+pnpm nx serve landing      # landing page Astro
 ```
 
 ### Mobile (Expo)
