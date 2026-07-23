@@ -5,9 +5,11 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { OrderItem } from './order-item.entity';
 import { User } from './user.entity';
 
 /**
@@ -48,6 +50,9 @@ export class Order {
 
   @Column({ type: 'text', nullable: true })
   notes?: string | null;
+
+  @OneToMany(() => OrderItem, (item) => item.order)
+  items!: OrderItem[];
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt!: Date;

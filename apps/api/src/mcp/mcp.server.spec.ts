@@ -47,6 +47,7 @@ describe('handleConsultarPedidosPorCliente', () => {
       subtotal: 500,
       total: 550,
       notes: null,
+      items: [],
       createdAt: new Date('2026-07-17T10:00:00Z'),
       updatedAt: new Date('2026-07-17T10:00:00Z'),
       customer: {

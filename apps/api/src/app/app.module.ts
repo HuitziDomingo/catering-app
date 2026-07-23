@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
 import { McpModule } from '../mcp/mcp.module';
 import { MenuModule } from '../menu/menu.module';
+import { OrdersModule } from '../orders/orders.module';
 import { buildDataSourceOptions } from '../database/data-source.options';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -25,6 +26,7 @@ import { AppService } from './app.service';
     AuthModule,
     McpModule,
     MenuModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,17 +1,36 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Order } from '../database/entities/order.entity';
+import { In, Repository } from 'typeorm';
 import { OrderStatus } from '@catering-app/shared-types';
+import { MenuItem } from '../database/entities/menu-item.entity';
+import { Order } from '../database/entities/order.entity';
+import { OrderItem } from '../database/entities/order-item.entity';
+import { CreateOrderDto } from './dto/create-order.dto';
 
 export interface FindByCustomerFilters {
   status?: OrderStatus;
   limit?: number;
 }
 
+interface Requester {
+  userId: string;
+  role: string;
+}
+
+/** Roles que pueden consultar cualquier pedido, no solo los propios. */
+const ORDER_READ_ANY_ROLES = ['staff', 'admin', 'superadmin'];
+
+function roundCurrency(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
 /**
  * Servicio para gestión de pedidos (ver ADR-006).
- * Implementación mínima para soportar el tool MCP consultar_pedidos_por_cliente.
  */
 @Injectable()
 export class OrdersService {
@@ -44,11 +63,93 @@ export class OrdersService {
   }
 
   /**
-   * Crea un nuevo pedido.
+   * Crea un pedido con sus líneas en una sola transacción (todo o nada): si
+   * algún menuItemId no existe o no está activo, no se crea nada. El precio
+   * de cada línea es un snapshot del base_price vigente del platillo en este
+   * momento (ver ADR-006) — un cambio de precio posterior nunca altera este
+   * pedido.
    */
-  async create(orderData: Partial<Order>): Promise<Order> {
-    const order = this.ordersRepository.create(orderData);
-    return this.ordersRepository.save(order);
+  async createOrder(customerId: string, dto: CreateOrderDto): Promise<Order> {
+    return this.ordersRepository.manager.transaction(async (manager) => {
+      const menuItemIds = [
+        ...new Set(dto.items.map((item) => item.menuItemId)),
+      ];
+      const menuItems = await manager.find(MenuItem, {
+        where: { id: In(menuItemIds) },
+      });
+      const menuItemsById = new Map(menuItems.map((item) => [item.id, item]));
+
+      let subtotal = 0;
+      const lineItems = dto.items.map((input) => {
+        const menuItem = menuItemsById.get(input.menuItemId);
+        if (!menuItem) {
+          throw new NotFoundException(
+            `El platillo ${input.menuItemId} no existe.`,
+          );
+        }
+        if (!menuItem.isActive) {
+          throw new BadRequestException(
+            `El platillo ${input.menuItemId} no está activo.`,
+          );
+        }
+
+        // numeric de Postgres llega como string por el driver pg (mismo
+        // patrón que MenuService al comparar basePrice).
+        const unitPrice = Number(menuItem.basePrice);
+        const lineSubtotal = roundCurrency(unitPrice * input.quantity);
+        subtotal = roundCurrency(subtotal + lineSubtotal);
+
+        return {
+          menuItemId: input.menuItemId,
+          quantity: input.quantity,
+          unitPrice,
+          subtotal: lineSubtotal,
+        };
+      });
+
+      const order = manager.create(Order, {
+        customerId,
+        status: OrderStatus.PENDING,
+        peopleCount: dto.peopleCount,
+        scheduledFor: new Date(dto.scheduledFor),
+        subtotal,
+        total: subtotal,
+        notes: dto.notes ?? null,
+      });
+      const savedOrder = await manager.save(order);
+
+      const orderItems = lineItems.map((line) =>
+        manager.create(OrderItem, { ...line, orderId: savedOrder.id }),
+      );
+      savedOrder.items = await manager.save(orderItems);
+
+      return savedOrder;
+    });
+  }
+
+  /**
+   * Obtiene un pedido con sus líneas. El cliente solo puede consultar sus
+   * propios pedidos; staff/admin/superadmin puede consultar cualquiera.
+   */
+  async findByIdForRequester(
+    id: string,
+    requester: Requester,
+  ): Promise<Order> {
+    const order = await this.ordersRepository.findOne({
+      where: { id },
+      relations: { items: true },
+    });
+    if (!order) {
+      throw new NotFoundException('El pedido no existe.');
+    }
+
+    const isOwner = order.customerId === requester.userId;
+    const canReadAny = ORDER_READ_ANY_ROLES.includes(requester.role);
+    if (!isOwner && !canReadAny) {
+      throw new ForbiddenException('No tienes acceso a este pedido.');
+    }
+
+    return order;
   }
 
   /**
