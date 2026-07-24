@@ -1,0 +1,45 @@
+<table class="menu-item-list">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Categoría</th>
+      <th>Precio</th>
+      <th>Sirve a</th>
+      <th>Estado</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (item of items(); track item.id) {
+      <tr>
+        <td>{{ item.name }}</td>
+        <td>{{ categoryName(item.categoryId) }}</td>
+        <td>{{ formatPrice(item.basePrice) }}</td>
+        <td>{{ item.servesPeople }}</td>
+        <td>
+          <span [attr.data-status]="item.isActive ? 'active' : 'inactive'">
+            {{ item.isActive ? 'Activo' : 'Inactivo' }}
+          </span>
+        </td>
+        <td class="menu-item-list__actions">
+          <button tuiButton type="button" size="xs" appearance="outline" (click)="edit.emit(item)">
+            Editar
+          </button>
+          <button
+            tuiButton
+            type="button"
+            size="xs"
+            appearance="outline-destructive"
+            (click)="delete.emit(item)"
+          >
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    } @empty {
+      <tr>
+        <td colspan="6">No hay platillos todavía.</td>
+      </tr>
+    }
+  </tbody>
+</table>

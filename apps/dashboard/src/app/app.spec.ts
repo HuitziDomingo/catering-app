@@ -1,10 +1,20 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { provideTaiga } from '@taiga-ui/core';
 import { App } from './app';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideTaiga(),
+      ],
     }).compileComponents();
   });
 
@@ -17,12 +27,10 @@ describe('App', () => {
     );
   });
 
-  it('should render the Taiga UI button', async () => {
+  it('should render the dev-only token banner', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('button')?.textContent).toContain(
-      'Probar Taiga UI',
-    );
+    expect(compiled.textContent).toContain('Modo desarrollo');
   });
 });

@@ -1,0 +1,24 @@
+.menu-item-list {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  [data-status='active'] {
+    color: #1a7f37;
+  }
+
+  [data-status='inactive'] {
+    color: #8a8a8a;
+  }
+}

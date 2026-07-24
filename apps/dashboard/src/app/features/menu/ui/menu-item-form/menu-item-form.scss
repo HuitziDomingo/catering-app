@@ -1,0 +1,23 @@
+.menu-item-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 480px;
+
+  &__error {
+    margin: -0.5rem 0 0;
+    color: #c62828;
+    font-size: 0.8rem;
+  }
+
+  &__toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+}

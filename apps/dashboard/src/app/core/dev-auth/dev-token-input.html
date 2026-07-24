@@ -1,0 +1,22 @@
+<div class="dev-token-banner">
+  <strong>⚠ Modo desarrollo:</strong>
+  pega un JWT de staff/admin/superadmin para probar altas, ediciones y
+  bajas del menú (temporal, hasta que exista una pantalla de login real).
+
+  @if (store.token()) {
+    <span data-testid="dev-token-status">Token activo.</span>
+    <button tuiButton type="button" size="xs" appearance="outline" (click)="clear()">
+      Quitar token
+    </button>
+  } @else {
+    <tui-textfield>
+      <input
+        data-testid="dev-token-input"
+        [ngModel]="draft()"
+        (ngModelChange)="draft.set($event)"
+        placeholder="Bearer JWT..."
+      />
+    </tui-textfield>
+    <button tuiButton type="button" size="xs" (click)="save()">Guardar</button>
+  }
+</div>

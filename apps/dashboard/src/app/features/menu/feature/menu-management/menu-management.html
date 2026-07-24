@@ -1,0 +1,43 @@
+<section class="menu-management">
+  <header class="menu-management__header">
+    <h2>Gestión de menú</h2>
+    <button tuiButton type="button" data-testid="new-item-button" (click)="startCreate()">
+      Nuevo platillo
+    </button>
+  </header>
+
+  @if (state.status() === 'loading') {
+    <p data-testid="menu-loading">Cargando…</p>
+  }
+
+  @if (state.status() === 'error') {
+    <p class="menu-management__error" data-testid="menu-error">{{ state.error() }}</p>
+    <button tuiButton type="button" appearance="outline" (click)="state.load()">
+      Reintentar
+    </button>
+  }
+
+  @if (state.status() === 'success') {
+    <app-menu-item-list
+      [items]="state.items()"
+      [categories]="state.categories()"
+      (edit)="startEdit($event)"
+      (delete)="confirmDelete($event)"
+    />
+  }
+
+  @if (showForm()) {
+    <div class="menu-management__form-panel">
+      <h3>{{ editingItem() ? 'Editar platillo' : 'Nuevo platillo' }}</h3>
+      @if (formError()) {
+        <p class="menu-management__error" data-testid="form-error">{{ formError() }}</p>
+      }
+      <app-menu-item-form
+        [item]="editingItem()"
+        [categories]="state.categories()"
+        (save)="save($event)"
+        (cancelled)="cancelForm()"
+      />
+    </div>
+  }
+</section>
