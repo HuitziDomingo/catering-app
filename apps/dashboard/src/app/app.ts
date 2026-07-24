@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { MenuSmoke } from './features/menu/feature/menu-smoke/menu-smoke';
+import { TuiRoot } from '@taiga-ui/core';
+import { DevTokenInput } from './core/dev-auth/dev-token-input';
 
 @Component({
-  imports: [RouterModule, MenuSmoke],
+  imports: [RouterModule, DevTokenInput, TuiRoot],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',

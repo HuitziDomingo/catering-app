@@ -14,6 +14,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
+  // Dev local del dashboard (nx serve dashboard, Angular). Sin esto el
+  // navegador bloquea las peticiones cross-origin desde :4200 a :3000.
+  app.enableCors({ origin: 'http://localhost:4200' });
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, transform: true }),
   );

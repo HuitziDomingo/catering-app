@@ -1,0 +1,88 @@
+<form class="menu-item-form" [formGroup]="form" (ngSubmit)="submit()">
+  <tui-textfield>
+    <input id="menu-item-name" formControlName="name" data-testid="name-input" />
+    <label tuiLabel for="menu-item-name">Nombre</label>
+  </tui-textfield>
+  @if (form.controls.name.invalid && form.controls.name.touched) {
+    <p class="menu-item-form__error" data-testid="name-error">
+      El nombre es obligatorio.
+    </p>
+  }
+
+  <tui-textfield>
+    <textarea
+      id="menu-item-description"
+      tuiTextarea
+      formControlName="description"
+      data-testid="description-input"
+    ></textarea>
+    <label tuiLabel for="menu-item-description">Descripción</label>
+  </tui-textfield>
+
+  <tui-textfield>
+    <select id="menu-item-category" formControlName="categoryId" data-testid="category-select">
+      <option value="" disabled>Selecciona una categoría</option>
+      @for (category of categories(); track category.id) {
+        <option [value]="category.id">{{ category.name }}</option>
+      }
+    </select>
+    <label tuiLabel for="menu-item-category">Categoría</label>
+  </tui-textfield>
+  @if (form.controls.categoryId.invalid && form.controls.categoryId.touched) {
+    <p class="menu-item-form__error" data-testid="category-error">
+      Selecciona una categoría.
+    </p>
+  }
+
+  <tui-textfield>
+    <input
+      id="menu-item-price"
+      type="number"
+      step="0.01"
+      formControlName="basePrice"
+      data-testid="price-input"
+    />
+    <label tuiLabel for="menu-item-price">Precio base (MXN)</label>
+  </tui-textfield>
+  @if (form.controls.basePrice.invalid && form.controls.basePrice.touched) {
+    <p class="menu-item-form__error" data-testid="price-error">
+      El precio debe ser mayor a 0.
+    </p>
+  }
+
+  <tui-textfield>
+    <input
+      id="menu-item-serves"
+      type="number"
+      step="1"
+      formControlName="servesPeople"
+      data-testid="serves-input"
+    />
+    <label tuiLabel for="menu-item-serves">Sirve a (personas)</label>
+  </tui-textfield>
+  @if (form.controls.servesPeople.invalid && form.controls.servesPeople.touched) {
+    <p class="menu-item-form__error" data-testid="serves-error">
+      Debe servir al menos a 1 persona.
+    </p>
+  }
+
+  <label class="menu-item-form__toggle" for="menu-item-active">
+    <input
+      id="menu-item-active"
+      type="checkbox"
+      tuiSwitch
+      formControlName="isActive"
+      data-testid="active-toggle"
+    />
+    Activo
+  </label>
+
+  <div class="menu-item-form__actions">
+    <button tuiButton type="submit" data-testid="submit-button">
+      {{ item() ? 'Guardar cambios' : 'Crear platillo' }}
+    </button>
+    <button tuiButton type="button" appearance="outline" (click)="cancelled.emit()">
+      Cancelar
+    </button>
+  </div>
+</form>
