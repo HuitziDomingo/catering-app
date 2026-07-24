@@ -1,17 +1,17 @@
-// Shell de la capa data-access del feature de menú (ver ADR-020). Cuando se
-// construya la pantalla real de menú, esto consumirá GET /menu/items (ver
-// ADR-006) vía axios (ADR-007). Por ahora solo el shell de la función, sin
-// cliente HTTP ni llamada real todavía.
+import type { MenuCategory, MenuItem } from '@catering-app/shared-types';
+import { apiClient } from './apiClient';
 
-/** Forma mínima esperada de un platillo; se alineará con
- * `@catering-app/shared-types` cuando esa dependencia se conecte a mobile. */
-export type MenuItem = {
-  id: string;
-  name: string;
-  basePrice: number;
-  isActive: boolean;
-};
+// Capa data-access del feature de menú (ver ADR-020). GET /menu/categories y
+// GET /menu/items son públicos (ver ADR-006): no requieren Authorization.
 
-export async function fetchMenuItems(): Promise<MenuItem[]> {
-  throw new Error('fetchMenuItems: aún no implementado (GET /menu/items).');
+export async function fetchMenuCategories(): Promise<MenuCategory[]> {
+  const { data } = await apiClient.get<MenuCategory[]>('/menu/categories');
+  return data;
+}
+
+export async function fetchMenuItems(categoryId?: string): Promise<MenuItem[]> {
+  const { data } = await apiClient.get<MenuItem[]>('/menu/items', {
+    params: categoryId ? { categoryId } : undefined,
+  });
+  return data;
 }
