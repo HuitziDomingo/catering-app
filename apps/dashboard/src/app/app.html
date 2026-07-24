@@ -1,19 +1,7 @@
 <main style="font-family: sans-serif; padding: 2rem; max-width: 640px">
   <h1>Catering — Dashboard</h1>
-  <p>
-    Esqueleto Angular {{ '21.0.x' }} + Taiga UI (ADR-012).
-    Aún sin páginas: esto solo prueba que Taiga UI instala y renderiza.
-  </p>
 
-  <button
-    tuiButton
-    type="button"
-    (click)="clicks.set(clicks() + 1)"
-  >
-    Probar Taiga UI
-  </button>
-
-  <p data-testid="click-count">Clicks: {{ clicks() }}</p>
+  <app-menu-smoke />
 
   <router-outlet></router-outlet>
 </main>
