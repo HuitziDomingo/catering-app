@@ -38,6 +38,10 @@ docs/
   database-design.pdf
 ```
 
+Dashboard y mobile organizan su código por feature (feature/data-access/ui
+en dashboard, `src/features/<nombre>/` en mobile) en vez de por tipo de
+archivo — ver [ADR-020](docs/adr/ADR-020-frontend-feature-architecture.md).
+
 ## Documentación de arquitectura
 
 Antes de tocar código, lee:
