@@ -7,6 +7,11 @@ module.exports = {
   moduleFileExtensions: ['ts', 'js', 'html', 'tsx', 'jsx'],
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   moduleNameMapper: {
+    // jest-expo's resolver (see `resolver` above) doesn't know about Nx
+    // workspace libs' tsconfig path mapping -- map it by hand so runtime
+    // (non type-only) imports like RoleName from shared-types resolve in
+    // tests, same as apps/api gets for free via @nx/jest/plugins/resolver.
+    '^@catering-app/shared-types$': '<rootDir>/../../libs/shared-types/src/index.ts',
     '[.]svg$': '@nx/expo/plugins/jest/svg-mock',
     // Reanimated's own documented Jest mock: sidesteps needing real native
     // bindings (and the reanimated/worklets peer version mismatch) in tests.

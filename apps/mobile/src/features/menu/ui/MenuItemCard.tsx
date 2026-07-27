@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { Icon, Text, useTheme } from '@ui-kitten/components';
 import type { MenuItem } from '@catering-app/shared-types';
 
 type MenuItemCardProps = {
   item: MenuItem;
+  onPress?: (item: MenuItem) => void;
 };
 
 const currencyFormatter = new Intl.NumberFormat('es-MX', {
@@ -15,7 +16,7 @@ const currencyFormatter = new Intl.NumberFormat('es-MX', {
 // Componente de presentación pura (sin lógica de negocio), vive en ui/ según
 // ADR-020. Recibe un MenuItem ya resuelto -- no llama a data-access ni al
 // store directamente.
-export const MenuItemCard = ({ item }: MenuItemCardProps) => {
+export const MenuItemCard = ({ item, onPress }: MenuItemCardProps) => {
   const theme = useTheme();
   // menu_items.image_url es opcional (ADR-006) y puede fallar en runtime
   // (URL rota, sin conexión) -- en ambos casos se cae al placeholder.
@@ -23,8 +24,9 @@ export const MenuItemCard = ({ item }: MenuItemCardProps) => {
   const showImage = Boolean(item.imageUrl) && !imageFailed;
 
   return (
-    <View
+    <Pressable
       testID="menu-item-card"
+      onPress={() => onPress?.(item)}
       style={[styles.card, { backgroundColor: theme['background-basic-color-1'] }]}
     >
       {showImage ? (
@@ -67,7 +69,7 @@ export const MenuItemCard = ({ item }: MenuItemCardProps) => {
           </Text>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 };
 
