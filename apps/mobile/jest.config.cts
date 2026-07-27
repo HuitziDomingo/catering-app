@@ -11,6 +11,10 @@ module.exports = {
     // Reanimated's own documented Jest mock: sidesteps needing real native
     // bindings (and the reanimated/worklets peer version mismatch) in tests.
     '^react-native-reanimated$': 'react-native-reanimated/mock',
+    // AsyncStorage's own documented Jest mock: in-memory storage, no native
+    // module bindings needed for Zustand's persist middleware in tests.
+    '^@react-native-async-storage/async-storage$':
+      '@react-native-async-storage/async-storage/jest/async-storage-mock',
   },
   transform: {
     '[.][jt]sx?$': [

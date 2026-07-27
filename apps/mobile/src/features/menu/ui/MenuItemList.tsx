@@ -30,6 +30,7 @@ export default MenuItemList;
 
 const styles = StyleSheet.create({
   content: {
+    paddingTop: 4,
     paddingBottom: 24,
     flexGrow: 1,
   },

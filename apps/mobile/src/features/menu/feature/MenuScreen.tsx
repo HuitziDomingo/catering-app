@@ -1,11 +1,13 @@
 import React, { useEffect } from 'react';
 import { StatusBar, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button, Spinner, Text } from '@ui-kitten/components';
+import { Button, Spinner, Text, useTheme } from '@ui-kitten/components';
 import { useShallow } from 'zustand/react/shallow';
 import { selectVisibleItems, useMenuStore } from '../state/useMenuStore';
 import { CategoryFilter } from '../ui/CategoryFilter';
 import { MenuItemList } from '../ui/MenuItemList';
+import { ThemeToggle } from '../../theme/ui/ThemeToggle';
+import { useResolvedColorScheme } from '../../theme/state/useThemeStore';
 
 // Pantalla del feature de menú (ver ADR-020): conecta data-access (via el
 // store) + estado (Zustand) + componentes de presentación de ui/. Primera
@@ -18,6 +20,8 @@ export const MenuScreen = () => {
   const load = useMenuStore((state) => state.load);
   const selectCategory = useMenuStore((state) => state.selectCategory);
   const visibleItems = useMenuStore(useShallow(selectVisibleItems));
+  const theme = useTheme();
+  const colorScheme = useResolvedColorScheme();
 
   useEffect(() => {
     load();
@@ -25,11 +29,14 @@ export const MenuScreen = () => {
 
   return (
     <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView style={styles.container}>
-        <Text category="h5" style={styles.title}>
-          Menú
-        </Text>
+      <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme['background-basic-color-2'] }]}
+      >
+        <View style={styles.header}>
+          <Text category="h5">Menú</Text>
+          <ThemeToggle />
+        </View>
 
         {status === 'loading' && (
           <View style={styles.centered} testID="menu-loading">
@@ -69,9 +76,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  title: {
+  header: {
+    flexDirection: 'row',
+    // flex-start (not space-between) keeps ThemeToggle away from the
+    // top-right corner, where Expo Dev Client's floating dev-menu button
+    // has an invisible hit region that swallows taps before they reach RN.
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    gap: 16,
     paddingHorizontal: 16,
     paddingTop: 8,
+    paddingBottom: 4,
   },
   centered: {
     flex: 1,

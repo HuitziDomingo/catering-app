@@ -10,6 +10,7 @@
     "@eva-design/eva": "^2.2.0",
     "@expo/metro": "~56.0.0",
     "@expo/vector-icons": "~15.1.0",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@testing-library/react-native": "~13.2.0",
     "@ui-kitten/components": "^5.3.1",
     "@ui-kitten/eva-icons": "^5.3.1",
