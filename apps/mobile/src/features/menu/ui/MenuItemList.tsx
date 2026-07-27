@@ -6,17 +6,18 @@ import { MenuItemCard } from './MenuItemCard';
 
 type MenuItemListProps = {
   items: MenuItem[];
+  onItemPress?: (item: MenuItem) => void;
 };
 
 // Componente de presentación pura (sin lógica de negocio), vive en ui/ según
 // ADR-020. Recibe la lista ya filtrada por categoría (filtrado vive en el
 // store, no aquí).
-export const MenuItemList = ({ items }: MenuItemListProps) => (
+export const MenuItemList = ({ items, onItemPress }: MenuItemListProps) => (
   <FlatList
     testID="menu-item-list"
     data={items}
     keyExtractor={(item) => item.id}
-    renderItem={({ item }) => <MenuItemCard item={item} />}
+    renderItem={({ item }) => <MenuItemCard item={item} onPress={onItemPress} />}
     contentContainerStyle={styles.content}
     ListEmptyComponent={
       <Text appearance="hint" style={styles.empty}>

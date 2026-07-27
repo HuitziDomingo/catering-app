@@ -46,3 +46,18 @@ export function selectVisibleItems(state: MenuState): MenuItem[] {
     ? state.items
     : state.items.filter((item) => item.categoryId === state.selectedCategoryId);
 }
+
+/**
+ * Selector puro parametrizado: busca un platillo por id dentro de los items
+ * ya cargados en el store. La pantalla de detalle (features/menu/feature/
+ * MenuItemDetailScreen.tsx) filtra en cliente en vez de pedir un endpoint
+ * GET /menu/items/:id -- el tab Menú ya carga el catálogo completo al
+ * montar, y el detalle solo es alcanzable tocando una tarjeta ya renderizada
+ * de esa lista, así que el item siempre está disponible en el store para
+ * cuando el usuario puede navegar al detalle. Evita una ida y vuelta extra
+ * a la API para un catálogo de este tamaño.
+ */
+export function selectMenuItemById(itemId: string) {
+  return (state: MenuState): MenuItem | undefined =>
+    state.items.find((item) => item.id === itemId);
+}

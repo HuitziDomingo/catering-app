@@ -2,7 +2,9 @@ import React, { useEffect } from 'react';
 import { StatusBar, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Spinner, Text, useTheme } from '@ui-kitten/components';
+import { useRouter } from 'expo-router';
 import { useShallow } from 'zustand/react/shallow';
+import type { MenuItem } from '@catering-app/shared-types';
 import { selectVisibleItems, useMenuStore } from '../state/useMenuStore';
 import { CategoryFilter } from '../ui/CategoryFilter';
 import { MenuItemList } from '../ui/MenuItemList';
@@ -22,10 +24,15 @@ export const MenuScreen = () => {
   const visibleItems = useMenuStore(useShallow(selectVisibleItems));
   const theme = useTheme();
   const colorScheme = useResolvedColorScheme();
+  const router = useRouter();
 
   useEffect(() => {
     load();
   }, [load]);
+
+  const goToItemDetail = (item: MenuItem) => {
+    router.push(`/menu/${item.id}`);
+  };
 
   return (
     <>
@@ -62,7 +69,7 @@ export const MenuScreen = () => {
               selectedCategoryId={selectedCategoryId}
               onSelect={selectCategory}
             />
-            <MenuItemList items={visibleItems} />
+            <MenuItemList items={visibleItems} onItemPress={goToItemDetail} />
           </>
         )}
       </SafeAreaView>

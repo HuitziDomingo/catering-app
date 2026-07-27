@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { fireEvent } from '@testing-library/react-native';
 import type { MenuItem } from '@catering-app/shared-types';
 import { renderWithProviders } from '../../../test-utils';
 import { MenuItemCard } from './MenuItemCard';
@@ -39,4 +40,14 @@ test('omits the description block when the item has none', () => {
     <MenuItemCard item={itemWithoutDescription} />
   );
   expect(queryByText('Con pollo deshebrado y crema')).toBeNull();
+});
+
+test('calls onPress with the item when tapped', () => {
+  const onPress = jest.fn();
+  const { getByTestId } = renderWithProviders(
+    <MenuItemCard item={mockItem} onPress={onPress} />
+  );
+
+  fireEvent.press(getByTestId('menu-item-card'));
+  expect(onPress).toHaveBeenCalledWith(mockItem);
 });

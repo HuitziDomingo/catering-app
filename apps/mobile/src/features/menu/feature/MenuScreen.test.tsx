@@ -1,22 +1,26 @@
 import * as React from 'react';
 import { waitFor } from '@testing-library/react-native';
-import { renderWithProviders } from './test-utils';
-import { useMenuStore } from './features/menu/state/useMenuStore';
-import Index from './app/index';
+import { renderWithProviders } from '../../../test-utils';
+import { useMenuStore } from '../state/useMenuStore';
+import { MenuScreen } from './MenuScreen';
 
 // UI Kitten's eva theme mapping generation is expensive on its first render
 // in a test process; the default 5s Jest timeout isn't enough here.
 jest.setTimeout(15000);
 
-jest.mock('./features/menu/data-access/menuDataAccess', () => ({
+jest.mock('../data-access/menuDataAccess', () => ({
   fetchMenuCategories: jest.fn(),
   fetchMenuItems: jest.fn(),
 }));
 
-import {
-  fetchMenuCategories,
-  fetchMenuItems,
-} from './features/menu/data-access/menuDataAccess';
+// MenuScreen navigates to the detail route on card tap (useRouter) -- this
+// test only exercises the list/loading/error assembly, so a stub router is
+// enough; navigation itself is out of scope here.
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: jest.fn() }),
+}));
+
+import { fetchMenuCategories, fetchMenuItems } from '../data-access/menuDataAccess';
 
 const mockCategory = { id: 'cat-1', name: 'Desayuno', displayOrder: 1, isActive: true };
 const mockItem = {
@@ -48,7 +52,7 @@ test('renders the real menu screen with categories and items once loaded', async
   (fetchMenuCategories as jest.Mock).mockResolvedValue([mockCategory]);
   (fetchMenuItems as jest.Mock).mockResolvedValue([mockItem]);
 
-  const { getByText, queryByTestId } = renderWithProviders(<Index />);
+  const { getByText, queryByTestId } = renderWithProviders(<MenuScreen />);
 
   await waitFor(() => expect(queryByTestId('menu-loading')).toBeNull());
 
@@ -60,7 +64,7 @@ test('shows an error state with a retry button when the API call fails', async (
   (fetchMenuCategories as jest.Mock).mockRejectedValue(new Error('Network down'));
   (fetchMenuItems as jest.Mock).mockResolvedValue([]);
 
-  const { getByText, getByTestId } = renderWithProviders(<Index />);
+  const { getByText, getByTestId } = renderWithProviders(<MenuScreen />);
 
   await waitFor(() => getByTestId('menu-error'));
   expect(getByText('Network down')).toBeTruthy();
