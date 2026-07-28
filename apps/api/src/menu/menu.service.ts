@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MenuCategory } from '../database/entities/menu-category.entity';
@@ -39,13 +43,15 @@ export class MenuService {
 
   async createItem(dto: CreateMenuItemDto): Promise<MenuItem> {
     await this.findCategoryOrThrow(dto.categoryId);
+    this.assertValidServesRange(dto.servesMin, dto.servesMax);
 
     const item = this.items.create({
       categoryId: dto.categoryId,
       name: dto.name,
       description: dto.description ?? null,
       basePrice: dto.basePrice,
-      servesPeople: dto.servesPeople,
+      servesMin: dto.servesMin,
+      servesMax: dto.servesMax,
       attributes: dto.attributes ?? {},
       imageUrl: dto.imageUrl ?? null,
       isActive: dto.isActive ?? true,
@@ -68,6 +74,10 @@ export class MenuService {
     if (dto.categoryId) {
       await this.findCategoryOrThrow(dto.categoryId);
     }
+    this.assertValidServesRange(
+      dto.servesMin ?? item.servesMin,
+      dto.servesMax ?? item.servesMax,
+    );
 
     // numeric de Postgres llega como string por el driver pg; se normaliza
     // antes de comparar (mismo patrón que mcp.server.ts con subtotal/total).
@@ -103,6 +113,20 @@ export class MenuService {
       throw new NotFoundException('El platillo indicado no existe.');
     }
     return item;
+  }
+
+  /**
+   * Valida serves_max >= serves_min (ver ADR-021). class-validator solo
+   * valida cada campo por separado; esta comparación cruzada vive aquí
+   * porque updateItem necesita evaluarla contra el valor ya guardado
+   * cuando el request solo trae uno de los dos campos.
+   */
+  private assertValidServesRange(servesMin: number, servesMax: number): void {
+    if (servesMax < servesMin) {
+      throw new BadRequestException(
+        'servesMax debe ser mayor o igual que servesMin.',
+      );
+    }
   }
 
   private async findCategoryOrThrow(

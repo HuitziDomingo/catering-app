@@ -42,12 +42,24 @@ export class UpdateMenuItemDto {
   basePrice?: number;
 
   @ApiPropertyOptional({
-    description: 'Número de personas que sirve una orden de este platillo.',
+    description:
+      'Mínimo de personas que sirve una orden de este platillo (ver ADR-021).',
   })
   @IsOptional()
   @IsInt()
   @Min(1)
-  servesPeople?: number;
+  servesMin?: number;
+
+  @ApiPropertyOptional({
+    description:
+      'Máximo de personas que sirve una orden de este platillo. El valor ' +
+      'efectivo (nuevo o el ya guardado) debe cumplir servesMax >= ' +
+      'servesMin (ver ADR-021).',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  servesMax?: number;
 
   @ApiPropertyOptional({
     description: 'Atributos flexibles del platillo (alérgenos, extras, etc.).',

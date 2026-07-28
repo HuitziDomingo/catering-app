@@ -38,8 +38,16 @@ export class MenuItem {
   @Column({ name: 'base_price', type: 'numeric', precision: 10, scale: 2 })
   basePrice!: number;
 
-  @Column({ name: 'serves_people', type: 'int' })
-  servesPeople!: number;
+  // Rango de personas que sirve una orden de este platillo (ver ADR-021):
+  // un solo entero no representa correctamente catering para grupos
+  // grandes (ej. "de 300 a 500 personas"). serves_max >= serves_min se
+  // aplica con un CHECK en la base de datos (ver migración) y en
+  // MenuService (ver ADR-021).
+  @Column({ name: 'serves_min', type: 'int' })
+  servesMin!: number;
+
+  @Column({ name: 'serves_max', type: 'int' })
+  servesMax!: number;
 
   @Column({ type: 'jsonb', default: {} })
   attributes!: Record<string, unknown>;
