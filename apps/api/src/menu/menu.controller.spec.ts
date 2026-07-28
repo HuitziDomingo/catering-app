@@ -113,7 +113,13 @@ describe('MenuController', () => {
     });
 
     it('createItem delegates to the service', async () => {
-      const dto = { categoryId: 'cat-1', name: 'Tacos', basePrice: 50, servesPeople: 1 };
+      const dto = {
+        categoryId: 'cat-1',
+        name: 'Tacos',
+        basePrice: 50,
+        servesMin: 1,
+        servesMax: 1,
+      };
       menuService.createItem.mockResolvedValue({ id: 'item-1', ...dto });
 
       await controller.createItem(dto);

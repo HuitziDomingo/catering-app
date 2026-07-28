@@ -38,12 +38,23 @@ export class CreateMenuItemDto {
   basePrice!: number;
 
   @ApiProperty({
-    description: 'Número de personas que sirve una orden de este platillo.',
-    example: 1,
+    description:
+      'Mínimo de personas que sirve una orden de este platillo (ver ADR-021).',
+    example: 300,
   })
   @IsInt()
   @Min(1)
-  servesPeople!: number;
+  servesMin!: number;
+
+  @ApiProperty({
+    description:
+      'Máximo de personas que sirve una orden de este platillo. Debe ser ' +
+      '>= servesMin (ver ADR-021).',
+    example: 500,
+  })
+  @IsInt()
+  @Min(1)
+  servesMax!: number;
 
   @ApiPropertyOptional({
     description:

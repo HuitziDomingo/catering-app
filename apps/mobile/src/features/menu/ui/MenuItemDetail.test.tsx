@@ -9,7 +9,8 @@ const mockItem: MenuItem = {
   name: 'Enchiladas verdes',
   description: 'Con pollo deshebrado y crema',
   basePrice: 125.5,
-  servesPeople: 4,
+  servesMin: 4,
+  servesMax: 4,
   attributes: {},
   imageUrl: null,
   isActive: true,
@@ -17,7 +18,7 @@ const mockItem: MenuItem = {
   updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
-test('renders name, category, formatted price, servesPeople and description', () => {
+test('renders name, category, formatted price, serves range and description', () => {
   const { getByText, getByTestId } = renderWithProviders(
     <MenuItemDetail item={mockItem} categoryName="Platos fuertes" />
   );
@@ -31,8 +32,19 @@ test('renders name, category, formatted price, servesPeople and description', ()
     currency: 'MXN',
   }).format(125.5);
   expect(getByTestId('menu-item-detail-price')).toHaveTextContent(expectedPrice);
-  expect(getByTestId('menu-item-detail-serves')).toHaveTextContent('Sirve a 4 personas');
+  expect(getByTestId('menu-item-detail-serves')).toHaveTextContent('Sirve 4 personas');
   expect(getByTestId('menu-item-detail-image-placeholder')).toBeTruthy();
+});
+
+test('renders a serves range when servesMin and servesMax differ', () => {
+  const wideRangeItem = { ...mockItem, servesMin: 300, servesMax: 500 };
+  const { getByTestId } = renderWithProviders(
+    <MenuItemDetail item={wideRangeItem} categoryName="Platos fuertes" />
+  );
+
+  expect(getByTestId('menu-item-detail-serves')).toHaveTextContent(
+    'Sirve de 300 a 500 personas'
+  );
 });
 
 test('falls back to a placeholder message when the item has no description', () => {

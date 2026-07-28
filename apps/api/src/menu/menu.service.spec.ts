@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MenuCategory } from '../database/entities/menu-category.entity';
@@ -63,6 +63,8 @@ describe('MenuService', () => {
         id: itemId,
         categoryId,
         basePrice: '100.00',
+        servesMin: 1,
+        servesMax: 1,
         isActive: true,
       } as unknown as MenuItem);
 
@@ -82,6 +84,8 @@ describe('MenuService', () => {
         id: itemId,
         categoryId,
         basePrice: '100.00',
+        servesMin: 1,
+        servesMax: 1,
         isActive: true,
       } as unknown as MenuItem);
 
@@ -96,6 +100,8 @@ describe('MenuService', () => {
         id: itemId,
         categoryId,
         basePrice: '100.00',
+        servesMin: 1,
+        servesMax: 1,
         isActive: true,
       } as unknown as MenuItem);
 
@@ -111,6 +117,8 @@ describe('MenuService', () => {
         categoryId,
         name: 'Chilaquiles',
         basePrice: '100.00',
+        servesMin: 1,
+        servesMax: 1,
         isActive: true,
       } as unknown as MenuItem);
 
@@ -161,7 +169,8 @@ describe('MenuService', () => {
           categoryId,
           name: 'Tacos',
           basePrice: 50,
-          servesPeople: 1,
+          servesMin: 1,
+          servesMax: 1,
         }),
       ).rejects.toThrow(NotFoundException);
       expect(itemsRepo.save).not.toHaveBeenCalled();
@@ -174,12 +183,114 @@ describe('MenuService', () => {
         categoryId,
         name: 'Tacos',
         basePrice: 50,
-        servesPeople: 1,
+        servesMin: 1,
+        servesMax: 1,
       });
 
       expect(itemsRepo.save).toHaveBeenCalled();
       expect(result.name).toBe('Tacos');
       expect(result.isActive).toBe(true);
+    });
+
+    it('creates the item with a wide serves range (ADR-021 catering case)', async () => {
+      categoriesRepo.findOne.mockResolvedValue({ id: categoryId });
+
+      const result = await service.createItem({
+        categoryId,
+        name: 'Charola grande',
+        basePrice: 3000,
+        servesMin: 300,
+        servesMax: 500,
+      });
+
+      expect(itemsRepo.save).toHaveBeenCalled();
+      expect(result.servesMin).toBe(300);
+      expect(result.servesMax).toBe(500);
+    });
+
+    it('throws BadRequestException when servesMax is less than servesMin', async () => {
+      categoriesRepo.findOne.mockResolvedValue({ id: categoryId });
+
+      await expect(
+        service.createItem({
+          categoryId,
+          name: 'Tacos',
+          basePrice: 50,
+          servesMin: 10,
+          servesMax: 5,
+        }),
+      ).rejects.toThrow(BadRequestException);
+      expect(itemsRepo.save).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateItem — serves range validation (ADR-021)', () => {
+    it('throws BadRequestException when the new servesMax is less than the new servesMin', async () => {
+      itemsRepo.findOne.mockResolvedValue({
+        id: itemId,
+        categoryId,
+        basePrice: '100.00',
+        servesMin: 1,
+        servesMax: 1,
+        isActive: true,
+      } as unknown as MenuItem);
+
+      await expect(
+        service.updateItem(itemId, { servesMin: 10, servesMax: 5 }, userId),
+      ).rejects.toThrow(BadRequestException);
+      expect(itemsRepo.save).not.toHaveBeenCalled();
+    });
+
+    it('throws BadRequestException when only servesMax is updated below the saved servesMin', async () => {
+      itemsRepo.findOne.mockResolvedValue({
+        id: itemId,
+        categoryId,
+        basePrice: '100.00',
+        servesMin: 300,
+        servesMax: 500,
+        isActive: true,
+      } as unknown as MenuItem);
+
+      await expect(
+        service.updateItem(itemId, { servesMax: 100 }, userId),
+      ).rejects.toThrow(BadRequestException);
+      expect(itemsRepo.save).not.toHaveBeenCalled();
+    });
+
+    it('throws BadRequestException when only servesMin is updated above the saved servesMax', async () => {
+      itemsRepo.findOne.mockResolvedValue({
+        id: itemId,
+        categoryId,
+        basePrice: '100.00',
+        servesMin: 300,
+        servesMax: 500,
+        isActive: true,
+      } as unknown as MenuItem);
+
+      await expect(
+        service.updateItem(itemId, { servesMin: 600 }, userId),
+      ).rejects.toThrow(BadRequestException);
+      expect(itemsRepo.save).not.toHaveBeenCalled();
+    });
+
+    it('allows updating servesMax alone when it still satisfies the saved servesMin', async () => {
+      itemsRepo.findOne.mockResolvedValue({
+        id: itemId,
+        categoryId,
+        basePrice: '100.00',
+        servesMin: 300,
+        servesMax: 500,
+        isActive: true,
+      } as unknown as MenuItem);
+
+      const result = await service.updateItem(
+        itemId,
+        { servesMax: 600 },
+        userId,
+      );
+
+      expect(itemsRepo.save).toHaveBeenCalledTimes(1);
+      expect(result.servesMax).toBe(600);
     });
   });
 

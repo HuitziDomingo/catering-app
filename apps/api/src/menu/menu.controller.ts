@@ -83,7 +83,7 @@ export class MenuController {
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'DTO inválido.',
+    description: 'DTO inválido, o servesMax menor que servesMin (ver ADR-021).',
     type: ErrorResponseDto,
   })
   @ApiResponse({
@@ -122,7 +122,9 @@ export class MenuController {
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'DTO inválido.',
+    description:
+      'DTO inválido, o el servesMax/servesMin efectivo (nuevo o ya ' +
+      'guardado) queda con servesMax menor que servesMin (ver ADR-021).',
     type: ErrorResponseDto,
   })
   @ApiResponse({

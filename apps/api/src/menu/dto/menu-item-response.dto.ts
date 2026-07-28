@@ -16,8 +16,11 @@ export class MenuItemResponseDto {
   @ApiProperty({ description: 'Precio base del platillo (MXN).' })
   basePrice!: number;
 
-  @ApiProperty({ description: 'Número de personas que sirve una orden de este platillo.' })
-  servesPeople!: number;
+  @ApiProperty({ description: 'Mínimo de personas que sirve una orden de este platillo.' })
+  servesMin!: number;
+
+  @ApiProperty({ description: 'Máximo de personas que sirve una orden de este platillo.' })
+  servesMax!: number;
 
   @ApiProperty({
     description: 'Atributos flexibles del platillo (alérgenos, extras, etc.).',

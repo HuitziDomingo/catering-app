@@ -12,6 +12,7 @@ import { AddMcpToolLogs1752537600001 } from './migrations/1752537600001-AddMcpTo
 import { AddOrders1752537600002 } from './migrations/1752537600002-AddOrders';
 import { AddMenu1752537600003 } from './migrations/1752537600003-AddMenu';
 import { AddOrderItems1752537600004 } from './migrations/1752537600004-AddOrderItems';
+import { AddMenuItemServesRange1752537600005 } from './migrations/1752537600005-AddMenuItemServesRange';
 
 /**
  * Construye las opciones de conexión de TypeORM a partir de variables de
@@ -55,6 +56,7 @@ export function buildDataSourceOptions(
       AddOrders1752537600002,
       AddMenu1752537600003,
       AddOrderItems1752537600004,
+      AddMenuItemServesRange1752537600005,
     ],
     synchronize: false,
     migrationsRun: false,

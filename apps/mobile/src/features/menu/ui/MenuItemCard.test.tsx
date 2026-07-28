@@ -10,7 +10,8 @@ const mockItem: MenuItem = {
   name: 'Enchiladas verdes',
   description: 'Con pollo deshebrado y crema',
   basePrice: 125.5,
-  servesPeople: 2,
+  servesMin: 2,
+  servesMax: 2,
   attributes: {},
   imageUrl: null,
   isActive: true,
@@ -18,7 +19,7 @@ const mockItem: MenuItem = {
   updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
-test('renders name, description, formatted price and servesPeople', () => {
+test('renders name, description, formatted price and serves range', () => {
   const { getByText, getByTestId } = renderWithProviders(
     <MenuItemCard item={mockItem} />
   );
@@ -31,7 +32,18 @@ test('renders name, description, formatted price and servesPeople', () => {
     currency: 'MXN',
   }).format(125.5);
   expect(getByTestId('menu-item-price')).toHaveTextContent(expectedPrice);
-  expect(getByTestId('menu-item-serves')).toHaveTextContent('Sirve a 2 personas');
+  expect(getByTestId('menu-item-serves')).toHaveTextContent('Sirve 2 personas');
+});
+
+test('renders a serves range when servesMin and servesMax differ', () => {
+  const wideRangeItem = { ...mockItem, servesMin: 300, servesMax: 500 };
+  const { getByTestId } = renderWithProviders(
+    <MenuItemCard item={wideRangeItem} />
+  );
+
+  expect(getByTestId('menu-item-serves')).toHaveTextContent(
+    'Sirve de 300 a 500 personas'
+  );
 });
 
 test('omits the description block when the item has none', () => {
