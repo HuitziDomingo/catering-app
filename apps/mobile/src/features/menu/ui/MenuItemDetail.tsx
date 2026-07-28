@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import { Icon, Text, useTheme } from '@ui-kitten/components';
 import type { MenuItem } from '@catering-app/shared-types';
+import { formatServesRange } from '../util/formatServesRange';
 
 type MenuItemDetailProps = {
   item: MenuItem;
@@ -63,7 +64,7 @@ export const MenuItemDetail = ({ item, categoryName }: MenuItemDetailProps) => {
             {currencyFormatter.format(Number(item.basePrice))}
           </Text>
           <Text appearance="hint" category="s1" testID="menu-item-detail-serves">
-            Sirve a {item.servesPeople} {item.servesPeople === 1 ? 'persona' : 'personas'}
+            {formatServesRange(item.servesMin, item.servesMax)}
           </Text>
         </View>
 
