@@ -131,6 +131,100 @@ describe('OrdersService', () => {
     });
   });
 
+  describe('createOrder — needsReview (peopleCount fuera de serves_min/serves_max, ADR-023)', () => {
+    it('needsReview = false cuando peopleCount cae dentro del rango de al menos un platillo pedido', async () => {
+      manager.find.mockResolvedValue([
+        {
+          id: menuItemId,
+          basePrice: '100.00',
+          isActive: true,
+          servesMin: 300,
+          servesMax: 500,
+        } as unknown as MenuItem,
+      ]);
+
+      const order = await service.createOrder(customerId, {
+        peopleCount: 400,
+        scheduledFor: '2026-08-01T18:00:00.000Z',
+        items: [{ menuItemId, quantity: 2 }],
+      });
+
+      expect(order.needsReview).toBe(false);
+    });
+
+    it('needsReview = true cuando peopleCount cae fuera del rango de todos los platillos pedidos, y el pedido igual se crea', async () => {
+      manager.find.mockResolvedValue([
+        {
+          id: menuItemId,
+          basePrice: '100.00',
+          isActive: true,
+          servesMin: 10,
+          servesMax: 50,
+        } as unknown as MenuItem,
+      ]);
+
+      const order = await service.createOrder(customerId, {
+        peopleCount: 400,
+        scheduledFor: '2026-08-01T18:00:00.000Z',
+        items: [{ menuItemId, quantity: 2 }],
+      });
+
+      expect(order.needsReview).toBe(true);
+      expect(manager.save).toHaveBeenCalled();
+    });
+
+    it('needsReview = false cuando peopleCount está en el borde exacto del rango (inclusive)', async () => {
+      manager.find.mockResolvedValue([
+        {
+          id: menuItemId,
+          basePrice: '100.00',
+          isActive: true,
+          servesMin: 300,
+          servesMax: 500,
+        } as unknown as MenuItem,
+      ]);
+
+      const order = await service.createOrder(customerId, {
+        peopleCount: 500,
+        scheduledFor: '2026-08-01T18:00:00.000Z',
+        items: [{ menuItemId, quantity: 2 }],
+      });
+
+      expect(order.needsReview).toBe(false);
+    });
+
+    it('needsReview = false si peopleCount cae dentro del rango de al menos uno de varios platillos pedidos', async () => {
+      const secondMenuItemId = '44444444-4444-4444-4444-444444444444';
+      manager.find.mockResolvedValue([
+        {
+          id: menuItemId,
+          basePrice: '100.00',
+          isActive: true,
+          servesMin: 10,
+          servesMax: 50,
+        } as unknown as MenuItem,
+        {
+          id: secondMenuItemId,
+          basePrice: '80.00',
+          isActive: true,
+          servesMin: 300,
+          servesMax: 500,
+        } as unknown as MenuItem,
+      ]);
+
+      const order = await service.createOrder(customerId, {
+        peopleCount: 400,
+        scheduledFor: '2026-08-01T18:00:00.000Z',
+        items: [
+          { menuItemId, quantity: 1 },
+          { menuItemId: secondMenuItemId, quantity: 1 },
+        ],
+      });
+
+      expect(order.needsReview).toBe(false);
+    });
+  });
+
   describe('findByIdForRequester — ownership check', () => {
     it('permite al cliente dueño consultar su propio pedido', async () => {
       ordersRepo.findOne.mockResolvedValue({

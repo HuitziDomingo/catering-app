@@ -29,6 +29,14 @@ export class OrderResponseDto {
   @ApiPropertyOptional({ description: 'Notas adicionales.', nullable: true })
   notes?: string | null;
 
+  @ApiProperty({
+    description:
+      'true si peopleCount cayó fuera del rango serves_min/serves_max de ' +
+      'todos los platillos pedidos: el pedido se creó igual pero requiere ' +
+      'revisión manual del negocio (ver ADR-023).',
+  })
+  needsReview!: boolean;
+
   @ApiProperty({ description: 'Líneas del pedido.', type: [OrderItemResponseDto] })
   items!: OrderItemResponseDto[];
 

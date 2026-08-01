@@ -1,7 +1,8 @@
 import { useChatStore } from './useChatStore';
+import type { PendingOrderDraft } from './useChatStore';
 
 beforeEach(() => {
-  useChatStore.setState({ messages: [], isLoading: false });
+  useChatStore.setState({ messages: [], isLoading: false, pendingOrderDraft: null });
 });
 
 test('addMessage appends a message with role, text, id and timestamp', () => {
@@ -41,4 +42,38 @@ test('reset clears messages and loading state', () => {
 
   expect(useChatStore.getState().messages).toEqual([]);
   expect(useChatStore.getState().isLoading).toBe(false);
+});
+
+describe('pendingOrderDraft (confirmation flow, ADR-023)', () => {
+  const draft: PendingOrderDraft = {
+    menuItemId: 'menu-item-1',
+    menuItemName: 'Chilaquiles',
+    peopleCount: 400,
+    scheduledFor: '2026-08-04T09:00:00.000Z',
+  };
+
+  test('starts as null', () => {
+    expect(useChatStore.getState().pendingOrderDraft).toBeNull();
+  });
+
+  test('setPendingOrderDraft stores the extracted draft awaiting confirmation', () => {
+    useChatStore.getState().setPendingOrderDraft(draft);
+
+    expect(useChatStore.getState().pendingOrderDraft).toEqual(draft);
+  });
+
+  test('setPendingOrderDraft(null) clears the draft (cancel or confirm)', () => {
+    useChatStore.getState().setPendingOrderDraft(draft);
+    useChatStore.getState().setPendingOrderDraft(null);
+
+    expect(useChatStore.getState().pendingOrderDraft).toBeNull();
+  });
+
+  test('reset also clears a pending draft', () => {
+    useChatStore.getState().setPendingOrderDraft(draft);
+
+    useChatStore.getState().reset();
+
+    expect(useChatStore.getState().pendingOrderDraft).toBeNull();
+  });
 });

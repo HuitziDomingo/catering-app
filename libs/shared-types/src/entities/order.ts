@@ -10,6 +10,7 @@ export interface Order {
   subtotal: number;
   total: number;
   notes: string | null;
+  needsReview: boolean;
   createdAt: string;
   updatedAt: string;
 }

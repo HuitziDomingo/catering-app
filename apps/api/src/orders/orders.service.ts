@@ -68,6 +68,10 @@ export class OrdersService {
    * de cada línea es un snapshot del base_price vigente del platillo en este
    * momento (ver ADR-006) — un cambio de precio posterior nunca altera este
    * pedido.
+   *
+   * Si `peopleCount` no cae dentro del rango serves_min/serves_max de
+   * ninguno de los platillos pedidos, el pedido no se rechaza — se crea con
+   * `needsReview = true` para revisión manual del negocio (ver ADR-023).
    */
   async createOrder(customerId: string, dto: CreateOrderDto): Promise<Order> {
     return this.ordersRepository.manager.transaction(async (manager) => {
@@ -107,6 +111,12 @@ export class OrdersService {
         };
       });
 
+      const withinServesRange = menuItems.some(
+        (menuItem) =>
+          dto.peopleCount >= menuItem.servesMin &&
+          dto.peopleCount <= menuItem.servesMax,
+      );
+
       const order = manager.create(Order, {
         customerId,
         status: OrderStatus.PENDING,
@@ -115,6 +125,7 @@ export class OrdersService {
         subtotal,
         total: subtotal,
         notes: dto.notes ?? null,
+        needsReview: !withinServesRange,
       });
       const savedOrder = await manager.save(order);
 
