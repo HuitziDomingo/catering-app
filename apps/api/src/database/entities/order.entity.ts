@@ -51,6 +51,12 @@ export class Order {
   @Column({ type: 'text', nullable: true })
   notes?: string | null;
 
+  // true cuando peopleCount cayó fuera del rango serves_min/serves_max de
+  // todos los platillos pedidos: el pedido se crea igual (ver ADR-023) pero
+  // queda marcado para revisión manual del negocio en vez de rechazarse.
+  @Column({ name: 'needs_review', type: 'boolean', default: false })
+  needsReview!: boolean;
+
   @OneToMany(() => OrderItem, (item) => item.order)
   items!: OrderItem[];
 

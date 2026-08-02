@@ -11,6 +11,8 @@ import {
   consultarPedidosPorClienteTool,
 } from './tools/consultar-pedidos-por-cliente.tool';
 import { handleConsultarPedidosPorCliente } from './handlers/consultar-pedidos-por-cliente.handler';
+import { crearPedidoTool } from './tools/crear-pedido.tool';
+import { handleCrearPedido } from './handlers/crear-pedido.handler';
 
 /**
  * Transporte HTTP Streamable para el servidor MCP.
@@ -104,6 +106,21 @@ export class McpTransport implements OnModuleDestroy {
       },
       async (input, extra) => {
         return handleConsultarPedidosPorCliente(input, extra, {
+          mcpToolLogsService: this.mcpToolLogsService,
+          ordersService: this.ordersService,
+        });
+      },
+    );
+
+    mcpServer.registerTool(
+      crearPedidoTool.name,
+      {
+        title: 'Crear pedido',
+        description: crearPedidoTool.description,
+        inputSchema: crearPedidoTool.inputSchema as unknown as AnySchema,
+      },
+      async (input, extra) => {
+        return handleCrearPedido(input, extra, {
           mcpToolLogsService: this.mcpToolLogsService,
           ordersService: this.ordersService,
         });

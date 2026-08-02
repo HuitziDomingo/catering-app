@@ -1,6 +1,7 @@
 import { OrderStatus } from '@catering-app/shared-types';
 import {
   consultarPedidosPorCliente,
+  crearPedido,
   listMcpTools,
   McpToolError,
 } from './mcpClient';
@@ -137,6 +138,72 @@ describe('consultarPedidosPorCliente', () => {
 
     await expect(consultarPedidosPorCliente('token-123')).rejects.toThrow(
       'status 401',
+    );
+  });
+});
+
+describe('crearPedido', () => {
+  const args = {
+    items: [{ menuItemId: 'menu-item-1', quantity: 1 }],
+    peopleCount: 400,
+    scheduledFor: '2026-08-04T09:00:00.000Z',
+    notes: undefined,
+  };
+
+  it('performs the initialize handshake, then tools/call with crear_pedido, and returns the parsed result', async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce(
+        sseResponse(
+          { jsonrpc: '2.0', id: 1, result: { protocolVersion: '2025-11-25' } },
+          { 'mcp-session-id': 'session-abc' },
+        ),
+      )
+      .mockResolvedValueOnce(acceptedResponse())
+      .mockResolvedValueOnce(
+        sseResponse({
+          jsonrpc: '2.0',
+          id: 2,
+          result: {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  success: true,
+                  data: { ...mockOrder, needsReview: false },
+                }),
+              },
+            ],
+          },
+        }),
+      );
+
+    const result = await crearPedido('token-123', args);
+
+    expect(result).toEqual({ success: true, data: { ...mockOrder, needsReview: false } });
+
+    const [, callOptions] = (global.fetch as jest.Mock).mock.calls[2];
+    const callBody = JSON.parse(callOptions.body);
+    expect(callBody.method).toBe('tools/call');
+    expect(callBody.params).toEqual({ name: 'crear_pedido', arguments: args });
+  });
+
+  it('throws an McpToolError when the tool returns isError (e.g. non-future scheduledFor)', async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce(sseResponse({ jsonrpc: '2.0', id: 1, result: {} }, { 'mcp-session-id': 's-1' }))
+      .mockResolvedValueOnce(acceptedResponse())
+      .mockResolvedValueOnce(
+        sseResponse({
+          jsonrpc: '2.0',
+          id: 2,
+          result: {
+            content: [{ type: 'text', text: 'scheduledFor debe ser una fecha futura' }],
+            isError: true,
+          },
+        }),
+      );
+
+    await expect(crearPedido('token-123', args)).rejects.toThrow(
+      'scheduledFor debe ser una fecha futura',
     );
   });
 });

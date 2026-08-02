@@ -200,3 +200,49 @@ export async function consultarPedidosPorCliente(
 
   return JSON.parse(text) as ConsultarPedidosPorClienteResult;
 }
+
+// Mismo subconjunto de campos que handleCrearPedido devuelve en la API (ver
+// apps/api/src/mcp/handlers/crear-pedido.handler.ts).
+export type CreatedOrderSummary = OrderSummary & { needsReview: boolean };
+
+export type CrearPedidoResult = {
+  success: boolean;
+  data: CreatedOrderSummary;
+};
+
+export type CrearPedidoArgs = {
+  items: Array<{ menuItemId: string; quantity: number }>;
+  peopleCount: number;
+  scheduledFor: string;
+  notes?: string;
+};
+
+export async function crearPedido(
+  accessToken: string,
+  args: CrearPedidoArgs,
+): Promise<CrearPedidoResult> {
+  const sessionId = await initializeMcpSession(accessToken);
+  const { message } = await postJsonRpc(accessToken, sessionId, {
+    jsonrpc: '2.0',
+    id: 2,
+    method: 'tools/call',
+    params: { name: 'crear_pedido', arguments: args },
+  });
+
+  if (message?.error) {
+    throw new McpToolError(message.error.message);
+  }
+
+  const result = message?.result as
+    | { content?: Array<{ type: string; text: string }>; isError?: boolean }
+    | undefined;
+  const text = result?.content?.[0]?.text;
+  if (!text) {
+    throw new McpToolError('El tool MCP no devolvió contenido.');
+  }
+  if (result?.isError) {
+    throw new McpToolError(text);
+  }
+
+  return JSON.parse(text) as CrearPedidoResult;
+}
