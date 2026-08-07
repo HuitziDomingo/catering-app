@@ -93,6 +93,7 @@
     "@taiga-ui/core": "^5.15.0",
     "@taiga-ui/design-tokens": "^0.310.0",
     "@taiga-ui/kit": "^5.15.0",
+    "@taiga-ui/polymorpheus": "^5.0.1",
     "@taiga-ui/styles": "^5.15.0",
     "bcryptjs": "^3.0.3",
     "class-transformer": "^0.5.1",

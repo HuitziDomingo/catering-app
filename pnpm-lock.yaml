@@ -83,6 +83,9 @@ importers:
       '@taiga-ui/kit':
         specifier: ^5.15.0
         version: 5.15.0(b77f0f83a26a9187faf5ff560bdb6e7f)
+      '@taiga-ui/polymorpheus':
+        specifier: ^5.0.1
+        version: 5.0.1(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(@angular/platform-browser@21.0.9(@angular/common@21.0.9(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1))(rxjs@7.8.1))(@angular/core@21.0.9(@angular/compiler@21.0.9)(rxjs@7.8.1)))
       '@taiga-ui/styles':
         specifier: ^5.15.0
         version: 5.15.0(@taiga-ui/design-tokens@0.310.0)

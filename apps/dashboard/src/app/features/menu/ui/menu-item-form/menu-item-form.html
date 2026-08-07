@@ -1,4 +1,10 @@
 <form class="menu-item-form" [formGroup]="form" (ngSubmit)="submit()">
+  @if (error()) {
+    <p class="menu-item-form__error menu-item-form__error--form" data-testid="form-error">
+      {{ error() }}
+    </p>
+  }
+
   <section class="menu-item-form__section">
     <h4 class="menu-item-form__section-title">Información general</h4>
 
@@ -38,7 +44,7 @@
         data-testid="category-select"
       >
         <option value="" disabled>Selecciona una categoría</option>
-        @for (category of categories(); track category.id) {
+        @for (category of categories; track category.id) {
           <option [value]="category.id">{{ category.name }}</option>
         }
       </select>
@@ -125,11 +131,18 @@
     </label>
 
     <div class="menu-item-form__actions">
-      <button tuiButton type="button" appearance="outline" (click)="cancelled.emit()">
+      <button
+        tuiButton
+        type="button"
+        appearance="outline"
+        data-testid="cancel-button"
+        [disabled]="saving()"
+        (click)="cancel()"
+      >
         Cancelar
       </button>
-      <button tuiButton type="submit" data-testid="submit-button">
-        {{ item() ? 'Guardar cambios' : 'Crear platillo' }}
+      <button tuiButton type="submit" [disabled]="saving()" data-testid="submit-button">
+        {{ item ? 'Guardar cambios' : 'Crear platillo' }}
       </button>
     </div>
   </section>

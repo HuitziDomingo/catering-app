@@ -25,19 +25,4 @@
       (delete)="confirmDelete($event)"
     />
   }
-
-  @if (showForm()) {
-    <div class="menu-management__form-panel">
-      <h3>{{ editingItem() ? 'Editar platillo' : 'Nuevo platillo' }}</h3>
-      @if (formError()) {
-        <p class="menu-management__error" data-testid="form-error">{{ formError() }}</p>
-      }
-      <app-menu-item-form
-        [item]="editingItem()"
-        [categories]="state.categories()"
-        (save)="save($event)"
-        (cancelled)="cancelForm()"
-      />
-    </div>
-  }
 </section>
