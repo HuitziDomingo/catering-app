@@ -11,6 +11,7 @@
   } @else {
     <tui-textfield>
       <input
+        tuiInput
         data-testid="dev-token-input"
         [ngModel]="draft()"
         (ngModelChange)="draft.set($event)"

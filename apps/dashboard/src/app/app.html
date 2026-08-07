@@ -1,9 +1,14 @@
 <tui-root>
-  <main style="font-family: sans-serif; padding: 2rem; max-width: 960px">
-    <h1>Catering — Dashboard</h1>
+  <div class="app-shell">
+    <header class="app-shell__header">
+      <h1 class="app-shell__title">Catering — Dashboard</h1>
+      <app-theme-toggle />
+    </header>
 
-    <app-dev-token-input />
+    <main class="app-shell__main">
+      <app-dev-token-input />
 
-    <router-outlet></router-outlet>
-  </main>
+      <router-outlet></router-outlet>
+    </main>
+  </div>
 </tui-root>

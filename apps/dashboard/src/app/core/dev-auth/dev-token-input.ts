@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TuiButton, TuiTextfieldComponent } from '@taiga-ui/core';
+import { TuiButton, TuiInput } from '@taiga-ui/core';
 import { DevTokenStore } from './dev-token.store';
 
 /**
@@ -9,7 +9,7 @@ import { DevTokenStore } from './dev-token.store';
  */
 @Component({
   selector: 'app-dev-token-input',
-  imports: [FormsModule, TuiButton, TuiTextfieldComponent],
+  imports: [FormsModule, TuiButton, TuiInput],
   templateUrl: './dev-token-input.html',
   styleUrl: './dev-token-input.scss',
 })

@@ -27,7 +27,7 @@ describe('MenuItemForm', () => {
     }).compileComponents();
   });
 
-  it('starts invalid: name, categoryId, basePrice and servesPeople are required', () => {
+  it('starts invalid: name and categoryId are required', () => {
     const form = formOf(createFixture().componentInstance);
 
     expect(form.invalid).toBe(true);
@@ -48,14 +48,31 @@ describe('MenuItemForm', () => {
     expect(form.controls.basePrice.invalid).toBe(false);
   });
 
-  it('rejects servesPeople below 1', () => {
+  it('rejects servesMin or servesMax below 1', () => {
     const form = formOf(createFixture().componentInstance);
 
-    form.controls.servesPeople.setValue(0);
-    expect(form.controls.servesPeople.invalid).toBe(true);
+    form.controls.servesMin.setValue(0);
+    expect(form.controls.servesMin.invalid).toBe(true);
 
-    form.controls.servesPeople.setValue(1);
-    expect(form.controls.servesPeople.invalid).toBe(false);
+    form.controls.servesMin.setValue(1);
+    expect(form.controls.servesMin.invalid).toBe(false);
+
+    form.controls.servesMax.setValue(0);
+    expect(form.controls.servesMax.invalid).toBe(true);
+
+    form.controls.servesMax.setValue(1);
+    expect(form.controls.servesMax.invalid).toBe(false);
+  });
+
+  it('rejects a servesMax lower than servesMin', () => {
+    const form = formOf(createFixture().componentInstance);
+
+    form.controls.servesMin.setValue(5);
+    form.controls.servesMax.setValue(2);
+    expect(form.errors?.['servesRange']).toBe(true);
+
+    form.controls.servesMax.setValue(5);
+    expect(form.errors?.['servesRange']).toBeUndefined();
   });
 
   it('is valid and emits the expected DTO once all required fields are filled', () => {
@@ -70,7 +87,8 @@ describe('MenuItemForm', () => {
       description: 'Con pollo',
       categoryId: 'cat-1',
       basePrice: 95.5,
-      servesPeople: 2,
+      servesMin: 2,
+      servesMax: 4,
       isActive: true,
     });
     expect(form.invalid).toBe(false);
@@ -83,7 +101,8 @@ describe('MenuItemForm', () => {
         description: 'Con pollo',
         categoryId: 'cat-1',
         basePrice: 95.5,
-        servesPeople: 2,
+        servesMin: 2,
+        servesMax: 4,
         isActive: true,
       },
     ]);
@@ -109,7 +128,8 @@ describe('MenuItemForm', () => {
       name: 'Flan napolitano',
       description: 'Receta casera',
       basePrice: '45.00',
-      servesPeople: 1,
+      servesMin: 1,
+      servesMax: 1,
       attributes: {},
       imageUrl: null,
       isActive: true,
@@ -121,7 +141,8 @@ describe('MenuItemForm', () => {
     expect(formOf(fixture.componentInstance).getRawValue()).toMatchObject({
       name: 'Flan napolitano',
       basePrice: 45,
-      servesPeople: 1,
+      servesMin: 1,
+      servesMax: 1,
     });
   });
 });

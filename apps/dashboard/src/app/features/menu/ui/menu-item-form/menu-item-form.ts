@@ -1,8 +1,17 @@
 import { Component, effect, inject, input, output } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TuiButton, TuiLabel, TuiTextfieldComponent } from '@taiga-ui/core';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { TuiButton, TuiInput } from '@taiga-ui/core';
 import { TuiSwitch, TuiTextareaComponent } from '@taiga-ui/kit';
 import type { CreateMenuItemDto, MenuCategory, MenuItem } from '@catering-app/shared-types';
+
+// servesMax debe ser >= servesMin (ver ADR-021, validación de rango).
+function servesRangeValidator(control: AbstractControl): ValidationErrors | null {
+  const min = control.get('servesMin')?.value;
+  const max = control.get('servesMax')?.value;
+  return typeof min === 'number' && typeof max === 'number' && max < min
+    ? { servesRange: true }
+    : null;
+}
 
 /**
  * Componente de presentación (formulario reactivo, validación de UI) según
@@ -11,7 +20,7 @@ import type { CreateMenuItemDto, MenuCategory, MenuItem } from '@catering-app/sh
  */
 @Component({
   selector: 'app-menu-item-form',
-  imports: [ReactiveFormsModule, TuiButton, TuiLabel, TuiTextfieldComponent, TuiSwitch, TuiTextareaComponent],
+  imports: [ReactiveFormsModule, TuiButton, TuiInput, TuiSwitch, TuiTextareaComponent],
   templateUrl: './menu-item-form.html',
   styleUrl: './menu-item-form.scss',
 })
@@ -23,14 +32,18 @@ export class MenuItemForm {
   readonly save = output<CreateMenuItemDto>();
   readonly cancelled = output<void>();
 
-  protected readonly form = this.fb.nonNullable.group({
-    name: ['', [Validators.required, Validators.maxLength(150)]],
-    description: [''],
-    categoryId: ['', Validators.required],
-    basePrice: [0, [Validators.required, Validators.min(0.01)]],
-    servesPeople: [1, [Validators.required, Validators.min(1)]],
-    isActive: [true],
-  });
+  protected readonly form = this.fb.nonNullable.group(
+    {
+      name: ['', [Validators.required, Validators.maxLength(150)]],
+      description: [''],
+      categoryId: ['', Validators.required],
+      basePrice: [0, [Validators.required, Validators.min(0.01)]],
+      servesMin: [1, [Validators.required, Validators.min(1)]],
+      servesMax: [1, [Validators.required, Validators.min(1)]],
+      isActive: [true],
+    },
+    { validators: servesRangeValidator },
+  );
 
   constructor() {
     effect(() => {
@@ -41,7 +54,8 @@ export class MenuItemForm {
           description: current.description ?? '',
           categoryId: current.categoryId,
           basePrice: Number(current.basePrice),
-          servesPeople: current.servesPeople,
+          servesMin: current.servesMin,
+          servesMax: current.servesMax,
           isActive: current.isActive,
         });
       } else {
@@ -50,7 +64,8 @@ export class MenuItemForm {
           description: '',
           categoryId: '',
           basePrice: 0,
-          servesPeople: 1,
+          servesMin: 1,
+          servesMax: 1,
           isActive: true,
         });
       }
@@ -68,7 +83,8 @@ export class MenuItemForm {
       description: value.description || null,
       categoryId: value.categoryId,
       basePrice: value.basePrice,
-      servesPeople: value.servesPeople,
+      servesMin: value.servesMin,
+      servesMax: value.servesMax,
       isActive: value.isActive,
     });
   }
