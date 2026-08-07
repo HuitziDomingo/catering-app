@@ -16,16 +16,4 @@
     color: var(--tui-text-negative);
     font: var(--tui-typography-body-s);
   }
-
-  &__form-panel {
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--tui-border-normal);
-  }
-
-  &__form-panel h3 {
-    margin: 0 0 1.25rem;
-    font: var(--tui-typography-heading-h6);
-    color: var(--tui-text-primary);
-  }
 }

@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import type { MenuCategory } from '@catering-app/shared-types';
+import { of, throwError } from 'rxjs';
+import { POLYMORPHEUS_CONTEXT } from '@taiga-ui/polymorpheus';
+import type { MenuCategory, MenuItem } from '@catering-app/shared-types';
 import { MenuItemForm } from './menu-item-form';
 
 const category: MenuCategory = {
@@ -9,22 +11,74 @@ const category: MenuCategory = {
   isActive: true,
 };
 
-// Expone el FormGroup `protected` del componente para las aserciones de este
-// spec sin relajar su visibilidad en el componente en sí.
+const item: MenuItem = {
+  id: 'item-1',
+  categoryId: 'cat-1',
+  name: 'Flan napolitano',
+  description: 'Receta casera',
+  basePrice: 45,
+  servesMin: 1,
+  servesMax: 1,
+  attributes: {},
+  imageUrl: null,
+  isActive: true,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  updatedAt: '2026-01-01T00:00:00.000Z',
+};
+
 const formOf = (instance: MenuItemForm) => (instance as unknown as { form: MenuItemForm['form'] }).form;
 
 describe('MenuItemForm', () => {
-  const createFixture = () => {
+  let save: jest.Mock;
+  let completeWith: jest.Mock;
+
+  // MenuItemForm se abre como contenido de diálogo (TuiDialogService.open),
+  // no con [item]/[categories] por binding de plantilla -- el equivalente
+  // de prueba es proveer POLYMORPHEUS_CONTEXT directamente (mismo mecanismo
+  // que injectContext() usa en tiempo de ejecución).
+  const createFixture = (dialogItem: MenuItem | null = null) => {
+    save = jest.fn();
+    completeWith = jest.fn();
+
+    TestBed.configureTestingModule({
+      imports: [MenuItemForm],
+      providers: [
+        {
+          provide: POLYMORPHEUS_CONTEXT,
+          useValue: {
+            data: { item: dialogItem, categories: [category], save },
+            completeWith,
+          },
+        },
+      ],
+    });
     const fixture = TestBed.createComponent(MenuItemForm);
-    fixture.componentRef.setInput('categories', [category]);
     fixture.detectChanges();
     return fixture;
   };
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [MenuItemForm],
-    }).compileComponents();
+  it('opens with an empty/default form when creating', () => {
+    const form = formOf(createFixture().componentInstance);
+
+    expect(form.getRawValue()).toMatchObject({
+      name: '',
+      categoryId: '',
+      basePrice: 0,
+      servesMin: 1,
+      servesMax: 1,
+      isActive: true,
+    });
+  });
+
+  it('opens pre-filled with the existing item when editing', () => {
+    const form = formOf(createFixture(item).componentInstance);
+
+    expect(form.getRawValue()).toMatchObject({
+      name: 'Flan napolitano',
+      basePrice: 45,
+      servesMin: 1,
+      servesMax: 1,
+    });
   });
 
   it('starts invalid: name and categoryId are required', () => {
@@ -75,13 +129,19 @@ describe('MenuItemForm', () => {
     expect(form.errors?.['servesRange']).toBeUndefined();
   });
 
-  it('is valid and emits the expected DTO once all required fields are filled', () => {
+  it('does not call save when submitted while invalid', () => {
     const fixture = createFixture();
-    const component = fixture.componentInstance;
-    const emitted: unknown[] = [];
-    component.save.subscribe((dto) => emitted.push(dto));
 
-    const form = formOf(component);
+    fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit'));
+
+    expect(save).not.toHaveBeenCalled();
+    expect(formOf(fixture.componentInstance).touched).toBe(true);
+  });
+
+  it('calls save with the expected DTO once all required fields are filled', () => {
+    const fixture = createFixture();
+    save.mockReturnValue(of(item));
+    const form = formOf(fixture.componentInstance);
     form.setValue({
       name: 'Chilaquiles verdes',
       description: 'Con pollo',
@@ -95,54 +155,63 @@ describe('MenuItemForm', () => {
 
     fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit'));
 
-    expect(emitted).toEqual([
-      {
-        name: 'Chilaquiles verdes',
-        description: 'Con pollo',
-        categoryId: 'cat-1',
-        basePrice: 95.5,
-        servesMin: 2,
-        servesMax: 4,
-        isActive: true,
-      },
-    ]);
+    expect(save).toHaveBeenCalledWith({
+      name: 'Chilaquiles verdes',
+      description: 'Con pollo',
+      categoryId: 'cat-1',
+      basePrice: 95.5,
+      servesMin: 2,
+      servesMax: 4,
+      isActive: true,
+    });
   });
 
-  it('does not emit when submitted while invalid', () => {
+  it('closes the dialog once save succeeds', () => {
     const fixture = createFixture();
-    const component = fixture.componentInstance;
-    const emitted: unknown[] = [];
-    component.save.subscribe((dto) => emitted.push(dto));
+    save.mockReturnValue(of(item));
+    formOf(fixture.componentInstance).setValue({
+      name: 'Chilaquiles verdes',
+      description: 'Con pollo',
+      categoryId: 'cat-1',
+      basePrice: 95.5,
+      servesMin: 2,
+      servesMax: 4,
+      isActive: true,
+    });
 
     fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit'));
 
-    expect(emitted).toEqual([]);
-    expect(formOf(component).touched).toBe(true);
+    expect(completeWith).toHaveBeenCalledTimes(1);
   });
 
-  it('patches the form with the existing item when editing', () => {
+  it('keeps the dialog open and shows the error when save fails', () => {
     const fixture = createFixture();
-    fixture.componentRef.setInput('item', {
-      id: 'item-1',
+    save.mockReturnValue(throwError(() => new Error('Unauthorized')));
+    formOf(fixture.componentInstance).setValue({
+      name: 'Chilaquiles verdes',
+      description: 'Con pollo',
       categoryId: 'cat-1',
-      name: 'Flan napolitano',
-      description: 'Receta casera',
-      basePrice: '45.00',
-      servesMin: 1,
-      servesMax: 1,
-      attributes: {},
-      imageUrl: null,
+      basePrice: 95.5,
+      servesMin: 2,
+      servesMax: 4,
       isActive: true,
-      createdAt: '2026-01-01T00:00:00.000Z',
-      updatedAt: '2026-01-01T00:00:00.000Z',
     });
+
+    fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit'));
     fixture.detectChanges();
 
-    expect(formOf(fixture.componentInstance).getRawValue()).toMatchObject({
-      name: 'Flan napolitano',
-      basePrice: 45,
-      servesMin: 1,
-      servesMax: 1,
-    });
+    expect(completeWith).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.querySelector('[data-testid="form-error"]').textContent).toContain(
+      'Unauthorized',
+    );
+  });
+
+  it('closes without calling save when cancelled', () => {
+    const fixture = createFixture();
+
+    fixture.nativeElement.querySelector('[data-testid="cancel-button"]').click();
+
+    expect(save).not.toHaveBeenCalled();
+    expect(completeWith).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,8 +1,11 @@
-import { Component, effect, inject, input, output } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { TuiButton, TuiInput } from '@taiga-ui/core';
+import { TuiButton, TuiInput, type TuiDialogContext } from '@taiga-ui/core';
 import { TuiSwitch, TuiTextareaComponent } from '@taiga-ui/kit';
+import { injectContext } from '@taiga-ui/polymorpheus';
+import type { Observable } from 'rxjs';
 import type { CreateMenuItemDto, MenuCategory, MenuItem } from '@catering-app/shared-types';
+import { extractErrorMessage } from '../../state/menu-state.service';
 
 // servesMax debe ser >= servesMin (ver ADR-021, validación de rango).
 function servesRangeValidator(control: AbstractControl): ValidationErrors | null {
@@ -14,9 +17,26 @@ function servesRangeValidator(control: AbstractControl): ValidationErrors | null
 }
 
 /**
+ * Datos que recibe el diálogo (ver ADR-023-bis: MenuItemForm pasó de
+ * inline a modal, mismo mecanismo que TUI_CONFIRM en menu-management.ts).
+ * `save` lo decide el feature/ (crear vs actualizar, ver ADR-020) -- este
+ * componente de ui/ solo lo invoca, sin conocer MenuStateService.
+ */
+export interface MenuItemFormDialogData {
+  readonly item: MenuItem | null;
+  readonly categories: MenuCategory[];
+  readonly save: (dto: CreateMenuItemDto) => Observable<MenuItem>;
+}
+
+/**
  * Componente de presentación (formulario reactivo, validación de UI) según
  * ADR-020 -- vive en ui/, sin llamar a data-access ni al store directamente.
- * El feature/ decide si el DTO emitido crea o actualiza un platillo.
+ *
+ * Se abre como contenido de TuiDialogService.open() (igual que TUI_CONFIRM),
+ * no con [item]/[categories]/(save)/(cancelled) por binding de plantilla --
+ * un componente instanciado como contenido de diálogo no tiene un padre de
+ * plantilla que pueda bindear outputs, así que lee sus datos de entrada vía
+ * injectContext().data y cierra el diálogo con context.completeWith().
  */
 @Component({
   selector: 'app-menu-item-form',
@@ -26,11 +46,12 @@ function servesRangeValidator(control: AbstractControl): ValidationErrors | null
 })
 export class MenuItemForm {
   private readonly fb = inject(FormBuilder);
+  protected readonly context = injectContext<TuiDialogContext<void, MenuItemFormDialogData>>();
 
-  readonly item = input<MenuItem | null>(null);
-  readonly categories = input.required<MenuCategory[]>();
-  readonly save = output<CreateMenuItemDto>();
-  readonly cancelled = output<void>();
+  protected readonly categories = this.context.data.categories;
+  protected readonly item = this.context.data.item;
+  protected readonly saving = signal(false);
+  protected readonly error = signal<string | null>(null);
 
   protected readonly form = this.fb.nonNullable.group(
     {
@@ -46,30 +67,18 @@ export class MenuItemForm {
   );
 
   constructor() {
-    effect(() => {
-      const current = this.item();
-      if (current) {
-        this.form.patchValue({
-          name: current.name,
-          description: current.description ?? '',
-          categoryId: current.categoryId,
-          basePrice: Number(current.basePrice),
-          servesMin: current.servesMin,
-          servesMax: current.servesMax,
-          isActive: current.isActive,
-        });
-      } else {
-        this.form.reset({
-          name: '',
-          description: '',
-          categoryId: '',
-          basePrice: 0,
-          servesMin: 1,
-          servesMax: 1,
-          isActive: true,
-        });
-      }
-    });
+    const current = this.item;
+    if (current) {
+      this.form.patchValue({
+        name: current.name,
+        description: current.description ?? '',
+        categoryId: current.categoryId,
+        basePrice: Number(current.basePrice),
+        servesMin: current.servesMin,
+        servesMax: current.servesMax,
+        isActive: current.isActive,
+      });
+    }
   }
 
   protected submit(): void {
@@ -78,7 +87,7 @@ export class MenuItemForm {
       return;
     }
     const value = this.form.getRawValue();
-    this.save.emit({
+    const dto: CreateMenuItemDto = {
       name: value.name,
       description: value.description || null,
       categoryId: value.categoryId,
@@ -86,6 +95,20 @@ export class MenuItemForm {
       servesMin: value.servesMin,
       servesMax: value.servesMax,
       isActive: value.isActive,
+    };
+
+    this.error.set(null);
+    this.saving.set(true);
+    this.context.data.save(dto).subscribe({
+      next: () => this.context.completeWith(),
+      error: (err: unknown) => {
+        this.saving.set(false);
+        this.error.set(extractErrorMessage(err));
+      },
     });
+  }
+
+  protected cancel(): void {
+    this.context.completeWith();
   }
 }
