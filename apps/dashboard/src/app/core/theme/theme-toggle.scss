@@ -1,0 +1,21 @@
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+
+  &__icon {
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    color: var(--tui-text-secondary);
+  }
+
+  &__label {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+}

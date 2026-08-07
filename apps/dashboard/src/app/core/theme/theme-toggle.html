@@ -1,0 +1,43 @@
+<label class="theme-toggle" for="theme-toggle-switch">
+  @if (darkMode()) {
+    <svg
+      class="theme-toggle__icon"
+      data-testid="theme-toggle-icon-moon"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36A5.4 5.4 0 0 1 12 3z" />
+    </svg>
+  } @else {
+    <svg
+      class="theme-toggle__icon"
+      data-testid="theme-toggle-icon-sun"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="4" />
+      <line x1="12" y1="1.5" x2="12" y2="3.5" />
+      <line x1="12" y1="20.5" x2="12" y2="22.5" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+      <line x1="1.5" y1="12" x2="3.5" y2="12" />
+      <line x1="20.5" y1="12" x2="22.5" y2="12" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+  }
+  <input
+    id="theme-toggle-switch"
+    type="checkbox"
+    tuiSwitch
+    data-testid="theme-toggle-switch"
+    [ngModel]="darkMode()"
+    (ngModelChange)="darkMode.set($event)"
+  />
+  <span class="theme-toggle__label">Cambiar a modo {{ darkMode() ? 'claro' : 'oscuro' }}</span>
+</label>

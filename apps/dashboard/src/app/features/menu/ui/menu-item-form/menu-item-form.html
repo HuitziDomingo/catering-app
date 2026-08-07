@@ -1,88 +1,136 @@
 <form class="menu-item-form" [formGroup]="form" (ngSubmit)="submit()">
-  <tui-textfield>
-    <input id="menu-item-name" formControlName="name" data-testid="name-input" />
-    <label tuiLabel for="menu-item-name">Nombre</label>
-  </tui-textfield>
-  @if (form.controls.name.invalid && form.controls.name.touched) {
-    <p class="menu-item-form__error" data-testid="name-error">
-      El nombre es obligatorio.
-    </p>
-  }
+  <section class="menu-item-form__section">
+    <h4 class="menu-item-form__section-title">Información general</h4>
 
-  <tui-textfield>
-    <textarea
-      id="menu-item-description"
-      tuiTextarea
-      formControlName="description"
-      data-testid="description-input"
-    ></textarea>
-    <label tuiLabel for="menu-item-description">Descripción</label>
-  </tui-textfield>
+    <tui-textfield>
+      <input tuiInput id="menu-item-name" formControlName="name" data-testid="name-input" />
+      <label tuiLabel for="menu-item-name">Nombre</label>
+    </tui-textfield>
+    @if (form.controls.name.invalid && form.controls.name.touched) {
+      <p class="menu-item-form__error" data-testid="name-error">
+        El nombre es obligatorio.
+      </p>
+    }
 
-  <tui-textfield>
-    <select id="menu-item-category" formControlName="categoryId" data-testid="category-select">
-      <option value="" disabled>Selecciona una categoría</option>
-      @for (category of categories(); track category.id) {
-        <option [value]="category.id">{{ category.name }}</option>
-      }
-    </select>
-    <label tuiLabel for="menu-item-category">Categoría</label>
-  </tui-textfield>
-  @if (form.controls.categoryId.invalid && form.controls.categoryId.touched) {
-    <p class="menu-item-form__error" data-testid="category-error">
-      Selecciona una categoría.
-    </p>
-  }
+    <tui-textfield>
+      <textarea
+        id="menu-item-description"
+        tuiTextarea
+        formControlName="description"
+        data-testid="description-input"
+      ></textarea>
+      <label tuiLabel for="menu-item-description">Descripción</label>
+    </tui-textfield>
+  </section>
 
-  <tui-textfield>
-    <input
-      id="menu-item-price"
-      type="number"
-      step="0.01"
-      formControlName="basePrice"
-      data-testid="price-input"
-    />
-    <label tuiLabel for="menu-item-price">Precio base (MXN)</label>
-  </tui-textfield>
-  @if (form.controls.basePrice.invalid && form.controls.basePrice.touched) {
-    <p class="menu-item-form__error" data-testid="price-error">
-      El precio debe ser mayor a 0.
-    </p>
-  }
+  <section class="menu-item-form__section">
+    <h4 class="menu-item-form__section-title">Categoría y precio</h4>
 
-  <tui-textfield>
-    <input
-      id="menu-item-serves"
-      type="number"
-      step="1"
-      formControlName="servesPeople"
-      data-testid="serves-input"
-    />
-    <label tuiLabel for="menu-item-serves">Sirve a (personas)</label>
-  </tui-textfield>
-  @if (form.controls.servesPeople.invalid && form.controls.servesPeople.touched) {
-    <p class="menu-item-form__error" data-testid="serves-error">
-      Debe servir al menos a 1 persona.
-    </p>
-  }
+    <div class="menu-item-form__field">
+      <label class="menu-item-form__field-label" for="menu-item-category">Categoría</label>
+      <select
+        id="menu-item-category"
+        class="menu-item-form__select"
+        [class.menu-item-form__select--invalid]="
+          form.controls.categoryId.invalid && form.controls.categoryId.touched
+        "
+        formControlName="categoryId"
+        data-testid="category-select"
+      >
+        <option value="" disabled>Selecciona una categoría</option>
+        @for (category of categories(); track category.id) {
+          <option [value]="category.id">{{ category.name }}</option>
+        }
+      </select>
+    </div>
+    @if (form.controls.categoryId.invalid && form.controls.categoryId.touched) {
+      <p class="menu-item-form__error" data-testid="category-error">
+        Selecciona una categoría.
+      </p>
+    }
 
-  <label class="menu-item-form__toggle" for="menu-item-active">
-    <input
-      id="menu-item-active"
-      type="checkbox"
-      tuiSwitch
-      formControlName="isActive"
-      data-testid="active-toggle"
-    />
-    Activo
-  </label>
+    <tui-textfield>
+      <input
+        tuiInput
+        id="menu-item-price"
+        type="number"
+        step="0.01"
+        formControlName="basePrice"
+        data-testid="price-input"
+      />
+      <label tuiLabel for="menu-item-price">Precio base (MXN)</label>
+    </tui-textfield>
+    @if (form.controls.basePrice.invalid && form.controls.basePrice.touched) {
+      <p class="menu-item-form__error" data-testid="price-error">
+        El precio debe ser mayor a 0.
+      </p>
+    }
+  </section>
 
-  <div class="menu-item-form__actions">
-    <button tuiButton type="submit" data-testid="submit-button">
-      {{ item() ? 'Guardar cambios' : 'Crear platillo' }}
-    </button>
-    <button tuiButton type="button" appearance="outline" (click)="cancelled.emit()">
-      Cancelar
-    </button>
-  </div>
+  <section class="menu-item-form__section">
+    <h4 class="menu-item-form__section-title">Capacidad</h4>
+
+    <div class="menu-item-form__range">
+      <tui-textfield>
+        <input
+          tuiInput
+          id="menu-item-serves-min"
+          type="number"
+          step="1"
+          formControlName="servesMin"
+          data-testid="serves-min-input"
+        />
+        <label tuiLabel for="menu-item-serves-min">Sirve desde (personas)</label>
+      </tui-textfield>
+
+      <tui-textfield>
+        <input
+          tuiInput
+          id="menu-item-serves-max"
+          type="number"
+          step="1"
+          formControlName="servesMax"
+          data-testid="serves-max-input"
+        />
+        <label tuiLabel for="menu-item-serves-max">Sirve hasta (personas)</label>
+      </tui-textfield>
+    </div>
+    @if (form.controls.servesMin.invalid && form.controls.servesMin.touched) {
+      <p class="menu-item-form__error" data-testid="serves-min-error">
+        Debe servir al menos a 1 persona.
+      </p>
+    }
+    @if (form.controls.servesMax.invalid && form.controls.servesMax.touched) {
+      <p class="menu-item-form__error" data-testid="serves-max-error">
+        Debe servir al menos a 1 persona.
+      </p>
+    }
+    @if (form.errors?.['servesRange'] && form.controls.servesMax.touched) {
+      <p class="menu-item-form__error" data-testid="serves-range-error">
+        El máximo debe ser mayor o igual al mínimo.
+      </p>
+    }
+  </section>
+
+  <section class="menu-item-form__section menu-item-form__section--footer">
+    <label class="menu-item-form__toggle" for="menu-item-active">
+      <input
+        id="menu-item-active"
+        type="checkbox"
+        tuiSwitch
+        formControlName="isActive"
+        data-testid="active-toggle"
+      />
+      Activo
+    </label>
+
+    <div class="menu-item-form__actions">
+      <button tuiButton type="button" appearance="outline" (click)="cancelled.emit()">
+        Cancelar
+      </button>
+      <button tuiButton type="submit" data-testid="submit-button">
+        {{ item() ? 'Guardar cambios' : 'Crear platillo' }}
+      </button>
+    </div>
+  </section>
 </form>

@@ -3,21 +3,21 @@
     <tr>
       <th>Nombre</th>
       <th>Categoría</th>
-      <th>Precio</th>
+      <th class="menu-item-list__numeric">Precio</th>
       <th>Sirve a</th>
       <th>Estado</th>
-      <th></th>
+      <th class="menu-item-list__actions-header">Acciones</th>
     </tr>
   </thead>
   <tbody>
     @for (item of items(); track item.id) {
       <tr>
-        <td>{{ item.name }}</td>
+        <td class="menu-item-list__name">{{ item.name }}</td>
         <td>{{ categoryName(item.categoryId) }}</td>
-        <td>{{ formatPrice(item.basePrice) }}</td>
-        <td>{{ item.servesPeople }}</td>
+        <td class="menu-item-list__numeric">{{ formatPrice(item.basePrice) }}</td>
+        <td>{{ servesRange(item) }}</td>
         <td>
-          <span [attr.data-status]="item.isActive ? 'active' : 'inactive'">
+          <span class="menu-item-list__status" [attr.data-status]="item.isActive ? 'active' : 'inactive'">
             {{ item.isActive ? 'Activo' : 'Inactivo' }}
           </span>
         </td>
@@ -38,7 +38,7 @@
       </tr>
     } @empty {
       <tr>
-        <td colspan="6">No hay platillos todavía.</td>
+        <td class="menu-item-list__empty" colspan="6">No hay platillos todavía.</td>
       </tr>
     }
   </tbody>

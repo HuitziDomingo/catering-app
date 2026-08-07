@@ -3,10 +3,11 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1.5rem;
-  background: #fff8e1;
-  border: 1px solid #f0c419;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
+  padding: 0.875rem 1.25rem;
+  margin-block-end: 1.5rem;
+  background: var(--tui-status-warning-pale);
+  border: 1px solid var(--tui-status-warning);
+  border-radius: var(--tui-radius-m);
+  color: var(--tui-text-primary);
+  font: var(--tui-typography-body-s);
 }

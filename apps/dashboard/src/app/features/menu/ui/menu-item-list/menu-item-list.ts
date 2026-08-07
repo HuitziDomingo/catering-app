@@ -1,6 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { TuiButton } from '@taiga-ui/core';
 import type { MenuCategory, MenuItem } from '@catering-app/shared-types';
+import { formatServesRange } from '../../util/format-serves-range';
 
 const currencyFormatter = new Intl.NumberFormat('es-MX', {
   style: 'currency',
@@ -31,5 +32,9 @@ export class MenuItemList {
   // tipo diga number -- mismo caso que menu.service.ts en la API.
   protected formatPrice(basePrice: number): string {
     return currencyFormatter.format(Number(basePrice));
+  }
+
+  protected servesRange(item: MenuItem): string {
+    return formatServesRange(item.servesMin, item.servesMax);
   }
 }

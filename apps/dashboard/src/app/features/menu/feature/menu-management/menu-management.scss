@@ -3,16 +3,29 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-block-end: 1.5rem;
+  }
+
+  &__header h2 {
+    margin: 0;
+    font: var(--tui-typography-heading-h5);
+    color: var(--tui-text-primary);
   }
 
   &__error {
-    color: #c62828;
+    color: var(--tui-text-negative);
+    font: var(--tui-typography-body-s);
   }
 
   &__form-panel {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #e0e0e0;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--tui-border-normal);
+  }
+
+  &__form-panel h3 {
+    margin: 0 0 1.25rem;
+    font: var(--tui-typography-heading-h6);
+    color: var(--tui-text-primary);
   }
 }

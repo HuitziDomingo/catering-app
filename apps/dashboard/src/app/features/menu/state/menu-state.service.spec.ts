@@ -17,7 +17,8 @@ const item: MenuItem = {
   name: 'Chilaquiles',
   description: null,
   basePrice: 95,
-  servesPeople: 1,
+  servesMin: 1,
+  servesMax: 1,
   attributes: {},
   imageUrl: null,
   isActive: true,
@@ -83,7 +84,8 @@ describe('MenuStateService', () => {
         categoryId: 'cat-1',
         name: 'Huevos rancheros',
         basePrice: 85,
-        servesPeople: 2,
+        servesMin: 2,
+        servesMax: 2,
       })
       .subscribe();
 
