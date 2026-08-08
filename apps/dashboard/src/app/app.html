@@ -2,12 +2,15 @@
   <div class="app-shell">
     <header class="app-shell__header">
       <h1 class="app-shell__title">Catering — Dashboard</h1>
-      <app-theme-toggle />
+      <div class="app-shell__actions">
+        <app-theme-toggle />
+        @if (auth.isAuthenticated()) {
+          <app-logout-button />
+        }
+      </div>
     </header>
 
     <main class="app-shell__main">
-      <app-dev-token-input />
-
       <router-outlet></router-outlet>
     </main>
   </div>

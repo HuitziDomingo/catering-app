@@ -12,8 +12,7 @@ import { API_BASE_URL } from '../../../core/api-config';
 /**
  * Capa data-access del feature de menú (ver ADR-020). GET es público (ver
  * ADR-006); POST/PATCH/DELETE requieren JWT de staff/admin/superadmin
- * (adjuntado por el authInterceptor -- ver DevTokenStore mientras no exista
- * login real).
+ * (adjuntado por authInterceptor -- ver core/auth/).
  */
 @Injectable({ providedIn: 'root' })
 export class MenuDataAccessService {

@@ -1,0 +1,10 @@
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  &__email {
+    color: var(--tui-text-secondary);
+    font: var(--tui-typography-body-s);
+  }
+}

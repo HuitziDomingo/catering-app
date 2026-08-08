@@ -1,0 +1,12 @@
+<section class="login-page">
+  <div class="login-page__card">
+    <h2 class="login-page__title">Iniciar sesión</h2>
+
+    <app-login-form [pending]="pending()" [error]="error()" (submitted)="onSubmit($event)" />
+
+    <p class="login-page__footer">
+      ¿No tienes cuenta?
+      <a routerLink="/register" data-testid="register-link">Crea una aquí</a>
+    </p>
+  </div>
+</section>

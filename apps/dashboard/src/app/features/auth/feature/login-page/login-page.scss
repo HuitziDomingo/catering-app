@@ -1,0 +1,31 @@
+.login-page {
+  display: flex;
+  justify-content: center;
+  padding-block-start: 3rem;
+
+  &__card {
+    inline-size: 100%;
+    max-inline-size: 400px;
+    padding: 2rem;
+    border-radius: var(--tui-radius-l);
+    border: 1px solid var(--tui-border-normal);
+    background: var(--tui-background-elevation-1);
+  }
+
+  &__title {
+    margin: 0 0 1.5rem;
+    font: var(--tui-typography-heading-h4);
+    color: var(--tui-text-primary);
+  }
+
+  &__footer {
+    margin: 1.5rem 0 0;
+    color: var(--tui-text-secondary);
+    font: var(--tui-typography-body-s);
+    text-align: center;
+
+    a {
+      color: var(--tui-text-action);
+    }
+  }
+}
