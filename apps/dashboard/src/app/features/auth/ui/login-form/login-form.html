@@ -1,0 +1,45 @@
+<form class="login-form" [formGroup]="form" (ngSubmit)="submit()">
+  @if (error()) {
+    <p class="login-form__error login-form__error--form" data-testid="login-error">
+      {{ error() }}
+    </p>
+  }
+
+  <tui-textfield>
+    <input
+      tuiInput
+      id="login-email"
+      type="email"
+      autocomplete="email"
+      formControlName="email"
+      data-testid="email-input"
+    />
+    <label tuiLabel for="login-email">Email</label>
+  </tui-textfield>
+  @if (form.controls.email.invalid && form.controls.email.touched) {
+    <p class="login-form__error" data-testid="email-error">
+      Ingresa un email válido.
+    </p>
+  }
+
+  <tui-textfield>
+    <input
+      tuiInput
+      id="login-password"
+      type="password"
+      autocomplete="current-password"
+      formControlName="password"
+      data-testid="password-input"
+    />
+    <label tuiLabel for="login-password">Contraseña</label>
+  </tui-textfield>
+  @if (form.controls.password.invalid && form.controls.password.touched) {
+    <p class="login-form__error" data-testid="password-error">
+      La contraseña es obligatoria.
+    </p>
+  }
+
+  <button tuiButton type="submit" [disabled]="pending()" data-testid="submit-button">
+    {{ pending() ? 'Entrando…' : 'Iniciar sesión' }}
+  </button>
+</form>

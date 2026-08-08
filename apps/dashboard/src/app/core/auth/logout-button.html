@@ -1,0 +1,8 @@
+<div class="logout-button">
+  @if (user(); as currentUser) {
+    <span class="logout-button__email" data-testid="current-user-email">{{ currentUser.email }}</span>
+  }
+  <button tuiButton type="button" size="s" appearance="outline" data-testid="logout-button" (click)="logout()">
+    Cerrar sesión
+  </button>
+</div>

@@ -1,0 +1,78 @@
+<form class="register-form" [formGroup]="form" (ngSubmit)="submit()">
+  @if (error()) {
+    <p class="register-form__error register-form__error--form" data-testid="register-error">
+      {{ error() }}
+    </p>
+  }
+
+  <tui-textfield>
+    <input
+      tuiInput
+      id="register-full-name"
+      autocomplete="name"
+      formControlName="fullName"
+      data-testid="full-name-input"
+    />
+    <label tuiLabel for="register-full-name">Nombre completo</label>
+  </tui-textfield>
+  @if (form.controls.fullName.invalid && form.controls.fullName.touched) {
+    <p class="register-form__error" data-testid="full-name-error">
+      El nombre completo es obligatorio.
+    </p>
+  }
+
+  <tui-textfield>
+    <input
+      tuiInput
+      id="register-email"
+      type="email"
+      autocomplete="email"
+      formControlName="email"
+      data-testid="email-input"
+    />
+    <label tuiLabel for="register-email">Email</label>
+  </tui-textfield>
+  @if (form.controls.email.invalid && form.controls.email.touched) {
+    <p class="register-form__error" data-testid="email-error">
+      Ingresa un email válido.
+    </p>
+  }
+
+  <tui-textfield>
+    <input
+      tuiInput
+      id="register-password"
+      type="password"
+      autocomplete="new-password"
+      formControlName="password"
+      data-testid="password-input"
+    />
+    <label tuiLabel for="register-password">Contraseña</label>
+  </tui-textfield>
+  @if (form.controls.password.invalid && form.controls.password.touched) {
+    <p class="register-form__error" data-testid="password-error">
+      La contraseña debe tener al menos 8 caracteres.
+    </p>
+  }
+
+  <tui-textfield>
+    <input
+      tuiInput
+      id="register-phone"
+      type="tel"
+      autocomplete="tel"
+      formControlName="phone"
+      data-testid="phone-input"
+    />
+    <label tuiLabel for="register-phone">Teléfono (opcional)</label>
+  </tui-textfield>
+  @if (form.controls.phone.invalid && form.controls.phone.touched) {
+    <p class="register-form__error" data-testid="phone-error">
+      El teléfono es demasiado largo.
+    </p>
+  }
+
+  <button tuiButton type="submit" [disabled]="pending()" data-testid="submit-button">
+    {{ pending() ? 'Creando cuenta…' : 'Crear cuenta' }}
+  </button>
+</form>

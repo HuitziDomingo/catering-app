@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { forkJoin, Observable, tap } from 'rxjs';
 import type {
@@ -7,16 +6,10 @@ import type {
   MenuItem,
   UpdateMenuItemDto,
 } from '@catering-app/shared-types';
+import { extractErrorMessage } from '../../../core/http/extract-error-message';
 import { MenuDataAccessService } from '../data-access/menu-data-access.service';
 
 export type MenuStatus = 'idle' | 'loading' | 'success' | 'error';
-
-export function extractErrorMessage(err: unknown): string {
-  if (err instanceof HttpErrorResponse) {
-    return (err.error as { message?: string } | null)?.message ?? err.message;
-  }
-  return err instanceof Error ? err.message : 'Ocurrió un error inesperado.';
-}
 
 /** Estado del feature de menú (ver ADR-020) manejado con signals de Angular. */
 @Injectable({ providedIn: 'root' })

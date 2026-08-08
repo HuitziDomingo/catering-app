@@ -5,7 +5,7 @@ import { TuiSwitch, TuiTextareaComponent } from '@taiga-ui/kit';
 import { injectContext } from '@taiga-ui/polymorpheus';
 import type { Observable } from 'rxjs';
 import type { CreateMenuItemDto, MenuCategory, MenuItem } from '@catering-app/shared-types';
-import { extractErrorMessage } from '../../state/menu-state.service';
+import { extractErrorMessage } from '../../../../core/http/extract-error-message';
 
 // servesMax debe ser >= servesMin (ver ADR-021, validación de rango).
 function servesRangeValidator(control: AbstractControl): ValidationErrors | null {

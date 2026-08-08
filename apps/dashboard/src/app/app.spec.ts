@@ -27,10 +27,10 @@ describe('App', () => {
     );
   });
 
-  it('should render the dev-only token banner', async () => {
+  it('should render the theme toggle', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.textContent).toContain('Modo desarrollo');
+    expect(compiled.querySelector('app-theme-toggle')).toBeTruthy();
   });
 });

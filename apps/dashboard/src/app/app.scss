@@ -18,6 +18,12 @@
     color: var(--tui-text-primary);
   }
 
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
   &__main {
     max-inline-size: 960px;
     margin-inline: auto;
