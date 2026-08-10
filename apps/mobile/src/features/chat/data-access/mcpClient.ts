@@ -1,4 +1,7 @@
 import type { OrderStatus } from '@catering-app/shared-types';
+import { API_BASE_URL } from '../../../core/http/apiClient';
+import { notifySessionExpired } from '../../../core/http/sessionExpiry';
+import { useSessionStore } from '../../auth/state/useSessionStore';
 
 // Capa data-access del feature de chat (ver ADR-020, ADR-002). Cliente MCP
 // mínimo: habla JSON-RPC 2.0 directo con /api/mcp en vez de usar el SDK
@@ -32,15 +35,22 @@ import type { OrderStatus } from '@catering-app/shared-types';
 // a un tool hace su propio handshake completo. Es más simple y evita tener
 // que manejar expiración/recuperación de sesión entre mensajes -- aceptable
 // para este v1 (ver ChatScreen.tsx).
+//
+// A diferencia de features/auth y features/menu, esta capa no puede usar
+// core/http/apiClient.ts (necesita fetch crudo para leer la respuesta SSE,
+// axios no expone eso) -- withAuthRetry de abajo reimplementa la misma
+// lógica de refresh-y-reintenta-una-vez del interceptor de apiClient.ts,
+// específica para fetch.
 
-const DEFAULT_API_URL = 'http://localhost:3000/api';
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_API_URL;
 const MCP_URL = `${API_BASE_URL}/mcp`;
 
 const MCP_PROTOCOL_VERSION = '2025-11-25';
 const CLIENT_INFO = { name: 'catering-app-mobile', version: '1.0.0' };
 
 export class McpToolError extends Error {}
+
+/** 401 en cualquier request MCP -- distinto de McpToolError para que withAuthRetry sepa cuándo vale la pena reintentar con un token refrescado. */
+class McpUnauthorizedError extends McpToolError {}
 
 type JsonRpcMessage = {
   jsonrpc: '2.0';
@@ -78,6 +88,10 @@ async function postJsonRpc(
   // 202 sin cuerpo -- ver webStandardStreamableHttp.js.
   if (response.status === 202) {
     return { sessionId: response.headers.get('mcp-session-id') ?? undefined };
+  }
+
+  if (response.status === 401) {
+    throw new McpUnauthorizedError('El servidor MCP respondió con status 401.');
   }
 
   if (!response.ok) {
@@ -128,6 +142,36 @@ async function initializeMcpSession(accessToken: string): Promise<string> {
   return sessionId;
 }
 
+/**
+ * Si `run` falla por un 401 (token expirado), intenta refrescar el access
+ * token una vez (useSessionStore.refreshSession, ver core/http/apiClient.ts
+ * para el equivalente en axios) y reintenta `run` completo con el token
+ * nuevo -- el handshake de MCP hay que rehacerlo entero porque el 401 pudo
+ * pasar en cualquier paso (initialize, notify o tools/call). Si el refresh
+ * también falla, limpia la sesión y manda a /login, igual que el
+ * interceptor de apiClient.ts.
+ */
+async function withAuthRetry<T>(
+  accessToken: string,
+  run: (token: string) => Promise<T>,
+): Promise<T> {
+  try {
+    return await run(accessToken);
+  } catch (err) {
+    if (!(err instanceof McpUnauthorizedError)) {
+      throw err;
+    }
+    try {
+      const tokens = await useSessionStore.getState().refreshSession();
+      return await run(tokens.accessToken);
+    } catch (refreshError) {
+      useSessionStore.getState().logout();
+      notifySessionExpired();
+      throw refreshError;
+    }
+  }
+}
+
 export type McpTool = {
   name: string;
   description?: string;
@@ -135,20 +179,22 @@ export type McpTool = {
 
 /** tools/list -- no se usa todavía en la UI; queda lista para extensiones futuras (ej. sugerencias de preguntas). */
 export async function listMcpTools(accessToken: string): Promise<McpTool[]> {
-  const sessionId = await initializeMcpSession(accessToken);
-  const { message } = await postJsonRpc(accessToken, sessionId, {
-    jsonrpc: '2.0',
-    id: 2,
-    method: 'tools/list',
-    params: {},
+  return withAuthRetry(accessToken, async (token) => {
+    const sessionId = await initializeMcpSession(token);
+    const { message } = await postJsonRpc(token, sessionId, {
+      jsonrpc: '2.0',
+      id: 2,
+      method: 'tools/list',
+      params: {},
+    });
+
+    if (message?.error) {
+      throw new McpToolError(message.error.message);
+    }
+
+    const result = message?.result as { tools?: McpTool[] } | undefined;
+    return result?.tools ?? [];
   });
-
-  if (message?.error) {
-    throw new McpToolError(message.error.message);
-  }
-
-  const result = message?.result as { tools?: McpTool[] } | undefined;
-  return result?.tools ?? [];
 }
 
 // Mismo subconjunto de campos que handleConsultarPedidosPorCliente mapea en
@@ -175,30 +221,32 @@ export async function consultarPedidosPorCliente(
   accessToken: string,
   args: { estado?: OrderStatus; limite?: number } = {},
 ): Promise<ConsultarPedidosPorClienteResult> {
-  const sessionId = await initializeMcpSession(accessToken);
-  const { message } = await postJsonRpc(accessToken, sessionId, {
-    jsonrpc: '2.0',
-    id: 2,
-    method: 'tools/call',
-    params: { name: 'consultar_pedidos_por_cliente', arguments: args },
+  return withAuthRetry(accessToken, async (token) => {
+    const sessionId = await initializeMcpSession(token);
+    const { message } = await postJsonRpc(token, sessionId, {
+      jsonrpc: '2.0',
+      id: 2,
+      method: 'tools/call',
+      params: { name: 'consultar_pedidos_por_cliente', arguments: args },
+    });
+
+    if (message?.error) {
+      throw new McpToolError(message.error.message);
+    }
+
+    const result = message?.result as
+      | { content?: Array<{ type: string; text: string }>; isError?: boolean }
+      | undefined;
+    const text = result?.content?.[0]?.text;
+    if (!text) {
+      throw new McpToolError('El tool MCP no devolvió contenido.');
+    }
+    if (result?.isError) {
+      throw new McpToolError(text);
+    }
+
+    return JSON.parse(text) as ConsultarPedidosPorClienteResult;
   });
-
-  if (message?.error) {
-    throw new McpToolError(message.error.message);
-  }
-
-  const result = message?.result as
-    | { content?: Array<{ type: string; text: string }>; isError?: boolean }
-    | undefined;
-  const text = result?.content?.[0]?.text;
-  if (!text) {
-    throw new McpToolError('El tool MCP no devolvió contenido.');
-  }
-  if (result?.isError) {
-    throw new McpToolError(text);
-  }
-
-  return JSON.parse(text) as ConsultarPedidosPorClienteResult;
 }
 
 // Mismo subconjunto de campos que handleCrearPedido devuelve en la API (ver
@@ -221,28 +269,30 @@ export async function crearPedido(
   accessToken: string,
   args: CrearPedidoArgs,
 ): Promise<CrearPedidoResult> {
-  const sessionId = await initializeMcpSession(accessToken);
-  const { message } = await postJsonRpc(accessToken, sessionId, {
-    jsonrpc: '2.0',
-    id: 2,
-    method: 'tools/call',
-    params: { name: 'crear_pedido', arguments: args },
+  return withAuthRetry(accessToken, async (token) => {
+    const sessionId = await initializeMcpSession(token);
+    const { message } = await postJsonRpc(token, sessionId, {
+      jsonrpc: '2.0',
+      id: 2,
+      method: 'tools/call',
+      params: { name: 'crear_pedido', arguments: args },
+    });
+
+    if (message?.error) {
+      throw new McpToolError(message.error.message);
+    }
+
+    const result = message?.result as
+      | { content?: Array<{ type: string; text: string }>; isError?: boolean }
+      | undefined;
+    const text = result?.content?.[0]?.text;
+    if (!text) {
+      throw new McpToolError('El tool MCP no devolvió contenido.');
+    }
+    if (result?.isError) {
+      throw new McpToolError(text);
+    }
+
+    return JSON.parse(text) as CrearPedidoResult;
   });
-
-  if (message?.error) {
-    throw new McpToolError(message.error.message);
-  }
-
-  const result = message?.result as
-    | { content?: Array<{ type: string; text: string }>; isError?: boolean }
-    | undefined;
-  const text = result?.content?.[0]?.text;
-  if (!text) {
-    throw new McpToolError('El tool MCP no devolvió contenido.');
-  }
-  if (result?.isError) {
-    throw new McpToolError(text);
-  }
-
-  return JSON.parse(text) as CrearPedidoResult;
 }
