@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text, useTheme } from '@ui-kitten/components';
 import { RoleName } from '@catering-app/shared-types';
-import type { SessionUser } from '../state/useSessionStore';
+import type { SessionUser } from '../../auth/state/useSessionStore';
 
 type ProfileCardProps = {
   user: SessionUser;
@@ -16,7 +16,10 @@ const ROLE_LABELS: Record<RoleName, string> = {
 };
 
 // Componente de presentación pura (sin lógica de negocio), vive en ui/ según
-// ADR-020. Recibe el usuario ya resuelto desde el store de sesión.
+// ADR-020. Recibe el usuario ya resuelto desde el store de sesión. Solo
+// muestra email/rol -- GET /auth/me (fuente única de verdad del usuario, ver
+// useSessionStore.ts) no devuelve fullName, así que no hay un nombre real
+// que mostrar aquí de forma consistente entre login y registro.
 export const ProfileCard = ({ user }: ProfileCardProps) => {
   const theme = useTheme();
 
@@ -25,10 +28,7 @@ export const ProfileCard = ({ user }: ProfileCardProps) => {
       testID="profile-card"
       style={[styles.card, { backgroundColor: theme['background-basic-color-1'] }]}
     >
-      <Text category="h6">{user.fullName}</Text>
-      <Text appearance="hint" category="p2" style={styles.row}>
-        {user.email}
-      </Text>
+      <Text category="h6">{user.email}</Text>
       <Text category="s1" status="primary" style={styles.row} testID="profile-card-role">
         {ROLE_LABELS[user.role]}
       </Text>

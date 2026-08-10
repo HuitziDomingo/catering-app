@@ -2,25 +2,42 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Spinner, Text, useTheme } from '@ui-kitten/components';
-import { useSessionStore } from '../state/useSessionStore';
+import { useRouter } from 'expo-router';
+import { useSessionStore } from '../../auth/state/useSessionStore';
+import { LoginScreen } from '../../auth/feature/LoginScreen';
 import { ProfileCard } from '../ui/ProfileCard';
 
-// Pantalla del feature de sesión (ver ADR-020). useSessionStore es
-// andamiaje temporal hasta que exista login real (ver ese archivo), así que
-// el botón de alternar autenticación de abajo es SOLO PARA DESARROLLO: se
-// elimina por completo cuando se construyan las pantallas de login. A
-// diferencia de la versión anterior, devLogin ahora hace una llamada de red
-// real (login/registro contra una cuenta de prueba fija), por eso el botón
-// necesita estado de carga/error.
+// Pantalla del feature de sesión (ver ADR-020). Reemplaza por completo al
+// toggle de desarrollo anterior: sin sesión, embebe LoginScreen (mismo
+// componente que la ruta app/login.tsx, ver ADR-020) en vez de solo un
+// mensaje; con sesión, muestra el perfil real y un logout real que limpia
+// el estado de useSessionStore y manda a /login.
 export const ProfileScreen = () => {
+  const isBootstrapping = useSessionStore((state) => state.isBootstrapping);
   const isAuthenticated = useSessionStore((state) => state.isAuthenticated);
   const user = useSessionStore((state) => state.user);
-  const authStatus = useSessionStore((state) => state.authStatus);
-  const authError = useSessionStore((state) => state.authError);
-  const devLogin = useSessionStore((state) => state.devLogin);
-  const devLogout = useSessionStore((state) => state.devLogout);
+  const logout = useSessionStore((state) => state.logout);
   const theme = useTheme();
-  const isLoading = authStatus === 'loading';
+  const router = useRouter();
+
+  if (isBootstrapping) {
+    return (
+      <SafeAreaView
+        style={[styles.centered, { backgroundColor: theme['background-basic-color-2'] }]}
+      >
+        <Spinner size="large" />
+      </SafeAreaView>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return <LoginScreen />;
+  }
+
+  const handleLogout = () => {
+    logout();
+    router.replace('/login');
+  };
 
   return (
     <SafeAreaView
@@ -30,38 +47,11 @@ export const ProfileScreen = () => {
         Perfil
       </Text>
 
-      {isAuthenticated && user ? (
-        <ProfileCard user={user} />
-      ) : (
-        <Text appearance="hint" style={styles.message} testID="profile-signed-out-message">
-          Inicia sesión para ver tu perfil.
-        </Text>
-      )}
+      <ProfileCard user={user} />
 
-      {authStatus === 'error' && authError ? (
-        <Text status="danger" style={styles.message} testID="profile-dev-auth-error">
-          {authError}
-        </Text>
-      ) : null}
-
-      {/* Andamiaje temporal solo para desarrollo (ver useSessionStore.ts) --
-          reemplazar por las pantallas de login/logout reales. */}
-      <View style={styles.devToggle}>
-        <Button
-          testID="profile-dev-auth-toggle"
-          appearance="outline"
-          status="basic"
-          disabled={isLoading}
-          accessoryLeft={
-            isLoading ? (evaProps) => <Spinner {...evaProps} size="small" /> : undefined
-          }
-          onPress={isAuthenticated ? devLogout : devLogin}
-        >
-          {isAuthenticated
-            ? 'Dev: cerrar sesión'
-            : isLoading
-              ? 'Iniciando sesión...'
-              : 'Dev: iniciar sesión'}
+      <View style={styles.logout}>
+        <Button testID="logout-button" appearance="outline" status="danger" onPress={handleLogout}>
+          Cerrar sesión
         </Button>
       </View>
     </SafeAreaView>
@@ -74,17 +64,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   title: {
     paddingHorizontal: 16,
     paddingTop: 8,
     paddingBottom: 4,
   },
-  message: {
-    textAlign: 'center',
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  devToggle: {
+  logout: {
     marginTop: 'auto',
     padding: 16,
   },

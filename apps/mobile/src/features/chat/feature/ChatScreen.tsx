@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, useTheme } from '@ui-kitten/components';
-import { useSessionStore } from '../../session/state/useSessionStore';
+import { Spinner, useTheme } from '@ui-kitten/components';
+import { useSessionStore } from '../../auth/state/useSessionStore';
+import { LoginScreen } from '../../auth/feature/LoginScreen';
 import { useMenuStore } from '../../menu/state/useMenuStore';
 import { useChatStore } from '../state/useChatStore';
 import type { PendingOrderDraft } from '../state/useChatStore';
@@ -44,6 +45,7 @@ const CLARIFICATION_BY_REASON: Record<OrderIntentExtractionFailureReason, string
 // cae al flujo existente de consulta (looksOrderRelated + tool
 // consultar_pedidos_por_cliente); si tampoco, responde con un mensaje fijo.
 export const ChatScreen = () => {
+  const isBootstrapping = useSessionStore((state) => state.isBootstrapping);
   const isAuthenticated = useSessionStore((state) => state.isAuthenticated);
   const accessToken = useSessionStore((state) => state.accessToken);
   const messages = useChatStore((state) => state.messages);
@@ -153,16 +155,18 @@ export const ChatScreen = () => {
     }
   };
 
-  if (!isAuthenticated) {
+  if (isBootstrapping) {
     return (
       <SafeAreaView
         style={[styles.centered, { backgroundColor: theme['background-basic-color-2'] }]}
       >
-        <Text appearance="hint" testID="chat-signed-out-message">
-          Inicia sesión para usar el chat
-        </Text>
+        <Spinner size="large" />
       </SafeAreaView>
     );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginScreen />;
   }
 
   return (

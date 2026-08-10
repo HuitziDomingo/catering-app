@@ -1,4 +1,19 @@
 import { OrderStatus } from '@catering-app/shared-types';
+
+const mockRefreshSession = jest.fn();
+const mockLogout = jest.fn();
+const mockNotifySessionExpired = jest.fn();
+
+jest.mock('../../auth/state/useSessionStore', () => ({
+  useSessionStore: {
+    getState: () => ({ refreshSession: mockRefreshSession, logout: mockLogout }),
+  },
+}));
+
+jest.mock('../../../core/http/sessionExpiry', () => ({
+  notifySessionExpired: () => mockNotifySessionExpired(),
+}));
+
 import {
   consultarPedidosPorCliente,
   crearPedido,
@@ -50,6 +65,9 @@ const mockOrder = {
 
 beforeEach(() => {
   global.fetch = jest.fn();
+  mockRefreshSession.mockReset();
+  mockLogout.mockReset();
+  mockNotifySessionExpired.mockReset();
 });
 
 describe('consultarPedidosPorCliente', () => {
@@ -133,12 +151,65 @@ describe('consultarPedidosPorCliente', () => {
 
   it('throws when the HTTP response is not ok', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce(
-      fakeResponse({ status: 401, text: '' }),
+      fakeResponse({ status: 500, text: '' }),
     );
 
     await expect(consultarPedidosPorCliente('token-123')).rejects.toThrow(
-      'status 401',
+      'status 500',
     );
+  });
+});
+
+describe('401 handling (refresh-and-retry, see withAuthRetry)', () => {
+  it('refreshes the token once and retries the full handshake when a request 401s', async () => {
+    (global.fetch as jest.Mock)
+      // Primer intento (token viejo): initialize responde 401.
+      .mockResolvedValueOnce(fakeResponse({ status: 401, text: '' }))
+      // Reintento (token nuevo, tras refresh): handshake completo + tools/call.
+      .mockResolvedValueOnce(
+        sseResponse(
+          { jsonrpc: '2.0', id: 1, result: {} },
+          { 'mcp-session-id': 'session-retry' },
+        ),
+      )
+      .mockResolvedValueOnce(acceptedResponse())
+      .mockResolvedValueOnce(
+        sseResponse({
+          jsonrpc: '2.0',
+          id: 2,
+          result: {
+            content: [
+              { type: 'text', text: JSON.stringify({ success: true, data: [], count: 0 }) },
+            ],
+          },
+        }),
+      );
+    mockRefreshSession.mockResolvedValue({ accessToken: 'new-token', refreshToken: 'new-refresh' });
+
+    const result = await consultarPedidosPorCliente('old-token');
+
+    expect(result).toEqual({ success: true, data: [], count: 0 });
+    expect(mockRefreshSession).toHaveBeenCalledTimes(1);
+    expect(mockLogout).not.toHaveBeenCalled();
+
+    // La primera request (que 401ó) usó el token viejo...
+    const [, firstOptions] = (global.fetch as jest.Mock).mock.calls[0];
+    expect(firstOptions.headers.Authorization).toBe('Bearer old-token');
+    // ...el reintento completo usa el token nuevo desde el primer paso (initialize).
+    const [, retryInitOptions] = (global.fetch as jest.Mock).mock.calls[1];
+    expect(retryInitOptions.headers.Authorization).toBe('Bearer new-token');
+  });
+
+  it('clears the session and redirects to /login when the refresh itself fails', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce(fakeResponse({ status: 401, text: '' }));
+    mockRefreshSession.mockRejectedValue(new Error('No hay refresh token disponible.'));
+
+    await expect(consultarPedidosPorCliente('old-token')).rejects.toThrow(
+      'No hay refresh token disponible.',
+    );
+
+    expect(mockLogout).toHaveBeenCalledTimes(1);
+    expect(mockNotifySessionExpired).toHaveBeenCalledTimes(1);
   });
 });
 

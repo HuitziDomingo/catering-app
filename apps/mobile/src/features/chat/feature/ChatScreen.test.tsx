@@ -3,7 +3,7 @@ import { fireEvent, waitFor } from '@testing-library/react-native';
 import { Input } from '@ui-kitten/components';
 import { OrderStatus, RoleName, type MenuItem } from '@catering-app/shared-types';
 import { renderWithProviders } from '../../../test-utils';
-import { useSessionStore } from '../../session/state/useSessionStore';
+import { useSessionStore } from '../../auth/state/useSessionStore';
 import { useMenuStore } from '../../menu/state/useMenuStore';
 import { useChatStore } from '../state/useChatStore';
 import { ChatScreen } from './ChatScreen';
@@ -21,13 +21,20 @@ jest.mock('../data-access/mcpClient', () => ({
   crearPedido: jest.fn(),
 }));
 
+// ChatScreen embeds LoginScreen (useRouter) when signed out -- a stub router
+// is enough here, navigation itself is out of scope for this test file (see
+// same pattern in MenuScreen.test.tsx).
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
+}));
+
 import { consultarPedidosPorCliente, crearPedido } from '../data-access/mcpClient';
 
 const authenticatedState = {
+  isBootstrapping: false,
   isAuthenticated: true,
   user: {
     id: 'user-1',
-    fullName: 'Cliente de Prueba',
     email: 'test@example.com',
     role: RoleName.CUSTOMER,
   },
@@ -54,6 +61,7 @@ const chilaquiles: MenuItem = {
 
 beforeEach(() => {
   useSessionStore.setState({
+    isBootstrapping: false,
     isAuthenticated: false,
     user: null,
     accessToken: null,
@@ -74,10 +82,10 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-test('shows a signed-out message instead of the chat UI when not authenticated', () => {
+test('renders the login screen instead of the chat UI when not authenticated', () => {
   const utils = renderWithProviders(<ChatScreen />);
 
-  expect(utils.getByTestId('chat-signed-out-message')).toBeTruthy();
+  expect(utils.getByTestId('login-submit-button')).toBeTruthy();
   expect(utils.queryByTestId('chat-send-button')).toBeNull();
 });
 
