@@ -34,7 +34,9 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-router"
+      "expo-router",
+      "expo-font",
+      "expo-status-bar"
     ]
   }
 }

@@ -90,11 +90,15 @@ confirmado de passthrough de stdio (sin fix disponible) que rompe la
 interacción con la CLI de Expo. Corre `npx expo start` directamente desde
 `apps/mobile`.
 
-Android build for apps/mobile is currently blocked by an upstream Expo
-Gradle-autolinking defect (SDK 56 + expo-router 56.2.15's @expo/ui Stack
-toolbar support). iOS works via the Dev Client. Tracked as known issue,
-not caused by this repo's config -- revisit on a future Expo SDK update
-or if a fix ships upstream.
+Android build for apps/mobile was blocked by an upstream Expo
+Gradle-autolinking defect on SDK 56 + expo-router 56.2.15's @expo/ui
+Stack toolbar support (expo-dev-launcher/expo-dev-menu/expo-constants
+pulled in as modules that the generated android/build.gradle never
+declared as Gradle dependencies). Upgrading to Expo SDK 57
+(expo/expo-router 57.0.14, 2026-08-18) resolves it -- a clean
+`npx expo prebuild --clean -p android` + `./gradlew :app:assembleDebug`
+now succeeds. iOS continues to work via the Dev Client; re-verify iOS
+after this upgrade since it wasn't re-tested here.
 
 ## Tests
 
