@@ -1,5 +1,7 @@
 # Catering App
 
+[![CI](https://github.com/HuitziDomingo/catering-app/actions/workflows/ci.yml/badge.svg)](https://github.com/HuitziDomingo/catering-app/actions/workflows/ci.yml)
+
 Plataforma de pedidos para un negocio de catering: los clientes ordenan
 desayunos, comidas y cenas desde una app móvil, y el negocio gestiona menú,
 precios y pedidos desde un dashboard web — con un chatbot de soporte

@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          filter: tree:0
+
+      # pnpm must be on PATH before actions/setup-node so its `cache: pnpm`
+      # option can resolve the pnpm store path.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Sets NX_BASE/NX_HEAD so `nx affected` only runs against what
+      # actually changed relative to main (or the last successful run on
+      # push to main), not the whole monorepo every time.
+      - name: Derive SHAs for nx affected
+        uses: nrwl/nx-set-shas@v5
+        with:
+          main-branch-name: main
+
+      - name: Lint affected projects
+        run: pnpm exec nx affected -t lint
+
+      - name: Test affected projects
+        run: pnpm exec nx affected -t test
+
+      # Excludes mobile: its inferred "build" target is @nx/expo:build
+      # (EAS cloud build, needs credentials/macOS signing we don't have
+      # in CI yet). api/dashboard/landing build normally here.
+      - name: Build affected projects
+        run: pnpm exec nx affected -t build --exclude=mobile
+
+      # Mobile's JS/TS bundle only (expo export via Metro) -- no native
+      # Gradle/Xcode compile, no EAS. Only mobile defines this target.
+      - name: Build mobile JS bundle
+        run: pnpm exec nx affected -t export
+
+      - name: Snyk dependency vulnerability scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --all-projects
