@@ -67,9 +67,13 @@ jobs:
       - name: Build mobile JS bundle
         run: pnpm exec nx affected -t export
 
+      # Default threshold (low) fails the build on every low-severity
+      # advisory across the workspace's manifests, which is too noisy to
+      # gate merges on. Only high/critical block CI; lower severities still
+      # show up in the Snyk report.
       - name: Snyk dependency vulnerability scan
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --all-projects
+          args: --all-projects --severity-threshold=high
