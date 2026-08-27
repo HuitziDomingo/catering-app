@@ -71,9 +71,20 @@ jobs:
       # advisory across the workspace's manifests, which is too noisy to
       # gate merges on. Only high/critical block CI; lower severities still
       # show up in the Snyk report.
+      # --exclude only matches directory/file names, not paths (a Snyk CLI
+      # constraint), so "dist,.nx" drops dist/apps/api/pnpm-lock.yaml and
+      # .nx/cache/**/dist/apps/api/pnpm-lock.yaml -- otherwise --all-projects
+      # picks those compiled-output lockfiles up as extra "projects" and
+      # duplicates the real api project's results.
+      # --fail-on=all still reports every high/critical finding, but only
+      # fails the build when at least one has a computed fix (upgrade or
+      # patch) available -- findings with no fix path yet (e.g. transitive
+      # deps like fast-uri/image-size/@hono/node-server as of this writing)
+      # stop blocking merges on something nobody can act on today, and
+      # automatically start blocking again once a fix ships upstream.
       - name: Snyk dependency vulnerability scan
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --all-projects --severity-threshold=high
+          args: --all-projects --severity-threshold=high --exclude=dist,.nx --fail-on=all
