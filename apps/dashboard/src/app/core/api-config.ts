@@ -2,3 +2,7 @@
 // necesite desplegarse a más de un entorno, esto se vuelve un
 // environment.ts real con fileReplacements de Angular.
 export const API_BASE_URL = 'http://localhost:3000/api';
+
+// El WebSocket Gateway (ADR-004) vive fuera del prefijo global 'api' que
+// setGlobalPrefix() aplica solo a rutas REST -- por eso NO lleva /api.
+export const SOCKET_BASE_URL = 'http://localhost:3000';

@@ -10,6 +10,7 @@ import { OrderStatus } from '@catering-app/shared-types';
 import { MenuItem } from '../database/entities/menu-item.entity';
 import { Order } from '../database/entities/order.entity';
 import { OrderItem } from '../database/entities/order-item.entity';
+import { NotificationGateway } from '../notifications/notification.gateway';
 import { CreateOrderDto } from './dto/create-order.dto';
 
 export interface FindByCustomerFilters {
@@ -37,6 +38,7 @@ export class OrdersService {
   constructor(
     @InjectRepository(Order)
     private readonly ordersRepository: Repository<Order>,
+    private readonly notificationGateway: NotificationGateway,
   ) {}
 
   /**
@@ -72,9 +74,14 @@ export class OrdersService {
    * Si `peopleCount` no cae dentro del rango serves_min/serves_max de
    * ninguno de los platillos pedidos, el pedido no se rechaza — se crea con
    * `needsReview = true` para revisión manual del negocio (ver ADR-023).
+   *
+   * Al confirmar la transacción, emite `new-order` por NotificationGateway
+   * (ADR-004) para el dashboard. Este método es el único punto de entrada
+   * para crear pedidos -- lo usan tanto POST /orders como el tool MCP
+   * crear_pedido -- así que ambos caminos quedan cubiertos con un solo emit.
    */
   async createOrder(customerId: string, dto: CreateOrderDto): Promise<Order> {
-    return this.ordersRepository.manager.transaction(async (manager) => {
+    const order = await this.ordersRepository.manager.transaction(async (manager) => {
       const menuItemIds = [
         ...new Set(dto.items.map((item) => item.menuItemId)),
       ];
@@ -136,6 +143,17 @@ export class OrdersService {
 
       return savedOrder;
     });
+
+    this.notificationGateway.emitNewOrder({
+      id: order.id,
+      customerId: order.customerId,
+      total: order.total,
+      peopleCount: order.peopleCount,
+      scheduledFor: order.scheduledFor.toISOString(),
+      needsReview: order.needsReview,
+    });
+
+    return order;
   }
 
   /**

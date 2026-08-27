@@ -15,8 +15,8 @@ para agentes de IA, y un servidor MCP propio como pieza central del backend.
 ## Stack
 
 - **Backend:** NestJS (REST API + WebSocket Gateway + servidor MCP), TypeORM, PostgreSQL (Supabase)
-- **Dashboard:** Angular + PrimeNG
-- **App móvil:** React Native (Expo) + gluestack, Zustand, axios
+- **Dashboard:** Angular + Taiga UI
+- **App móvil:** React Native (Expo) + UI Kitten + Moti, Zustand, axios
 - **Notificaciones:** WhatsApp vía Twilio
 - **PDF:** pdfkit
 - **Monorepo:** Nx + pnpm
@@ -28,8 +28,8 @@ para agentes de IA, y un servidor MCP propio como pieza central del backend.
 
 ```
 apps/
-  dashboard/     # Angular + PrimeNG — panel de operación y super usuario
-  mobile/        # React Native (Expo) + gluestack — app de clientes
+  dashboard/     # Angular + Taiga UI — panel de operación y super usuario
+  mobile/        # React Native (Expo) + UI Kitten + Moti — app de clientes
   api/           # NestJS: REST API + WebSocket Gateway + servidor MCP + PdfModule
   landing/       # Astro + Pico.css — landing page pública (dominio.com)
 libs/

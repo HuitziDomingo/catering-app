@@ -4,6 +4,9 @@
       <h1 class="app-shell__title">Catering — Dashboard</h1>
       <div class="app-shell__actions">
         <app-theme-toggle />
+        @if (showNotifications()) {
+          <app-notification-bell />
+        }
         @if (auth.isAuthenticated()) {
           <app-logout-button />
         }

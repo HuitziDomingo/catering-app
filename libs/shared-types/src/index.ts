@@ -17,3 +17,6 @@ export * from './entities/order-item';
 export * from './entities/order-document';
 export * from './entities/notification';
 export * from './entities/mcp-tool-log';
+
+// WebSocket
+export * from './websocket/new-order-event';

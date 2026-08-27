@@ -1,0 +1,31 @@
+<div class="notification-bell">
+  <tui-badged-content>
+    <button
+      tuiButton
+      type="button"
+      size="s"
+      appearance="outline"
+      data-testid="notification-bell-button"
+      (click)="toggle()"
+    >
+      🔔
+    </button>
+    @if (unreadCount() > 0) {
+      <tui-badge-notification tuiSlot="top" data-testid="notification-badge">
+        {{ unreadCount() }}
+      </tui-badge-notification>
+    }
+  </tui-badged-content>
+
+  @if (open()) {
+    <ul class="notification-bell__list" data-testid="notification-list">
+      @for (item of recent(); track item.id) {
+        <li>
+          Pedido {{ item.id.slice(0, 8) }} — {{ item.peopleCount }} personas — ${{ item.total }}
+        </li>
+      } @empty {
+        <li class="notification-bell__empty">Sin notificaciones recientes.</li>
+      }
+    </ul>
+  }
+</div>
