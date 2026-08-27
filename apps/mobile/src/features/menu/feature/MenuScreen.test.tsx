@@ -49,17 +49,25 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-test('renders the real menu screen with categories and items once loaded', async () => {
-  (fetchMenuCategories as jest.Mock).mockResolvedValue([mockCategory]);
-  (fetchMenuItems as jest.Mock).mockResolvedValue([mockItem]);
+// CI runners are slower than local dev machines, and this test's real
+// UI Kitten/Moti render can exceed the suite's 15s default there even
+// though it's comfortably under that locally (see ChatScreen.test.tsx,
+// which takes ~54s on a similar setup) -- give this one test more room.
+test(
+  'renders the real menu screen with categories and items once loaded',
+  async () => {
+    (fetchMenuCategories as jest.Mock).mockResolvedValue([mockCategory]);
+    (fetchMenuItems as jest.Mock).mockResolvedValue([mockItem]);
 
-  const { getByText, queryByTestId } = renderWithProviders(<MenuScreen />);
+    const { getByText, queryByTestId } = renderWithProviders(<MenuScreen />);
 
-  await waitFor(() => expect(queryByTestId('menu-loading')).toBeNull());
+    await waitFor(() => expect(queryByTestId('menu-loading')).toBeNull());
 
-  expect(getByText('Desayuno')).toBeTruthy();
-  expect(getByText('Chilaquiles')).toBeTruthy();
-});
+    expect(getByText('Desayuno')).toBeTruthy();
+    expect(getByText('Chilaquiles')).toBeTruthy();
+  },
+  30000,
+);
 
 test('shows an error state with a retry button when the API call fails', async () => {
   (fetchMenuCategories as jest.Mock).mockRejectedValue(new Error('Network down'));
