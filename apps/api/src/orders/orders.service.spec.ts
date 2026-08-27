@@ -7,6 +7,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MenuItem } from '../database/entities/menu-item.entity';
 import { Order } from '../database/entities/order.entity';
+import { NotificationGateway } from '../notifications/notification.gateway';
 import { OrdersService } from './orders.service';
 
 describe('OrdersService', () => {
@@ -20,6 +21,7 @@ describe('OrdersService', () => {
     create: jest.Mock;
     save: jest.Mock;
   };
+  let notificationGateway: { emitNewOrder: jest.Mock };
 
   const customerId = '11111111-1111-1111-1111-111111111111';
   const otherCustomerId = '99999999-9999-9999-9999-999999999999';
@@ -43,10 +45,13 @@ describe('OrdersService', () => {
       },
     };
 
+    notificationGateway = { emitNewOrder: jest.fn() };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OrdersService,
         { provide: getRepositoryToken(Order), useValue: ordersRepo },
+        { provide: NotificationGateway, useValue: notificationGateway },
       ],
     }).compile();
 
@@ -90,6 +95,52 @@ describe('OrdersService', () => {
       // ...pero el pedido ya creado nunca se modifica (no es una referencia viva).
       expect(firstOrder.items[0].unitPrice).toBe(100);
       expect(firstOrder.subtotal).toBe(200);
+    });
+  });
+
+  describe('createOrder — notificación en vivo (ADR-004)', () => {
+    it('emite "new-order" con el resumen del pedido tras confirmar la transacción', async () => {
+      manager.find.mockResolvedValue([
+        {
+          id: menuItemId,
+          basePrice: '100.00',
+          isActive: true,
+          servesMin: 1,
+          servesMax: 10,
+        } as unknown as MenuItem,
+      ]);
+
+      const order = await service.createOrder(customerId, {
+        peopleCount: 5,
+        scheduledFor: '2026-08-01T18:00:00.000Z',
+        items: [{ menuItemId, quantity: 2 }],
+      });
+
+      expect(notificationGateway.emitNewOrder).toHaveBeenCalledTimes(1);
+      expect(notificationGateway.emitNewOrder).toHaveBeenCalledWith({
+        id: order.id,
+        customerId,
+        total: 200,
+        peopleCount: 5,
+        scheduledFor: '2026-08-01T18:00:00.000Z',
+        needsReview: false,
+      });
+    });
+
+    it('no emite nada si la transacción falla (rollback)', async () => {
+      manager.find.mockResolvedValue([
+        { id: menuItemId, basePrice: '100.00', isActive: false } as unknown as MenuItem,
+      ]);
+
+      await expect(
+        service.createOrder(customerId, {
+          peopleCount: 5,
+          scheduledFor: '2026-08-01T18:00:00.000Z',
+          items: [{ menuItemId, quantity: 1 }],
+        }),
+      ).rejects.toThrow(BadRequestException);
+
+      expect(notificationGateway.emitNewOrder).not.toHaveBeenCalled();
     });
   });
 
