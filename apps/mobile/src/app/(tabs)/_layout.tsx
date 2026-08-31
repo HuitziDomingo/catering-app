@@ -1,7 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Tabs, type BottomTabBarProps } from 'expo-router/js-tabs';
-import { useTheme } from '@ui-kitten/components';
 import { TabBar, type TabBarItem } from '../../features/navigation/ui/TabBar';
 
 // Metadata de cada tab (título mostrado + icono Eva), indexada por el nombre
@@ -21,16 +20,16 @@ const TAB_META: Record<string, TabBarItem> = {
 // de React Navigation.
 //
 // NavigationTabBar se monta vía JSX (abajo, en renderTabBar) -- por eso es
-// seguro usar hooks (useTheme) aquí dentro. React Navigation invoca la prop
-// `tabBar` como una llamada de función plana, no como JSX, así que un hook
-// llamado directamente en esa función rompe las reglas de hooks (no hay
-// fiber propio para esa invocación); delegar a un componente real evita el
-// problema.
+// seguro que TabBar (su hijo) use hooks como useTheme. React Navigation
+// invoca la prop `tabBar` como una llamada de función plana, no como JSX,
+// así que un hook llamado directamente en esa función rompe las reglas de
+// hooks (no hay fiber propio para esa invocación); delegar a un componente
+// real evita el problema.
 const NavigationTabBar = ({ state, navigation, insets }: BottomTabBarProps) => {
-  const theme = useTheme();
-
   return (
-    <View style={{ paddingBottom: insets.bottom, backgroundColor: theme['background-basic-color-1'] }}>
+    // Sin backgroundColor propio (ver ADR-025): TabBar ya pinta su propio
+    // fondo esmerilado vía BlurView -- un fondo sólido acá detrás lo taparía.
+    <View style={{ paddingBottom: insets.bottom }}>
       <TabBar
         items={state.routeNames.map(
           (name) => TAB_META[name] ?? { title: name, icon: 'grid-outline' }

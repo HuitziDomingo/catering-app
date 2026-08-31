@@ -20,6 +20,10 @@ module.exports = {
     // module bindings needed for Zustand's persist middleware in tests.
     '^@react-native-async-storage/async-storage$':
       '@react-native-async-storage/async-storage/jest/async-storage-mock',
+    // expo-blur (ADR-025) doesn't publish its own Jest mock unlike the two
+    // above -- BlurView.tsx uses requireNativeViewManager, unavailable
+    // under jest-expo's mocked NativeModules. See src/test-mocks/expo-blur.tsx.
+    '^expo-blur$': '<rootDir>/src/test-mocks/expo-blur.tsx',
   },
   transform: {
     '[.][jt]sx?$': [
