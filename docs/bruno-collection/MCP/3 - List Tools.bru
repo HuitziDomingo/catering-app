@@ -1,0 +1,33 @@
+meta {
+  name: 3 - List Tools
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/mcp
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json, text/event-stream
+  Mcp-Session-Id: {{mcpSessionId}}
+}
+
+body:json {
+  {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/list",
+    "params": {}
+  }
+}
+
+docs {
+  Paso 3/5 (opcional dentro del handshake, pero útil para confirmar que la
+  sesión quedó bien establecida): lista los tools MCP disponibles
+  (`consultar_pedidos_por_cliente`, `crear_pedido`). Respuesta SSE -- ver
+  docs de la carpeta.
+}

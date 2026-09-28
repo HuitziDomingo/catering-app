@@ -1,0 +1,35 @@
+meta {
+  name: Refresh
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/auth/refresh
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "refreshToken": "{{refreshToken}}"
+  }
+}
+
+script:post-response {
+  bru.setVar("accessToken", res.body.accessToken);
+  bru.setVar("refreshToken", res.body.refreshToken);
+}
+
+docs {
+  Emite un par de tokens nuevo a partir del `refreshToken` guardado por
+  Login/Register (variable runtime). Útil cuando el accessToken (15 min
+  por default, JWT_ACCESS_EXPIRES_IN) expiró a mitad de una sesión de
+  pruebas.
+
+  Límite: 5 requests/min por IP.
+}

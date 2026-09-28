@@ -1,0 +1,39 @@
+meta {
+  name: Login
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "cliente.prueba@example.com",
+    "password": "contrasena-segura-123"
+  }
+}
+
+script:post-response {
+  bru.setVar("accessToken", res.body.accessToken);
+  bru.setVar("refreshToken", res.body.refreshToken);
+}
+
+docs {
+  Autentica un usuario existente. Guarda `accessToken`/`refreshToken` como
+  variables runtime -- todas las demás requests de la colección heredan
+  este accessToken automáticamente (auth: inherit → Bearer, ver
+  collection.bru).
+
+  Ajustá email/password a una cuenta real: la que creaste con
+  **Auth > Register**, o cualquiera que ya uses en la app.
+
+  Límite: 5 requests/min por IP.
+}

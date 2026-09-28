@@ -1,0 +1,12 @@
+meta {
+  name: Orders
+  seq: 3
+}
+
+docs {
+  Pedidos de catering (ver ADR-006, ADR-023). Create Order guarda el id
+  del pedido creado en la variable runtime `orderId`, que usa tanto Get
+  Order By Id como Payments > Create Preference -- así podés correr
+  Login → Create Order → Create Preference en secuencia sin copiar nada a
+  mano.
+}

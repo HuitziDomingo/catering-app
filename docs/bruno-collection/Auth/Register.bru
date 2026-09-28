@@ -1,0 +1,45 @@
+meta {
+  name: Register
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/auth/register
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "fullName": "Cliente de Prueba",
+    "email": "cliente.prueba@example.com",
+    "password": "contrasena-segura-123",
+    "phone": "+52 55 1234 5678",
+    "whatsappNumber": "+52 55 1234 5678"
+  }
+}
+
+script:post-response {
+  if (res.body && res.body.accessToken) {
+    bru.setVar("accessToken", res.body.accessToken);
+    bru.setVar("refreshToken", res.body.refreshToken);
+  }
+}
+
+docs {
+  Crea un usuario nuevo (rol "customer" por defecto, ver AuthService) y
+  guarda sus tokens en las variables runtime `accessToken`/`refreshToken`
+  -- mismas que usa Login.
+
+  El email debe ser único: si ya corriste este request antes, va a fallar
+  con 409 Conflict. En ese caso usá **Login** en su lugar, o cambiá el
+  email antes de correrlo de nuevo.
+
+  Límite: 5 requests/min por IP (throttle propio de /auth, ver
+  auth.controller.ts).
+}

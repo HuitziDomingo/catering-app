@@ -1,0 +1,46 @@
+meta {
+  name: Create Item
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/menu/items
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "categoryId": "{{categoryId}}",
+    "name": "Chilaquiles verdes",
+    "description": "Chilaquiles bañados en salsa verde, con pollo deshebrado.",
+    "basePrice": 120.5,
+    "servesMin": 300,
+    "servesMax": 500,
+    "attributes": { "allergens": ["gluten"] },
+    "isActive": true
+  }
+}
+
+script:post-response {
+  if (res.body && res.body.id) {
+    bru.setVar("menuItemId", res.body.id);
+  }
+}
+
+docs {
+  Requiere rol staff/admin/superadmin (RolesGuard) -- el usuario logueado
+  en Auth > Login debe tener uno de esos roles, si no responde 403.
+
+  `categoryId` debe ser un id real de categoría (ver Menu > List
+  Categories, o la variable de entorno `categoryId`).
+
+  El id del platillo creado se guarda automáticamente en la variable
+  runtime `menuItemId`, que usan Orders > Create Order y MCP > Crear
+  Pedido.
+}

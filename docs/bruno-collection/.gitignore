@@ -1,0 +1,3 @@
+# Artefactos locales de la app Bruno -- nunca deberían versionarse.
+.bruno/
+*.log

@@ -1,0 +1,22 @@
+meta {
+  name: Delete Item
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/menu/items/{{menuItemId}}
+  body: none
+  auth: inherit
+}
+
+docs {
+  Requiere rol staff/admin/superadmin. Soft delete (`is_active = false`),
+  no borra la fila. Devuelve 204 sin cuerpo.
+
+  Usa `menuItemId` (variable runtime). Ojo: si corriste Orders > Create
+  Order con este mismo `menuItemId`, el pedido ya creado no se ve
+  afectado (el precio quedó snapshotteado en `order_items`, ver ADR-006)
+  pero no vas a poder crear pedidos nuevos con este platillo hasta
+  reactivarlo.
+}

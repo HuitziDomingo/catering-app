@@ -1,0 +1,48 @@
+meta {
+  name: Create Preference
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/payments/preferences
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "orderId": "{{orderId}}"
+  }
+}
+
+script:post-response {
+  if (res.body && res.body.checkoutUrl) {
+    bru.setVar("checkoutUrl", res.body.checkoutUrl);
+  }
+}
+
+docs {
+  El request que este archivo reemplaza: correr esto a mano contra
+  Swagger significaba ir a copiar accessToken y orderId cada vez. Acá
+  corren encadenados:
+
+    Auth > Login  →  Orders > Create Order  →  Payments > Create Preference
+
+  1, 2 y 3 en secuencia (Collection Runner, o a mano en ese orden) y
+  `accessToken`/`orderId` viajan solos vía variables runtime.
+
+  Precondiciones reales del endpoint (PaymentsService.createPreference):
+  - El pedido `orderId` debe pertenecer al usuario logueado (Forbidden si
+    no) y estar en status "pending" (BadRequest si no).
+  - `MERCADOPAGO_ACCESS_TOKEN` debe estar seteado en apps/api/.env con
+    credenciales reales de prueba (TEST-...) -- si falta, 500.
+
+  La respuesta trae `checkoutUrl` (guardado en la variable runtime
+  `checkoutUrl`): abrilo en el navegador y pagá con una tarjeta de prueba
+  de Mercado Pago para completar el flujo hasta el webhook.
+}

@@ -1,0 +1,55 @@
+meta {
+  name: Webhook (no correr manualmente)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/payments/webhook?data.id=REEMPLAZAR
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  x-signature: ts=REEMPLAZAR,v1=REEMPLAZAR
+  x-request-id: REEMPLAZAR
+}
+
+body:json {
+  {
+    "action": "payment.updated",
+    "type": "payment",
+    "data": { "id": "REEMPLAZAR" }
+  }
+}
+
+docs {
+  Este request está acá por completitud del catálogo de endpoints, **no
+  para correrlo con datos inventados**: `POST /payments/webhook` lo llama
+  Mercado Pago directamente cuando cambia el estado de un pago real, no es
+  algo que tenga sentido simular a mano.
+
+  Por qué no es simulable con datos falsos:
+
+  1. **Firma real**: PaymentsService.processWebhook valida `x-signature`
+     con HMAC-SHA256 contra `MERCADOPAGO_WEBHOOK_SECRET`
+     (WebhookSignatureValidator del SDK oficial, ver ADR-024) -- sin
+     calcular esa firma correctamente (timestamp + request-id + data.id,
+     con el secreto real), la request rechaza con 401 antes de llegar a
+     ninguna lógica de negocio.
+
+  2. **Re-consulta real**: aunque la firma fuera válida, el handler NUNCA
+     confía en el payload del webhook -- siempre re-consulta el pago real
+     contra `GET /v1/payments/{id}` de Mercado Pago (ver ADR-024). Un
+     `data.id` inventado no existe ahí, así que el flujo termina en error
+     igual.
+
+  Cómo probarlo de verdad: correr Payments > Create Preference, pagar en
+  el `checkoutUrl` real con una tarjeta de prueba, y confirmar en los logs
+  de la API (`pnpm nx serve api`) que el webhook real llegó, pasó la
+  validación de firma, y que Orders > Get Order By Id ahora muestra
+  "confirmed" (o "payment_failed"). Ver la sección "Pagos (Mercado Pago)"
+  del README raíz del repo para el detalle completo (incluye cómo exponer
+  tu API local con ngrok para que Mercado Pago pueda llamarla).
+}

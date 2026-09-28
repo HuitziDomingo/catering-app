@@ -1,0 +1,46 @@
+meta {
+  name: 4 - Consultar Pedidos Por Cliente
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/mcp
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json, text/event-stream
+  Mcp-Session-Id: {{mcpSessionId}}
+}
+
+body:json {
+  {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/call",
+    "params": {
+      "name": "consultar_pedidos_por_cliente",
+      "arguments": {
+        "limite": 5
+      }
+    }
+  }
+}
+
+docs {
+  Paso 4/5: invoca el tool `consultar_pedidos_por_cliente` (ver
+  apps/api/src/mcp/tools/consultar-pedidos-por-cliente.tool.ts). El
+  cliente se toma del JWT (no es un argumento) -- devuelve los pedidos del
+  usuario de Auth > Login.
+
+  `arguments.estado` es opcional (uno de: pending, confirmed, preparing,
+  delivered, cancelled, payment_failed) para filtrar por status;
+  `arguments.limite` es 1-20, default 5.
+
+  Un error de negocio (ej. "Usuario no autenticado") no llega como error
+  JSON-RPC de protocolo: el SDK lo envuelve en un result exitoso con
+  `isError: true` -- revisá el body completo, no solo el status HTTP.
+}

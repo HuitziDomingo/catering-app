@@ -1,0 +1,21 @@
+meta {
+  name: List Categories
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/menu/categories
+  body: none
+  auth: none
+}
+
+docs {
+  Público -- no requiere JWT. Devuelve categorías activas ordenadas por
+  `displayOrder`.
+
+  No hay endpoint para crear categorías (se siembran por migración/seed,
+  ver ADR-006) -- copiá un `id` de la respuesta a la variable de entorno
+  `categoryId` (o pegalo directo en Menu > Create Item) para usarlo en el
+  resto de la colección.
+}

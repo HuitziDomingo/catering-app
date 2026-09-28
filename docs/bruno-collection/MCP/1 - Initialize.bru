@@ -1,0 +1,47 @@
+meta {
+  name: 1 - Initialize
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/mcp
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json, text/event-stream
+}
+
+body:json {
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+      "protocolVersion": "2025-11-25",
+      "capabilities": {},
+      "clientInfo": { "name": "bruno-collection", "version": "1.0.0" }
+    }
+  }
+}
+
+script:post-response {
+  var sessionId = res.headers["mcp-session-id"];
+  if (sessionId) {
+    bru.setVar("mcpSessionId", sessionId);
+  }
+}
+
+docs {
+  Paso 1/5 del handshake MCP. El servidor devuelve el id de sesión en el
+  header de RESPUESTA `mcp-session-id` (no en el body) -- este script lo
+  guarda en la variable runtime `mcpSessionId`, que las siguientes 4
+  requests reenvían en el header `Mcp-Session-Id`.
+
+  `Accept: application/json, text/event-stream` y
+  `Content-Type: application/json` son obligatorios: el SDK MCP responde
+  406/415 sin ellos (ver comentario en mcpClient.ts, mobile).
+}

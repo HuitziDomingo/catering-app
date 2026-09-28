@@ -1,0 +1,30 @@
+auth {
+  mode: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  # Catering App API — colección Bruno
+
+  Ver `README.md` en esta carpeta para instrucciones de uso.
+
+  ## Auth compartido
+
+  Todas las requests heredan (`auth: inherit`) este Bearer token de la
+  variable **runtime** `accessToken`, poblada automáticamente por
+  `Auth > Login` (o `Auth > Register`). Las requests públicas (Register,
+  Login, Refresh, Payments > Webhook) declaran `auth: none` explícitamente.
+
+  ## Por qué `bru.setVar` y no `bru.setEnvVar`
+
+  Los scripts post-response de esta colección usan `bru.setVar(...)`
+  (variable runtime, en memoria, vive mientras la app/sesión de Bruno está
+  abierta) en vez de `bru.setEnvVar(...)` (variable de entorno, que Bruno
+  v4 persiste a disco por default). Como esta colección se versiona en git,
+  usar `setEnvVar` reescribiría `environments/Local.bru` con tokens reales
+  cada vez que corrés Login -- `setVar` logra el mismo encadenamiento
+  automático entre requests sin tocar ningún archivo trackeado.
+}

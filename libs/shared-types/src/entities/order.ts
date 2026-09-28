@@ -11,6 +11,8 @@ export interface Order {
   total: number;
   notes: string | null;
   needsReview: boolean;
+  /** id de la Preferencia de Pago de Mercado Pago asociada (ver ADR-024). */
+  paymentPreferenceId: string | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -57,6 +57,11 @@ export class Order {
   @Column({ name: 'needs_review', type: 'boolean', default: false })
   needsReview!: boolean;
 
+  // id de la Preferencia de Pago de Mercado Pago asociada a este pedido (ver
+  // ADR-024) -- null hasta que se llama POST /payments/preferences.
+  @Column({ name: 'payment_preference_id', type: 'varchar', length: 255, nullable: true })
+  paymentPreferenceId?: string | null;
+
   @OneToMany(() => OrderItem, (item) => item.order)
   items!: OrderItem[];
 
