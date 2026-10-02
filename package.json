@@ -6,7 +6,8 @@
     "typeorm": "TS_NODE_PROJECT=apps/api/tsconfig.typeorm.json typeorm-ts-node-commonjs -d apps/api/src/database/data-source.ts",
     "migration:run": "pnpm run typeorm migration:run",
     "migration:revert": "pnpm run typeorm migration:revert",
-    "migration:show": "pnpm run typeorm migration:show"
+    "migration:show": "pnpm run typeorm migration:show",
+    "mp:smoke": "TS_NODE_PROJECT=apps/api/tsconfig.typeorm.json ts-node apps/api/scripts/mp-smoke.ts"
   },
   "private": true,
   "devDependencies": {
