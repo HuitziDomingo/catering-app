@@ -24,9 +24,9 @@
  * Así se validaron APRO -> confirmed y OTHE -> payment_failed.
  *
  * Uso (desde la raíz del repo):
- *   pnpm run mp:smoke            # APRO -> confirmed y OTHE -> payment_failed
- *   pnpm run mp:smoke -- APRO    # solo aprobado
- *   pnpm run mp:smoke -- OTHE    # solo rechazado
+ *   pnpm run mp:smoke            # sin argumentos: imprime la ayuda (USAGE) y no llama a la API
+ *   pnpm run mp:smoke -- APRO    # pago directo aprobado -> confirmed (hoy 401, ver NOTA)
+ *   pnpm run mp:smoke -- OTHE    # pago directo rechazado -> payment_failed (hoy 401, ver NOTA)
  *
  * Modo manual con Checkout Pro (pago real en el navegador con el comprador de prueba):
  *   pnpm run mp:smoke -- checkout
@@ -378,11 +378,31 @@ async function runWebhook(
   return verifyOrderStatus(session.accessToken, orderId, expected);
 }
 
+const USAGE = `Uso: pnpm run mp:smoke -- <modo>
+
+Modos:
+  checkout
+      Crea un pedido y su preferencia de Checkout Pro; imprime orderId, checkoutUrl
+      (init_point) y las credenciales del cliente (SMOKE_EMAIL/SMOKE_PASSWORD). No paga.
+  webhook <paymentId> <orderId> <confirmed|payment_failed>
+      Firma y manda el webhook de un pago ya hecho y verifica el status del pedido.
+      Requiere SMOKE_EMAIL/SMOKE_PASSWORD del dueño del pedido.
+  APRO | OTHE
+      Pago directo por POST /v1/payments (APRO -> confirmed, OTHE -> payment_failed).
+      OJO: hoy devuelven 401 "Unauthorized use of live credentials" con credenciales
+      de usuario de prueba; el flujo validado es checkout + webhook.
+
+API: ${API_URL} (sobreescribible con SMOKE_API_URL)`;
+
 async function main(): Promise<void> {
   // `pnpm run mp:smoke -- APRO` le pasa el `--` literal al script: se ignora.
   const args = process.argv.slice(2).filter((a) => a !== '--');
   const mode = args[0]?.toLowerCase();
 
+  if (!mode || mode === 'help' || mode === '-h' || mode === '--help') {
+    console.log(USAGE);
+    return;
+  }
   if (mode === 'checkout') {
     await runCheckout();
     return;
@@ -392,15 +412,14 @@ async function main(): Promise<void> {
     return;
   }
 
-  const arg = args[0]?.toUpperCase();
-  const holders: Holder[] =
-    arg === 'APRO' || arg === 'OTHE' ? [arg] : ['APRO', 'OTHE'];
-
-  let allOk = true;
-  for (const holder of holders) {
-    allOk = (await run(holder)) && allOk;
+  const holder = args[0].toUpperCase();
+  if (holder === 'APRO' || holder === 'OTHE') {
+    process.exitCode = (await run(holder)) ? 0 : 1;
+    return;
   }
-  process.exitCode = allOk ? 0 : 1;
+
+  console.error(`Modo desconocido: ${args[0]}\n\n${USAGE}`);
+  process.exitCode = 1;
 }
 
 main().catch((err: unknown) => {
