@@ -78,10 +78,14 @@ jobs:
       # duplicates the real api project's results.
       # --fail-on=all still reports every high/critical finding, but only
       # fails the build when at least one has a computed fix (upgrade or
-      # patch) available -- findings with no fix path yet (e.g. transitive
-      # deps like fast-uri/image-size/@hono/node-server as of this writing)
-      # stop blocking merges on something nobody can act on today, and
+      # patch) available -- "all" means upgradable OR patchable, unlike
+      # --fail-on=upgradable, which ignores patch-only fixes. Findings with no
+      # fix path yet (e.g. transitive deps like fast-uri, or image-size, whose
+      # fix needs a major bump metro doesn't allow, as of this writing) stop
+      # blocking merges on something nobody can act on today, and
       # automatically start blocking again once a fix ships upstream.
+      # Transitive runtime deps we can patch without a major bump are pinned
+      # via "pnpm.overrides" in the root package.json.
       - name: Snyk dependency vulnerability scan
         uses: snyk/actions/node@master
         env:
