@@ -1,0 +1,27 @@
+meta {
+  name: MCP
+  seq: 4
+}
+
+docs {
+  `/mcp` NO es un endpoint REST: es JSON-RPC 2.0 sobre el transporte
+  Streamable HTTP oficial del SDK MCP (ver apps/api/src/mcp/mcp.controller.ts
+  y mcp.transport.ts) -- mismo protocolo que implementa
+  apps/mobile/src/features/chat/data-access/mcpClient.ts contra este mismo
+  endpoint.
+
+  Corré las requests de esta carpeta EN ORDEN (1 a 5, número al inicio del
+  nombre = seq): cada sesión MCP exige el handshake `initialize` +
+  `notifications/initialized` antes de poder llamar `tools/list` o
+  `tools/call`. Las 5 requests comparten el mismo `Mcp-Session-Id`,
+  capturado automáticamente del header de RESPUESTA de "1 - Initialize" en
+  la variable runtime `mcpSessionId` y reenviado por las siguientes.
+
+  Todas exigen JWT (a diferencia de MCP en general, este server no tiene
+  rutas públicas) -- correr Auth > Login primero.
+
+  Las respuestas llegan como Server-Sent Events
+  (`event: message\ndata: {...}\n\n`), no JSON plano -- es normal verlas
+  así en el panel de respuesta de Bruno; el `data:` de esa línea es el
+  JSON-RPC real.
+}

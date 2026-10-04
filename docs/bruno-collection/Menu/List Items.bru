@@ -1,0 +1,21 @@
+meta {
+  name: List Items
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/menu/items
+  body: none
+  auth: none
+}
+
+params:query {
+  ~categoryId: {{categoryId}}
+}
+
+docs {
+  Público -- no requiere JWT. `categoryId` es un filtro opcional, viene
+  deshabilitado por default (prefijo `~`) -- habilitalo en el panel de
+  params de Bruno para filtrar por categoría.
+}

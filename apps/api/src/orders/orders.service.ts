@@ -335,4 +335,14 @@ export class OrdersService {
       );
     }
   }
+
+  /**
+   * Asocia el pedido con el id de la Preferencia de Pago de Mercado Pago
+   * generada para él (ver ADR-024, PaymentsService.createPreference). Vive
+   * en OrdersService (no en PaymentsModule) para no exponer el repositorio
+   * de Order fuera de este módulo -- mismo patrón que updateStatus.
+   */
+  async attachPaymentPreference(id: string, preferenceId: string): Promise<void> {
+    await this.ordersRepository.update(id, { paymentPreferenceId: preferenceId });
+  }
 }

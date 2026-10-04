@@ -1,0 +1,17 @@
+meta {
+  name: Me
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/auth/me
+  body: none
+  auth: inherit
+}
+
+docs {
+  Ruta protegida de prueba: devuelve el payload del JWT actual (`sub`,
+  `email`, `role`). Útil para confirmar que `accessToken` quedó bien
+  seteado tras Login/Register.
+}

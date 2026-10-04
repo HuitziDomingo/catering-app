@@ -7,6 +7,7 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
   [OrderStatus.PREPARING]: 'En preparación',
   [OrderStatus.DELIVERED]: 'Entregado',
   [OrderStatus.CANCELLED]: 'Cancelado',
+  [OrderStatus.PAYMENT_FAILED]: 'Pago rechazado',
 };
 
 const currencyFormatter = new Intl.NumberFormat('es-MX', {

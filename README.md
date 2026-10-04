@@ -102,6 +102,37 @@ declared as Gradle dependencies). Upgrading to Expo SDK 57
 now succeeds. iOS continues to work via the Dev Client; re-verify iOS
 after this upgrade since it wasn't re-tested here.
 
+## Pagos (Mercado Pago)
+
+`apps/api` integra Mercado Pago Checkout Pro (ver
+[ADR-022](docs/adr/ADR-022-mercado-pago.md) y
+[ADR-024](docs/adr/ADR-024-mercadopago-checkout-pro.md)):
+`POST /payments/preferences` crea la preferencia de pago de un pedido propio,
+`POST /payments/webhook` recibe la notificación de Mercado Pago tras el pago.
+
+Para probar contra la API real de Mercado Pago necesitas credenciales de
+**prueba** propias (gratis, cuenta de Mercado Pago > Developers > Tus
+integraciones > crear aplicación):
+
+1. Copia el Access Token de prueba (`TEST-...`) a `MERCADOPAGO_ACCESS_TOKEN`
+   en `apps/api/.env`.
+2. En esa misma aplicación, configura una URL de notificaciones (Webhooks) —
+   en local necesitas un túnel público (ej. `ngrok http 3000`) apuntando a
+   `/api/payments/webhook`, porque Mercado Pago no puede llamar a
+   `localhost`. Copia el secreto que te muestra ahí a
+   `MERCADOPAGO_WEBHOOK_SECRET`.
+3. Arranca la API (`pnpm nx serve api`) y crea un pedido normal
+   (`POST /orders`, ver Swagger en `/api/docs`) para obtener un `orderId`.
+4. Llama `POST /api/payments/preferences` con ese `orderId` y tu access
+   token de usuario (login normal de la app). La respuesta debe traer un
+   `checkoutUrl` real de `mercadopago.com` (`sandbox_init_point`/`init_point`
+   de Mercado Pago) — ábrelo en el navegador y paga con una
+   [tarjeta de prueba](https://www.mercadopago.com.mx/developers/en/docs/checkout-pro/additional-content/test-cards)
+   de Mercado Pago.
+5. Tras pagar, confirma en los logs de la API que llegó el webhook, que la
+   firma se validó, y que `orders.status` del pedido pasó a `confirmed` (o
+   `payment_failed` si usas una tarjeta de prueba de rechazo).
+
 ## Tests
 
 ```bash

@@ -1,0 +1,45 @@
+meta {
+  name: Create Order
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/orders
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "peopleCount": 10,
+    "scheduledFor": "2026-12-01T18:00:00.000Z",
+    "notes": "Pedido de prueba vía Bruno",
+    "items": [
+      { "menuItemId": "{{menuItemId}}", "quantity": 2 }
+    ]
+  }
+}
+
+script:post-response {
+  if (res.body && res.body.id) {
+    bru.setVar("orderId", res.body.id);
+  }
+}
+
+docs {
+  `customerId` se toma del JWT (no del body) -- correr Auth > Login
+  primero, con cualquier rol.
+
+  `menuItemId` debe ser un id real y activo (ver Menu > List Items, o la
+  variable runtime que deja Menu > Create Item).
+
+  El id del pedido creado (status inicial "pending") se guarda
+  automáticamente en la variable runtime `orderId`, que usan Get Order By
+  Id y Payments > Create Preference -- esto es lo que permite encadenar
+  Login → Create Order → Create Preference sin copiar/pegar nada.
+}

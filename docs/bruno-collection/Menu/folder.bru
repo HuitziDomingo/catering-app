@@ -1,0 +1,11 @@
+meta {
+  name: Menu
+  seq: 2
+}
+
+docs {
+  Catálogo de menú (ver ADR-006, ADR-021). Categorías y listado de
+  platillos son públicos; crear/editar/borrar platillos requiere rol
+  staff/admin/superadmin (correr Auth > Login con una cuenta de ese rol
+  primero -- el registro público siempre crea rol "customer").
+}

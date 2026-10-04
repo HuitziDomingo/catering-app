@@ -1,0 +1,31 @@
+meta {
+  name: Update Item
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/menu/items/{{menuItemId}}
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "basePrice": 135
+  }
+}
+
+docs {
+  Requiere rol staff/admin/superadmin. Un cambio de `basePrice` queda
+  auditado en `menu_item_price_history` (ver ADR-006). Cualquier subset de
+  campos de UpdateMenuItemDto es válido -- este ejemplo solo cambia el
+  precio.
+
+  Usa `menuItemId` (variable runtime poblada por Menu > Create Item, o
+  seteala a mano con un id existente).
+}

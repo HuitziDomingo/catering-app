@@ -1,0 +1,50 @@
+meta {
+  name: 5 - Crear Pedido
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/mcp
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json, text/event-stream
+  Mcp-Session-Id: {{mcpSessionId}}
+}
+
+body:json {
+  {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/call",
+    "params": {
+      "name": "crear_pedido",
+      "arguments": {
+        "items": [
+          { "menuItemId": "{{menuItemId}}", "quantity": 2 }
+        ],
+        "peopleCount": 10,
+        "scheduledFor": "2026-12-01T18:00:00.000Z",
+        "notes": "Pedido de prueba vía Bruno (MCP)"
+      }
+    }
+  }
+}
+
+docs {
+  Paso 5/5: invoca el tool `crear_pedido` (ver ADR-023,
+  apps/api/src/mcp/tools/crear-pedido.tool.ts) -- el equivalente MCP de
+  Orders > Create Order, pensado para que el chatbot cree pedidos a partir
+  de lenguaje natural ya estructurado por el cliente (mobile).
+
+  `customerId` sale del JWT. `menuItemId` debe ser real (ver Menu > List
+  Items o Menu > Create Item). `scheduledFor` debe ser una fecha futura
+  (ISO 8601) o el tool la rechaza.
+
+  Igual que el tool anterior: un error de negocio viene como result
+  exitoso con `isError: true`, no como error de protocolo JSON-RPC.
+}

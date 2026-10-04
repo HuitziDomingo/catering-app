@@ -1,0 +1,17 @@
+meta {
+  name: Payments
+  seq: 5
+}
+
+docs {
+  Integración con Mercado Pago Checkout Pro (ver ADR-022, ADR-024).
+
+  Create Preference es lo que este archivo está pensado para reemplazar:
+  la secuencia Auth > Login → Orders > Create Order → Payments > Create
+  Preference corre encadenada sin copiar nada a mano (accessToken →
+  orderId → checkoutUrl, todas variables runtime).
+
+  Requiere MERCADOPAGO_ACCESS_TOKEN real (credenciales TEST- de sandbox)
+  configurado en apps/api/.env -- ver README.md de esta colección y la
+  sección "Pagos (Mercado Pago)" del README raíz del repo.
+}

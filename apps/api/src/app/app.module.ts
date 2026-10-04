@@ -7,6 +7,7 @@ import { AuthModule } from '../auth/auth.module';
 import { McpModule } from '../mcp/mcp.module';
 import { MenuModule } from '../menu/menu.module';
 import { OrdersModule } from '../orders/orders.module';
+import { PaymentsModule } from '../payments/payments.module';
 import { buildDataSourceOptions } from '../database/data-source.options';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -35,6 +36,7 @@ import { AppService } from './app.service';
     McpModule,
     MenuModule,
     OrdersModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
