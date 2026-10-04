@@ -121,4 +121,5 @@ Note for mobile tests specifically: Jest's module resolution for this workspace 
 - Single quotes, Prettier-formatted (`.prettierrc`); ESLint via `@nx/eslint-plugin` flat config, with Nx module-boundary enforcement across all lib/app tags.
 - Tests live alongside source as `*.spec.ts` (api/dashboard) or `*.test.ts`/`*.test.tsx` (mobile), not in a separate test tree.
 - ADRs are numbered and immutable once accepted; a reversed/updated decision is a new ADR, not an edit to the old one (see the ADR-003/ADR-009 and ADR-001/ADR-010 examples already in the repo).
+- Al completar un item listado en la nota de Obsidian 'Catering-App/Cosas que faltan en el frontend', márcalo como hecho ([x]) vía el MCP de Obsidian en la misma sesión.
 
