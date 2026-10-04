@@ -10,6 +10,7 @@ import { selectItemCount, useCartStore } from '../../features/cart/state/useCart
 const TAB_META: Record<string, TabBarItem> = {
   menu: { title: 'Menú', icon: 'grid-outline' },
   carrito: { title: 'Carrito', icon: 'shopping-cart-outline' },
+  pedidos: { title: 'Pedidos', icon: 'file-text-outline' },
   chat: { title: 'Chat', icon: 'message-circle-outline' },
   perfil: { title: 'Perfil', icon: 'person-outline' },
 };
@@ -54,6 +55,7 @@ export const TabsLayout = () => (
   <Tabs tabBar={renderTabBar} screenOptions={{ headerShown: false }}>
     <Tabs.Screen name="menu" options={{ title: TAB_META.menu.title }} />
     <Tabs.Screen name="carrito" options={{ title: TAB_META.carrito.title }} />
+    <Tabs.Screen name="pedidos" options={{ title: TAB_META.pedidos.title }} />
     <Tabs.Screen name="chat" options={{ title: TAB_META.chat.title }} />
     <Tabs.Screen name="perfil" options={{ title: TAB_META.perfil.title }} />
   </Tabs>

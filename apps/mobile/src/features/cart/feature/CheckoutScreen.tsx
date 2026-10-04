@@ -4,6 +4,7 @@ import { Button, Spinner, Text, useTheme } from '@ui-kitten/components';
 import { useRouter } from 'expo-router';
 import { formatCurrency } from '../../../core/ui/formatCurrency';
 import { useSessionStore } from '../../auth/state/useSessionStore';
+import { usePayOrder } from '../../payments/feature/usePayOrder';
 import { LoginScreen } from '../../auth/feature/LoginScreen';
 import { selectSubtotal, useCartStore } from '../state/useCartStore';
 import { CheckoutForm, type CheckoutFormValue } from '../ui/CheckoutForm';
@@ -37,6 +38,7 @@ export const CheckoutScreen = () => {
   const resetSubmit = useCartStore((state) => state.resetSubmit);
   const theme = useTheme();
   const router = useRouter();
+  const { payOrder, busy: paying, error: payError } = usePayOrder();
 
   const [form, setForm] = useState<CheckoutFormValue>(EMPTY_FORM);
   const [errors, setErrors] = useState<CheckoutErrors>({});
@@ -68,7 +70,23 @@ export const CheckoutScreen = () => {
         contentContainerStyle={styles.content}
       >
         <OrderPlacedCard order={lastOrder} />
-        <Button appearance="outline" onPress={() => router.replace('/menu')}>
+        <Button
+          testID="checkout-pay-now"
+          disabled={paying}
+          accessoryLeft={paying ? () => <Spinner size="tiny" status="control" /> : undefined}
+          onPress={() => payOrder(lastOrder.id)}
+        >
+          Pagar ahora
+        </Button>
+        {payError ? (
+          <Text status="danger" testID="checkout-pay-error">
+            {payError}
+          </Text>
+        ) : null}
+        <Button appearance="outline" onPress={() => router.replace(`/pedidos/${lastOrder.id}`)}>
+          Ver mi pedido
+        </Button>
+        <Button appearance="ghost" onPress={() => router.replace('/menu')}>
           Volver al menú
         </Button>
       </ScrollView>

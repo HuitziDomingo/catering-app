@@ -157,6 +157,13 @@ valida el webhook por firma, re-consultando siempre el pago real. Las
 al deep link de la app (addendum 01 de ADR-024, con instrucciones de
 prueba en local para iOS y Android).
 
+En mobile, iOS/Android abren el checkout en una sesión de navegador del
+sistema (`expo-web-browser`, `openAuthSessionAsync`) que se cierra sola al
+llegar a `mobile://payment/<result>`; en web es una redirección de página
+completa. La pantalla de regreso nunca confía en el resultado de la URL:
+re-consulta `GET /orders/:id` (con reintentos) hasta que el webhook fija el
+status.
+
 ## Estado actual
 
 - `apps/api`: `auth`, `menu`, `orders` (creación, listados, status,
@@ -167,8 +174,9 @@ prueba en local para iOS y Android).
 - `apps/mobile`: features `auth`, `menu`, `chat`, `session`, `theme`,
   `navigation`, `cart` (carrito persistido en AsyncStorage + checkout que
   crea un pedido con todos los platillos, con aviso de rango
-  serves_min/serves_max) y `orders` (data-access). Pago y "Mis pedidos" en
-  curso (`feat/order-flow`).
+  serves_min/serves_max), `orders` ("Mis pedidos": lista paginada y
+  detalle) y `payments` (Pagar → Checkout Pro con `expo-web-browser`, y
+  pantalla de regreso `/payment/<result>` que re-consulta el pedido).
 - `libs/shared-types`: enums, entidades, evento WebSocket y contratos de
   API (`src/api/`: paginación, orders, payments).
 - Lint: solo `dashboard` tiene target de lint en Nx; `api` y `mobile` no

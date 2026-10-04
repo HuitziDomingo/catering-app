@@ -40,7 +40,7 @@ export const OrderPlacedCard = ({ order }: OrderPlacedCardProps) => (
       </Text>
     ) : null}
     <Text appearance="hint" category="p2" style={styles.note}>
-      Tu pedido queda pendiente de pago.
+      Tu pedido queda pendiente de pago: puedes pagarlo ahora o después desde Mis pedidos.
     </Text>
   </Card>
 );

@@ -24,6 +24,8 @@ module.exports = {
     // above -- BlurView.tsx uses requireNativeViewManager, unavailable
     // under jest-expo's mocked NativeModules. See src/test-mocks/expo-blur.tsx.
     '^expo-blur$': '<rootDir>/src/test-mocks/expo-blur.tsx',
+    // Igual que expo-blur: módulo nativo sin mock propio (ver el archivo).
+    '^expo-web-browser$': '<rootDir>/src/test-mocks/expo-web-browser.ts',
   },
   transform: {
     '[.][jt]sx?$': [
