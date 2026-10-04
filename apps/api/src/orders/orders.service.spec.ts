@@ -14,6 +14,11 @@ import { User } from '../database/entities/user.entity';
 import { NotificationGateway } from '../notifications/notification.gateway';
 import { WhatsAppService } from '../notifications/whatsapp/whatsapp.service';
 import { OrdersService } from './orders.service';
+import { SCHEDULED_FOR_IN_PAST_MESSAGE } from './scheduled-for.validation';
+
+// Fecha del evento lejana: createOrder exige scheduledFor futura (ADR-023),
+// así que una fecha fija "de hoy" dejaría de servir con el tiempo.
+const FUTURE_EVENT_ISO = '2099-08-01T18:00:00.000Z';
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -111,6 +116,22 @@ describe('OrdersService', () => {
     jest.clearAllMocks();
   });
 
+  describe('createOrder — scheduledFor debe ser futura (ADR-023)', () => {
+    it('lanza BadRequestException con el mensaje claro y no abre la transacción ni notifica', async () => {
+      await expect(
+        service.createOrder(customerId, {
+          peopleCount: 5,
+          scheduledFor: '2020-01-01T10:00:00.000Z',
+          items: [{ menuItemId, quantity: 1 }],
+        }),
+      ).rejects.toThrow(new BadRequestException(SCHEDULED_FOR_IN_PAST_MESSAGE));
+
+      expect(ordersRepo.manager.transaction).not.toHaveBeenCalled();
+      expect(notificationGateway.emitNewOrder).not.toHaveBeenCalled();
+      expect(whatsAppService.sendMessage).not.toHaveBeenCalled();
+    });
+  });
+
   describe('createOrder — price snapshotting', () => {
     it('stores unitPrice as a snapshot of basePrice at creation time; a later price change never alters the stored order', async () => {
       // El driver pg devuelve numeric como string (mismo patrón que MenuService).
@@ -120,7 +141,7 @@ describe('OrdersService', () => {
 
       const firstOrder = await service.createOrder(customerId, {
         peopleCount: 5,
-        scheduledFor: '2026-08-01T18:00:00.000Z',
+        scheduledFor: FUTURE_EVENT_ISO,
         items: [{ menuItemId, quantity: 2 }],
       });
 
@@ -135,7 +156,7 @@ describe('OrdersService', () => {
 
       const secondOrder = await service.createOrder(customerId, {
         peopleCount: 3,
-        scheduledFor: '2026-08-01T18:00:00.000Z',
+        scheduledFor: FUTURE_EVENT_ISO,
         items: [{ menuItemId, quantity: 1 }],
       });
 
@@ -161,7 +182,7 @@ describe('OrdersService', () => {
 
       const order = await service.createOrder(customerId, {
         peopleCount: 5,
-        scheduledFor: '2026-08-01T18:00:00.000Z',
+        scheduledFor: FUTURE_EVENT_ISO,
         items: [{ menuItemId, quantity: 2 }],
       });
 
@@ -171,7 +192,7 @@ describe('OrdersService', () => {
         customerId,
         total: 200,
         peopleCount: 5,
-        scheduledFor: '2026-08-01T18:00:00.000Z',
+        scheduledFor: FUTURE_EVENT_ISO,
         needsReview: false,
       });
     });
@@ -184,7 +205,7 @@ describe('OrdersService', () => {
       await expect(
         service.createOrder(customerId, {
           peopleCount: 5,
-          scheduledFor: '2026-08-01T18:00:00.000Z',
+          scheduledFor: FUTURE_EVENT_ISO,
           items: [{ menuItemId, quantity: 1 }],
         }),
       ).rejects.toThrow(BadRequestException);
@@ -208,7 +229,7 @@ describe('OrdersService', () => {
 
       const order = await service.createOrder(customerId, {
         peopleCount: 5,
-        scheduledFor: '2026-08-01T18:00:00.000Z',
+        scheduledFor: FUTURE_EVENT_ISO,
         items: [{ menuItemId, quantity: 2 }],
       });
 
@@ -235,7 +256,7 @@ describe('OrdersService', () => {
 
       await service.createOrder(customerId, {
         peopleCount: 5,
-        scheduledFor: '2026-08-01T18:00:00.000Z',
+        scheduledFor: FUTURE_EVENT_ISO,
         items: [{ menuItemId, quantity: 1 }],
       });
 
@@ -253,7 +274,7 @@ describe('OrdersService', () => {
       await expect(
         service.createOrder(customerId, {
           peopleCount: 5,
-          scheduledFor: '2026-08-01T18:00:00.000Z',
+          scheduledFor: FUTURE_EVENT_ISO,
           items: [{ menuItemId, quantity: 1 }],
         }),
       ).resolves.toBeDefined();
@@ -272,7 +293,7 @@ describe('OrdersService', () => {
 
       const order = await service.createOrder(customerId, {
         peopleCount: 5,
-        scheduledFor: '2026-08-01T18:00:00.000Z',
+        scheduledFor: FUTURE_EVENT_ISO,
         items: [{ menuItemId, quantity: 1 }],
       });
 
@@ -292,7 +313,7 @@ describe('OrdersService', () => {
       await expect(
         service.createOrder(customerId, {
           peopleCount: 5,
-          scheduledFor: '2026-08-01T18:00:00.000Z',
+          scheduledFor: FUTURE_EVENT_ISO,
           items: [
             { menuItemId, quantity: 1 },
             { menuItemId: missingMenuItemId, quantity: 1 },
@@ -311,7 +332,7 @@ describe('OrdersService', () => {
       await expect(
         service.createOrder(customerId, {
           peopleCount: 5,
-          scheduledFor: '2026-08-01T18:00:00.000Z',
+          scheduledFor: FUTURE_EVENT_ISO,
           items: [{ menuItemId, quantity: 1 }],
         }),
       ).rejects.toThrow(BadRequestException);
@@ -334,7 +355,7 @@ describe('OrdersService', () => {
 
       const order = await service.createOrder(customerId, {
         peopleCount: 400,
-        scheduledFor: '2026-08-01T18:00:00.000Z',
+        scheduledFor: FUTURE_EVENT_ISO,
         items: [{ menuItemId, quantity: 2 }],
       });
 
@@ -354,7 +375,7 @@ describe('OrdersService', () => {
 
       const order = await service.createOrder(customerId, {
         peopleCount: 400,
-        scheduledFor: '2026-08-01T18:00:00.000Z',
+        scheduledFor: FUTURE_EVENT_ISO,
         items: [{ menuItemId, quantity: 2 }],
       });
 
@@ -375,7 +396,7 @@ describe('OrdersService', () => {
 
       const order = await service.createOrder(customerId, {
         peopleCount: 500,
-        scheduledFor: '2026-08-01T18:00:00.000Z',
+        scheduledFor: FUTURE_EVENT_ISO,
         items: [{ menuItemId, quantity: 2 }],
       });
 
@@ -403,7 +424,7 @@ describe('OrdersService', () => {
 
       const order = await service.createOrder(customerId, {
         peopleCount: 400,
-        scheduledFor: '2026-08-01T18:00:00.000Z',
+        scheduledFor: FUTURE_EVENT_ISO,
         items: [
           { menuItemId, quantity: 1 },
           { menuItemId: secondMenuItemId, quantity: 1 },
@@ -481,7 +502,7 @@ describe('OrdersService', () => {
         id: orderId,
         customerId,
         status: OrderStatus.PENDING,
-        scheduledFor: new Date('2026-08-01T18:00:00.000Z'),
+        scheduledFor: new Date(FUTURE_EVENT_ISO),
       } as unknown as Order);
 
       await service.updateStatus(orderId, OrderStatus.CONFIRMED);
@@ -497,7 +518,7 @@ describe('OrdersService', () => {
         id: orderId,
         customerId,
         status: OrderStatus.PENDING,
-        scheduledFor: new Date('2026-08-01T18:00:00.000Z'),
+        scheduledFor: new Date(FUTURE_EVENT_ISO),
       } as unknown as Order);
 
       await service.updateStatus(orderId, OrderStatus.PAYMENT_FAILED);
@@ -513,7 +534,7 @@ describe('OrdersService', () => {
         id: orderId,
         customerId,
         status: OrderStatus.CONFIRMED,
-        scheduledFor: new Date('2026-08-01T18:00:00.000Z'),
+        scheduledFor: new Date(FUTURE_EVENT_ISO),
       } as unknown as Order);
 
       await service.updateStatus(orderId, OrderStatus.PREPARING);
@@ -526,7 +547,7 @@ describe('OrdersService', () => {
         id: orderId,
         customerId,
         status: OrderStatus.PENDING,
-        scheduledFor: new Date('2026-08-01T18:00:00.000Z'),
+        scheduledFor: new Date(FUTURE_EVENT_ISO),
       } as unknown as Order);
       usersRepo.findOne.mockResolvedValueOnce({ ...customerWithWhatsApp, whatsappNumber: null });
 
@@ -542,7 +563,7 @@ describe('OrdersService', () => {
         id: orderId,
         customerId,
         status: OrderStatus.PENDING,
-        scheduledFor: new Date('2026-08-01T18:00:00.000Z'),
+        scheduledFor: new Date(FUTURE_EVENT_ISO),
       } as unknown as Order);
       whatsAppService.sendMessage.mockRejectedValue(new Error('Twilio down'));
 
@@ -621,7 +642,7 @@ describe('OrdersService', () => {
         id: orderId,
         customerId,
         status,
-        scheduledFor: new Date('2026-08-01T18:00:00.000Z'),
+        scheduledFor: new Date(FUTURE_EVENT_ISO),
       }) as unknown as Order;
 
     it.each([
@@ -683,7 +704,7 @@ describe('OrdersService', () => {
         id: orderId,
         customerId,
         status: OrderStatus.PENDING,
-        scheduledFor: new Date('2026-08-01T18:00:00.000Z'),
+        scheduledFor: new Date(FUTURE_EVENT_ISO),
       });
 
       await service.recordPaymentResult(orderId, OrderStatus.CONFIRMED, payment);
@@ -725,7 +746,7 @@ describe('OrdersService', () => {
         customerId,
         status: OrderStatus.PENDING,
         paidAt: previousPaidAt,
-        scheduledFor: new Date('2026-08-01T18:00:00.000Z'),
+        scheduledFor: new Date(FUTURE_EVENT_ISO),
       });
 
       await service.recordPaymentResult(orderId, OrderStatus.PAYMENT_FAILED, {
@@ -758,7 +779,7 @@ describe('OrdersService', () => {
         peopleCount: 1000,
         notes: null,
         needsReview: true,
-        scheduledFor: new Date('2026-08-01T18:00:00.000Z'),
+        scheduledFor: new Date(FUTURE_EVENT_ISO),
         items: [{ menuItem: { servesMin: 300, servesMax: 500 } }],
         ...overrides,
       }) as unknown as Order;

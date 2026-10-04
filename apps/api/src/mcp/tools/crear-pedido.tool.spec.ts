@@ -1,4 +1,5 @@
 import { crearPedidoTool } from './crear-pedido.tool';
+import { SCHEDULED_FOR_IN_PAST_MESSAGE } from '../../orders/scheduled-for.validation';
 
 describe('crearPedidoInputSchema (crear_pedido tool input validation)', () => {
   const menuItemId = '22222222-2222-2222-2222-222222222222';
@@ -65,13 +66,16 @@ describe('crearPedidoInputSchema (crear_pedido tool input validation)', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejects a scheduledFor in the past', () => {
+  it('rejects a scheduledFor in the past with the same message as OrdersService (shared rule)', () => {
     const pastIso = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const result = crearPedidoTool.inputSchema.safeParse({
       ...validInput(),
       scheduledFor: pastIso,
     });
     expect(result.success).toBe(false);
+    expect(result.error?.issues.map((issue) => issue.message)).toContain(
+      SCHEDULED_FOR_IN_PAST_MESSAGE,
+    );
   });
 
   it('rejects a missing peopleCount', () => {

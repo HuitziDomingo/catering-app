@@ -28,6 +28,7 @@ import {
   MyOrdersQueryDto,
 } from './dto/list-orders-query.dto';
 import { ReviewOrderDto } from './dto/review-order.dto';
+import { assertScheduledForInFuture } from './scheduled-for.validation';
 
 /** Estados de pedido que disparan un aviso de WhatsApp al cliente (ver ADR-026). */
 const CUSTOMER_NOTIFIABLE_STATUSES: string[] = [
@@ -125,8 +126,12 @@ export class OrdersService {
    * (ADR-004) para el dashboard. Este método es el único punto de entrada
    * para crear pedidos -- lo usan tanto POST /orders como el tool MCP
    * crear_pedido -- así que ambos caminos quedan cubiertos con un solo emit.
+   * Por la misma razón aquí se valida que scheduledFor sea futura (400 si
+   * no, ADR-023): una sola regla para REST y MCP.
    */
   async createOrder(customerId: string, dto: CreateOrderDto): Promise<Order> {
+    assertScheduledForInFuture(dto.scheduledFor);
+
     // Se llena dentro de la transacción (tiene los nombres de los platillos,
     // que la orden guardada ya no trae sin otro join) y se usa después para
     // armar los mensajes de WhatsApp -- si la transacción falla, nunca se

@@ -119,7 +119,9 @@ parámetros, resultado, timestamp).
 3. API valida contra menu_items, calcula totales, guarda en Postgres
    (orders + order_items con snapshot de precio). Si peopleCount queda
    fuera del rango serves_min/serves_max de todos los platillos, se crea
-   igual con needsReview = true (ADR-023)
+   igual con needsReview = true (ADR-023). scheduledFor debe ser futura
+   (400 si no): misma regla para POST /orders y la tool MCP crear_pedido
+   (`orders/scheduled-for.validation.ts`)
 4. API emite evento WebSocket `new-order` → dashboard Angular lo refleja en vivo
 5. WhatsApp (Twilio) al negocio y al cliente (ADR-026) — solo texto por ahora
 6. Pago: POST /payments/preferences → Checkout Pro → webhook re-consulta

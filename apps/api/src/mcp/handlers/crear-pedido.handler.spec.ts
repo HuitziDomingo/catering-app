@@ -5,6 +5,8 @@ import { JwtPayload } from '../../auth/jwt-payload.interface';
 import { Order } from '../../database/entities/order.entity';
 import { McpToolLog } from '../../database/entities/mcp-tool-log.entity';
 import type { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
+import { BadRequestException } from '@nestjs/common';
+import { SCHEDULED_FOR_IN_PAST_MESSAGE } from '../../orders/scheduled-for.validation';
 
 describe('handleCrearPedido', () => {
   let mcpToolLogsService: McpToolLogsService;
@@ -194,6 +196,45 @@ describe('handleCrearPedido', () => {
       mockJwtPayload.sub,
       input,
       'El platillo no existe.',
+    );
+  });
+
+  it('rechaza un scheduledFor pasado antes de llegar al servicio, con el mensaje compartido', async () => {
+    const input = {
+      ...validInput(),
+      scheduledFor: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+    };
+
+    await expect(
+      handleCrearPedido(input, { authInfo: mockAuthInfo }, {
+        mcpToolLogsService,
+        ordersService,
+      }),
+    ).rejects.toThrow(SCHEDULED_FOR_IN_PAST_MESSAGE);
+
+    expect(ordersService.createOrder).not.toHaveBeenCalled();
+  });
+
+  it('si OrdersService rechaza la fecha (la pasó el schema pero ya venció), propaga el 400 y lo registra en mcp_tool_logs', async () => {
+    // Caso borde: el schema valida contra "ahora" y el servicio vuelve a
+    // validar -- si la fecha vence entre ambas, la regla del servicio manda.
+    jest
+      .spyOn(ordersService, 'createOrder')
+      .mockRejectedValueOnce(new BadRequestException(SCHEDULED_FOR_IN_PAST_MESSAGE));
+    const input = validInput();
+
+    await expect(
+      handleCrearPedido(input, { authInfo: mockAuthInfo }, {
+        mcpToolLogsService,
+        ordersService,
+      }),
+    ).rejects.toThrow(BadRequestException);
+
+    expect(mcpToolLogsService.logError).toHaveBeenCalledWith(
+      'crear_pedido',
+      mockJwtPayload.sub,
+      input,
+      SCHEDULED_FOR_IN_PAST_MESSAGE,
     );
   });
 });
