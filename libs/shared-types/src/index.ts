@@ -20,3 +20,8 @@ export * from './entities/mcp-tool-log';
 
 // WebSocket
 export * from './websocket/new-order-event';
+
+// API contracts
+export * from './api/pagination';
+export * from './api/orders';
+export * from './api/payments';

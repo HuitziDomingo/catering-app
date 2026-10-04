@@ -13,6 +13,12 @@ export interface Order {
   needsReview: boolean;
   /** id de la Preferencia de Pago de Mercado Pago asociada (ver ADR-024). */
   paymentPreferenceId: string | null;
+  /** id del pago en Mercado Pago (tomado de la re-consulta del webhook, ADR-027). */
+  paymentId: string | null;
+  /** payment_method_id de Mercado Pago (ej. visa, oxxo, spei). */
+  paymentMethod: string | null;
+  /** Fecha de aprobación del pago; null si no hay pago aprobado. */
+  paidAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

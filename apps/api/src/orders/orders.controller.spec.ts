@@ -2,7 +2,10 @@ import { GUARDS_METADATA } from '@nestjs/common/constants';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
+import { ReviewOrderAction, OrderStatus } from '@catering-app/shared-types';
+import { ROLES_KEY } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtPayload } from '../auth/jwt-payload.interface';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
@@ -12,6 +15,11 @@ describe('OrdersController', () => {
   let ordersService: {
     createOrder: jest.Mock;
     findByIdForRequester: jest.Mock;
+    findForStaff: jest.Mock;
+    findMine: jest.Mock;
+    findDetailById: jest.Mock;
+    updateStatus: jest.Mock;
+    reviewOrder: jest.Mock;
   };
 
   const reflector = new Reflector();
@@ -20,6 +28,11 @@ describe('OrdersController', () => {
     ordersService = {
       createOrder: jest.fn(),
       findByIdForRequester: jest.fn(),
+      findForStaff: jest.fn(),
+      findMine: jest.fn(),
+      findDetailById: jest.fn(),
+      updateStatus: jest.fn(),
+      reviewOrder: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -53,6 +66,28 @@ describe('OrdersController', () => {
         OrdersController.prototype.findById,
       );
       expect(guards).toContain(JwtAuthGuard);
+    });
+
+    it.each(['findForStaff', 'updateStatus', 'review'] as const)(
+      '%s requiere JwtAuthGuard + RolesGuard con roles staff/admin/superadmin',
+      (handler) => {
+        const method = OrdersController.prototype[handler];
+        expect(reflector.get<unknown[]>(GUARDS_METADATA, method)).toEqual([
+          JwtAuthGuard,
+          RolesGuard,
+        ]);
+        expect(reflector.get<string[]>(ROLES_KEY, method)).toEqual([
+          'staff',
+          'admin',
+          'superadmin',
+        ]);
+      },
+    );
+
+    it('GET /orders/mine requiere solo JwtAuthGuard (cualquier usuario, sus propios pedidos)', () => {
+      const method = OrdersController.prototype.findMine;
+      expect(reflector.get<unknown[]>(GUARDS_METADATA, method)).toEqual([JwtAuthGuard]);
+      expect(reflector.get<string[]>(ROLES_KEY, method)).toBeUndefined();
     });
   });
 
@@ -91,6 +126,54 @@ describe('OrdersController', () => {
         'order-1',
         { userId: 'user-1', role: 'staff' },
       );
+    });
+
+    it('findMine usa el sub del JWT y mapea cada pedido de la página', async () => {
+      const req = { user: { sub: 'user-1', email: 'c@example.com', role: 'customer' } } as unknown as Request;
+      ordersService.findMine.mockResolvedValue({
+        items: [{ id: 'order-1', total: '100.00', subtotal: '100.00' }],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+      });
+
+      const page = await controller.findMine({ page: 1 }, req);
+
+      expect(ordersService.findMine).toHaveBeenCalledWith('user-1', { page: 1 });
+      expect(page.total).toBe(1);
+      expect(page.items[0].total).toBe(100);
+    });
+
+    it('findForStaff pasa la query al servicio y mapea la página', async () => {
+      ordersService.findForStaff.mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 20 });
+      const query = { needsReview: true, sort: 'scheduledFor' as const };
+
+      await expect(controller.findForStaff(query)).resolves.toEqual({
+        items: [],
+        total: 0,
+        page: 1,
+        pageSize: 20,
+      });
+      expect(ordersService.findForStaff).toHaveBeenCalledWith(query);
+    });
+
+    it('updateStatus cambia el status y devuelve el detalle recargado', async () => {
+      ordersService.findDetailById.mockResolvedValue({ id: 'order-1', status: 'preparing' });
+
+      const result = await controller.updateStatus('order-1', { status: OrderStatus.PREPARING });
+
+      expect(ordersService.updateStatus).toHaveBeenCalledWith('order-1', OrderStatus.PREPARING);
+      expect(result.status).toBe('preparing');
+    });
+
+    it('review delega en reviewOrder', async () => {
+      ordersService.reviewOrder.mockResolvedValue({ id: 'order-1', needsReview: false });
+      const dto = { action: ReviewOrderAction.APPROVE };
+
+      const result = await controller.review('order-1', dto);
+
+      expect(ordersService.reviewOrder).toHaveBeenCalledWith('order-1', dto);
+      expect(result.needsReview).toBe(false);
     });
   });
 });

@@ -1,7 +1,8 @@
 import { GUARDS_METADATA } from '@nestjs/common/constants';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Reflector } from '@nestjs/core';
-import type { Request } from 'express';
+import { BadRequestException } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { JwtPayload } from '../auth/jwt-payload.interface';
 import { PaymentsController } from './payments.controller';
@@ -9,7 +10,11 @@ import { PaymentsService } from './payments.service';
 
 describe('PaymentsController', () => {
   let controller: PaymentsController;
-  let paymentsService: { createPreference: jest.Mock; processWebhook: jest.Mock };
+  let paymentsService: {
+    createPreference: jest.Mock;
+    processWebhook: jest.Mock;
+    buildAppReturnUrl: jest.Mock;
+  };
 
   const reflector = new Reflector();
 
@@ -17,6 +22,7 @@ describe('PaymentsController', () => {
     paymentsService = {
       createPreference: jest.fn(),
       processWebhook: jest.fn(),
+      buildAppReturnUrl: jest.fn(() => 'mobile://payment/success?orderId=order-1'),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -78,6 +84,29 @@ describe('PaymentsController', () => {
         dataId: 'payment-1',
         type: 'payment',
       });
+    });
+
+    it('GET /payments/return/:result es público y redirige (302) al deep link con external_reference/status', () => {
+      const res = { redirect: jest.fn() } as unknown as Response;
+
+      controller.paymentReturn('success', 'order-1', 'approved', res);
+
+      expect(reflector.get<unknown[]>(GUARDS_METADATA, PaymentsController.prototype.paymentReturn))
+        .toBeUndefined();
+      expect(paymentsService.buildAppReturnUrl).toHaveBeenCalledWith('success', {
+        orderId: 'order-1',
+        paymentStatus: 'approved',
+      });
+      expect(res.redirect).toHaveBeenCalledWith(302, 'mobile://payment/success?orderId=order-1');
+    });
+
+    it('GET /payments/return/:result rechaza un result desconocido sin redirigir', () => {
+      const res = { redirect: jest.fn() } as unknown as Response;
+
+      expect(() => controller.paymentReturn('hacked', 'order-1', undefined, res)).toThrow(
+        BadRequestException,
+      );
+      expect(res.redirect).not.toHaveBeenCalled();
     });
   });
 });

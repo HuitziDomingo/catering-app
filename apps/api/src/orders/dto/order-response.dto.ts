@@ -1,6 +1,23 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { OrderItemResponseDto } from './order-item-response.dto';
 
+export class OrderCustomerSummaryDto {
+  @ApiProperty({ description: 'id (uuid) del cliente.' })
+  id!: string;
+
+  @ApiProperty()
+  fullName!: string;
+
+  @ApiProperty()
+  email!: string;
+
+  @ApiPropertyOptional({ nullable: true })
+  phone!: string | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  whatsappNumber!: string | null;
+}
+
 export class OrderResponseDto {
   @ApiProperty({ description: 'id (uuid) del pedido.' })
   id!: string;
@@ -27,7 +44,7 @@ export class OrderResponseDto {
   total!: number;
 
   @ApiPropertyOptional({ description: 'Notas adicionales.', nullable: true })
-  notes?: string | null;
+  notes!: string | null;
 
   @ApiProperty({
     description:
@@ -37,6 +54,38 @@ export class OrderResponseDto {
   })
   needsReview!: boolean;
 
+  @ApiPropertyOptional({
+    description: 'id de la Preferencia de Pago de Mercado Pago (ADR-024).',
+    nullable: true,
+  })
+  paymentPreferenceId!: string | null;
+
+  @ApiPropertyOptional({
+    description: 'id del pago en Mercado Pago, de la re-consulta del webhook (ADR-027).',
+    nullable: true,
+  })
+  paymentId!: string | null;
+
+  @ApiPropertyOptional({
+    description: 'payment_method_id de Mercado Pago (ej. visa, oxxo, spei).',
+    nullable: true,
+  })
+  paymentMethod!: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Fecha de aprobación del pago; null si no hay pago aprobado.',
+    nullable: true,
+  })
+  paidAt!: Date | null;
+
+  @ApiPropertyOptional({
+    description:
+      'Datos del cliente. Viene en las lecturas (GET); POST /orders lo devuelve null.',
+    type: OrderCustomerSummaryDto,
+    nullable: true,
+  })
+  customer!: OrderCustomerSummaryDto | null;
+
   @ApiProperty({ description: 'Líneas del pedido.', type: [OrderItemResponseDto] })
   items!: OrderItemResponseDto[];
 
@@ -45,4 +94,18 @@ export class OrderResponseDto {
 
   @ApiProperty({ description: 'Fecha de última actualización.' })
   updatedAt!: Date;
+}
+
+export class PaginatedOrdersResponseDto {
+  @ApiProperty({ type: [OrderResponseDto] })
+  items!: OrderResponseDto[];
+
+  @ApiProperty({ description: 'Total de pedidos que cumplen el filtro.' })
+  total!: number;
+
+  @ApiProperty({ description: 'Página actual, empezando en 1.' })
+  page!: number;
+
+  @ApiProperty()
+  pageSize!: number;
 }
