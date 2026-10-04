@@ -14,4 +14,19 @@ export const styles = StyleSheet.create({
   navigation: {
     backgroundColor: 'transparent',
   },
+  badge: {
+    position: 'absolute',
+    top: -6,
+    right: -10,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    paddingHorizontal: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    fontSize: 11,
+    lineHeight: 14,
+  },
 });

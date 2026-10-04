@@ -163,8 +163,10 @@ prueba en local para iOS y Android).
 - `apps/dashboard`: features `auth`, `menu`, `notifications` (campanita).
   Gestión de pedidos en curso (`feat/order-flow`).
 - `apps/mobile`: features `auth`, `menu`, `chat`, `session`, `theme`,
-  `navigation`. Carrito, checkout, pago y "Mis pedidos" en curso
-  (`feat/order-flow`).
+  `navigation`, `cart` (carrito persistido en AsyncStorage + checkout que
+  crea un pedido con todos los platillos, con aviso de rango
+  serves_min/serves_max) y `orders` (data-access). Pago y "Mis pedidos" en
+  curso (`feat/order-flow`).
 - `libs/shared-types`: enums, entidades, evento WebSocket y contratos de
   API (`src/api/`: paginación, orders, payments).
 - Lint: solo `dashboard` tiene target de lint en Nx; `api` y `mobile` no

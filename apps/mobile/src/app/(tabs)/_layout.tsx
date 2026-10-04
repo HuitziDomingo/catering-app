@@ -2,12 +2,14 @@ import React from 'react';
 import { View } from 'react-native';
 import { Tabs, type BottomTabBarProps } from 'expo-router/js-tabs';
 import { TabBar, type TabBarItem } from '../../features/navigation/ui/TabBar';
+import { selectItemCount, useCartStore } from '../../features/cart/state/useCartStore';
 
 // Metadata de cada tab (título mostrado + icono Eva), indexada por el nombre
 // de ruta (carpeta/archivo bajo app/(tabs)/) tal como lo expone React
 // Navigation en `state.routeNames`.
 const TAB_META: Record<string, TabBarItem> = {
   menu: { title: 'Menú', icon: 'grid-outline' },
+  carrito: { title: 'Carrito', icon: 'shopping-cart-outline' },
   chat: { title: 'Chat', icon: 'message-circle-outline' },
   perfil: { title: 'Perfil', icon: 'person-outline' },
 };
@@ -25,15 +27,20 @@ const TAB_META: Record<string, TabBarItem> = {
 // así que un hook llamado directamente en esa función rompe las reglas de
 // hooks (no hay fiber propio para esa invocación); delegar a un componente
 // real evita el problema.
+// El badge del carrito se lee acá (no dentro de TabBar) para que TabBar siga
+// siendo presentación pura -- mismo motivo por el que el layout traduce el
+// estado de React Navigation a props.
 const NavigationTabBar = ({ state, navigation, insets }: BottomTabBarProps) => {
+  const cartCount = useCartStore(selectItemCount);
   return (
     // Sin backgroundColor propio (ver ADR-025): TabBar ya pinta su propio
     // fondo esmerilado vía BlurView -- un fondo sólido acá detrás lo taparía.
     <View style={{ paddingBottom: insets.bottom }}>
       <TabBar
-        items={state.routeNames.map(
-          (name) => TAB_META[name] ?? { title: name, icon: 'grid-outline' }
-        )}
+        items={state.routeNames.map((name) => {
+          const meta = TAB_META[name] ?? { title: name, icon: 'grid-outline' };
+          return name === 'carrito' ? { ...meta, badge: cartCount } : meta;
+        })}
         selectedIndex={state.index}
         onSelect={(index) => navigation.navigate(state.routeNames[index])}
       />
@@ -46,6 +53,7 @@ const renderTabBar = (props: BottomTabBarProps) => <NavigationTabBar {...props} 
 export const TabsLayout = () => (
   <Tabs tabBar={renderTabBar} screenOptions={{ headerShown: false }}>
     <Tabs.Screen name="menu" options={{ title: TAB_META.menu.title }} />
+    <Tabs.Screen name="carrito" options={{ title: TAB_META.carrito.title }} />
     <Tabs.Screen name="chat" options={{ title: TAB_META.chat.title }} />
     <Tabs.Screen name="perfil" options={{ title: TAB_META.perfil.title }} />
   </Tabs>

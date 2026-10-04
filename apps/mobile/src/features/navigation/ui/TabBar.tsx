@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { BottomNavigation, BottomNavigationTab, Icon, useTheme } from '@ui-kitten/components';
+import { BottomNavigation, BottomNavigationTab, Icon, Text, useTheme } from '@ui-kitten/components';
 import { BlurView } from 'expo-blur';
 import { hexToRgba } from '../../../core/ui/hexToRgba';
 import { useResolvedColorScheme } from '../../theme/state/useThemeStore';
@@ -9,7 +9,11 @@ import { styles } from './TabBar.styles';
 export type TabBarItem = {
   title: string;
   icon: string;
+  /** Contador sobre el icono (ej. unidades en el carrito); 0/undefined lo oculta. */
+  badge?: number;
 };
+
+const MAX_BADGE = 99;
 
 type TabBarProps = {
   items: TabBarItem[];
@@ -59,7 +63,21 @@ export const TabBar = ({ items, selectedIndex, onSelect }: TabBarProps) => {
           <BottomNavigationTab
             key={item.title}
             title={item.title}
-            icon={(props) => <Icon {...props} name={item.icon} />}
+            icon={(props) => (
+              <View>
+                <Icon {...props} name={item.icon} />
+                {item.badge ? (
+                  <View
+                    testID={`tab-badge-${item.title}`}
+                    style={[styles.badge, { backgroundColor: theme['color-danger-500'] }]}
+                  >
+                    <Text style={styles.badgeText} status="control" category="c2">
+                      {item.badge > MAX_BADGE ? `${MAX_BADGE}+` : String(item.badge)}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            )}
           />
         ))}
       </BottomNavigation>
