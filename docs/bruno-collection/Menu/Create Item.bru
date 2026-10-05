@@ -29,7 +29,7 @@ body:json {
 
 script:post-response {
   if (res.body && res.body.id) {
-    bru.setVar("menuItemId", res.body.id);
+    bru.setVar("createdMenuItemId", res.body.id);
   }
 }
 
@@ -40,7 +40,13 @@ docs {
   `categoryId` debe ser un id real de categoría (ver Menu > List
   Categories, o la variable de entorno `categoryId`).
 
-  El id del platillo creado se guarda automáticamente en la variable
-  runtime `menuItemId`, que usan Orders > Create Order y MCP > Crear
-  Pedido.
+  El id del platillo creado se guarda en la variable runtime
+  `createdMenuItemId`, que usan Update Item, Upload/Remove Item Image y
+  Delete Item. Orders y MCP usan `menuItemId` (un platillo activo, ver
+  List Items), así correr toda la carpeta no deja a Orders apuntando al
+  platillo que Delete Item acaba de dar de baja.
+
+  **Sin imagen:** `imageUrl` ya no se acepta en el body (ADR-028; si se
+  manda, se descarta). La imagen se pone después con
+  **Menu > Upload Item Image**.
 }

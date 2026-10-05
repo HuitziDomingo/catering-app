@@ -4,11 +4,13 @@ meta {
 }
 
 docs {
-  Integración con Mercado Pago Checkout Pro (ver ADR-022, ADR-024).
+  Integración con Mercado Pago Checkout Pro (ver ADR-022, ADR-024 y su
+  addendum 01). Create Preference, Webhook (documentado, no simulable) y
+  Payment Return (back_url que redirige a la app).
 
   Create Preference es lo que este archivo está pensado para reemplazar:
   la secuencia Auth > Login → Orders > Create Order → Payments > Create
-  Preference corre encadenada sin copiar nada a mano (accessToken →
+  Preference corre encadenada sin copiar nada a mano (token →
   orderId → checkoutUrl, todas variables runtime).
 
   Requiere MERCADOPAGO_ACCESS_TOKEN real (credenciales TEST- de sandbox)

@@ -1,0 +1,19 @@
+meta {
+  name: Remove Item Image
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{baseUrl}}/menu/items/{{createdMenuItemId}}/image
+  body: none
+  auth: inherit
+}
+
+
+docs {
+  Quita la imagen del platillo y borra el objeto del almacenamiento
+  (ADR-028). Requiere rol staff/admin/superadmin. Devuelve el platillo con
+  `imageUrl: null`. Si el platillo no tenía imagen, no hace nada (también
+  200).
+}

@@ -45,6 +45,15 @@ docs {
      `data.id` inventado no existe ahí, así que el flujo termina en error
      igual.
 
+  Ojo (pendiente, anotado en Obsidian): hoy, si la re-consulta del pago
+  falla (p. ej. un `data.id` que no existe en Mercado Pago), el endpoint
+  responde 500 en vez de 200/4xx.
+
+  Además del status, el webhook guarda `paymentId`, `paymentMethod` y
+  `paidAt` en el pedido (ADR-027). Un pago aprobado sobre un pedido ya
+  cancelado se guarda sin mover el status (el dashboard lo marca
+  "Pagado: reembolsar").
+
   Cómo probarlo de verdad: correr Payments > Create Preference, pagar en
   el `checkoutUrl` real con una tarjeta de prueba, y confirmar en los logs
   de la API (`pnpm nx serve api`) que el webhook real llegó, pasó la

@@ -1,0 +1,22 @@
+meta {
+  name: API Root
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("la API responde", function () {
+    expect(res.status).to.equal(200);
+  });
+}
+
+docs {
+  `GET /api` (AppController): público, responde `{ "message": "Hello API" }`.
+  Útil para confirmar que la API corre antes de mandar el resto.
+}

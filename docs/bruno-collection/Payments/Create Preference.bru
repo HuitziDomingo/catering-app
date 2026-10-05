@@ -28,13 +28,13 @@ script:post-response {
 
 docs {
   El request que este archivo reemplaza: correr esto a mano contra
-  Swagger significaba ir a copiar accessToken y orderId cada vez. Acá
+  Swagger significaba ir a copiar el token y el orderId cada vez. Acá
   corren encadenados:
 
     Auth > Login  →  Orders > Create Order  →  Payments > Create Preference
 
   1, 2 y 3 en secuencia (Collection Runner, o a mano en ese orden) y
-  `accessToken`/`orderId` viajan solos vía variables runtime.
+  `token`/`orderId` viajan solos vía variables runtime.
 
   Precondiciones reales del endpoint (PaymentsService.createPreference):
   - El pedido `orderId` debe pertenecer al usuario logueado (Forbidden si

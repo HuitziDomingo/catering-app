@@ -17,8 +17,8 @@ headers {
 body:json {
   {
     "fullName": "Cliente de Prueba",
-    "email": "cliente.prueba@example.com",
-    "password": "contrasena-segura-123",
+    "email": "{{loginEmail}}",
+    "password": "{{loginPassword}}",
     "phone": "+52 55 1234 5678",
     "whatsappNumber": "+52 55 1234 5678"
   }
@@ -26,14 +26,14 @@ body:json {
 
 script:post-response {
   if (res.body && res.body.accessToken) {
-    bru.setVar("accessToken", res.body.accessToken);
+    bru.setVar("token", res.body.accessToken);
     bru.setVar("refreshToken", res.body.refreshToken);
   }
 }
 
 docs {
   Crea un usuario nuevo (rol "customer" por defecto, ver AuthService) y
-  guarda sus tokens en las variables runtime `accessToken`/`refreshToken`
+  guarda sus tokens en las variables runtime `token`/`refreshToken`
   -- mismas que usa Login.
 
   El email debe ser único: si ya corriste este request antes, va a fallar

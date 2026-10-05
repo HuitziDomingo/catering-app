@@ -4,7 +4,17 @@ meta {
 }
 
 docs {
-  Pedidos de catering (ver ADR-006, ADR-023). Create Order guarda el id
+  Pedidos de catering (ver ADR-006, ADR-023, ADR-027).
+
+  - Cliente: Create Order, Get Order By Id, List My Orders.
+  - Staff/admin/superadmin: List Orders (filtros y paginación), Update
+    Order Status y Review Order -- correr Auth > Login con una cuenta de
+    ese rol.
+
+  Las respuestas pasan por `order-response.mapper.ts`: numéricos como
+  number, `customer` resumido y datos del pago (`paymentId`,
+  `paymentMethod`, `paidAt`).
+ Create Order guarda el id
   del pedido creado en la variable runtime `orderId`, que usa tanto Get
   Order By Id como Payments > Create Preference -- así podés correr
   Login → Create Order → Create Preference en secuencia sin copiar nada a

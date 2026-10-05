@@ -1,0 +1,43 @@
+meta {
+  name: Review Order
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{baseUrl}}/orders/{{orderId}}/review
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "action": "adjust",
+    "peopleCount": 350,
+    "notes": "Ajustado por el staff al rango del platillo"
+  }
+}
+
+docs {
+  Resuelve un pedido marcado `needsReview` (ADR-027). Requiere rol
+  staff/admin/superadmin.
+
+  `action`:
+  - `approve`: se acepta tal cual (`needsReview = false`).
+  - `reject`: se cancela (`status = cancelled`, `needsReview = false`).
+  - `adjust`: corrige `peopleCount` y/o `notes`; `needsReview` se recalcula
+    con la misma regla que al crear (si sigue fuera de rango, la marca se
+    queda).
+
+  `peopleCount`/`notes` solo con `adjust` (400 con approve/reject). 409 si
+  el pedido no tiene `needsReview` o ya está en un status final. Cambiar
+  platillos no se permite a propósito.
+
+  Para probarlo, crea un pedido con `peopleCount` fuera del rango
+  serves_min/serves_max de sus platillos (Orders > Create Order) y usa su
+  `orderId`.
+}

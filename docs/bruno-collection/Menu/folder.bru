@@ -8,4 +8,8 @@ docs {
   platillos son públicos; crear/editar/borrar platillos requiere rol
   staff/admin/superadmin (correr Auth > Login con una cuenta de ese rol
   primero -- el registro público siempre crea rol "customer").
+
+  Imagen del platillo (ADR-028): Upload Item Image (multipart, campo
+  `image`) y Remove Item Image. La base guarda `image_key` y las respuestas
+  exponen `imageUrl`.
 }
