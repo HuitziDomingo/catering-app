@@ -1,0 +1,44 @@
+<table class="order-list">
+  <thead>
+    <tr>
+      <th>Evento</th>
+      <th>Cliente</th>
+      <th class="order-list__numeric">Personas</th>
+      <th class="order-list__numeric">Total</th>
+      <th>Status</th>
+      <th>Creado</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (order of orders(); track order.id) {
+      <tr data-testid="order-row" (click)="open.emit(order)">
+        <td class="order-list__strong">{{ formatDateTime(order.scheduledFor) }}</td>
+        <td>{{ order.customer?.fullName ?? '—' }}</td>
+        <td class="order-list__numeric">{{ order.peopleCount }}</td>
+        <td class="order-list__numeric">{{ formatPrice(order.total) }}</td>
+        <td>
+          <div class="order-list__flags">
+            <app-order-status-badge [status]="order.status" />
+            @if (hasPaymentToRefund(order)) {
+              <span class="order-list__flag order-list__flag--refund" data-testid="refund-flag">
+                Pagado: reembolsar
+              </span>
+            }
+            @if (order.needsReview) {
+              <span class="order-list__flag" data-testid="review-flag">Revisar</span>
+            }
+          </div>
+        </td>
+        <td class="order-list__muted">{{ formatDateTime(order.createdAt) }}</td>
+        <td class="order-list__actions">
+          <button tuiButton type="button" size="xs" appearance="outline">Ver</button>
+        </td>
+      </tr>
+    } @empty {
+      <tr>
+        <td class="order-list__empty" colspan="7">No hay pedidos con estos filtros.</td>
+      </tr>
+    }
+  </tbody>
+</table>

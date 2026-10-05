@@ -1,0 +1,166 @@
+<section class="order-detail">
+  <a class="order-detail__back" routerLink="/orders">← Pedidos</a>
+
+  @if (state.detailStatus() === 'loading' && !selected()) {
+    <p data-testid="order-loading">Cargando…</p>
+  }
+
+  @if (state.detailStatus() === 'error') {
+    <p class="order-detail__error" data-testid="order-error">{{ state.detailError() }}</p>
+  }
+
+  @if (selected(); as order) {
+    <header class="order-detail__header">
+      <h2>Pedido {{ order.id.slice(0, 8) }}</h2>
+      <app-order-status-badge [status]="order.status" />
+    </header>
+
+    @if (paymentToRefund()) {
+      <div class="order-detail__alert" role="alert" data-testid="refund-alert">
+        <strong>Pedido cancelado con un pago aprobado.</strong>
+        El cliente pagó {{ formatPrice(order.total) }}
+        @if (order.paidAt) {
+          el {{ formatDateTime(order.paidAt) }}
+        }
+        (operación {{ order.paymentId ?? '—' }}). Hay que reembolsarlo a mano desde Mercado Pago.
+      </div>
+    }
+
+    @if (actionError()) {
+      <p class="order-detail__error" data-testid="action-error">{{ actionError() }}</p>
+    }
+
+    @if (canReview()) {
+      <div class="order-detail__review" data-testid="review-panel">
+        <p>
+          <strong>Requiere revisión:</strong> las {{ order.peopleCount }} personas quedan fuera
+          del rango de los platillos pedidos.
+        </p>
+        <div class="order-detail__buttons">
+          <button tuiButton type="button" size="s" [disabled]="saving()" (click)="approve(order)">
+            Aprobar
+          </button>
+          <button
+            tuiButton
+            type="button"
+            size="s"
+            appearance="outline"
+            [disabled]="saving()"
+            (click)="adjust(order)"
+          >
+            Ajustar
+          </button>
+          <button
+            tuiButton
+            type="button"
+            size="s"
+            appearance="outline-destructive"
+            [disabled]="saving()"
+            (click)="reject(order)"
+          >
+            Rechazar
+          </button>
+        </div>
+      </div>
+    }
+
+    @if (nextStatuses().length > 0) {
+      <div class="order-detail__buttons" data-testid="status-actions">
+        @for (status of nextStatuses(); track status) {
+          <button
+            tuiButton
+            type="button"
+            size="s"
+            [appearance]="status === cancelled ? 'outline-destructive' : 'primary'"
+            [disabled]="saving()"
+            (click)="changeStatus(order, status)"
+          >
+            {{ actionLabels[status] }}
+          </button>
+        }
+      </div>
+    }
+
+    <div class="order-detail__grid">
+      <div class="order-detail__card">
+        <h3>Cliente</h3>
+        @if (order.customer; as customer) {
+          <dl>
+            <dt>Nombre</dt>
+            <dd>{{ customer.fullName }}</dd>
+            <dt>Email</dt>
+            <dd>{{ customer.email }}</dd>
+            <dt>Teléfono</dt>
+            <dd>{{ customer.phone ?? '—' }}</dd>
+            <dt>WhatsApp</dt>
+            <dd>{{ customer.whatsappNumber ?? '—' }}</dd>
+          </dl>
+        } @else {
+          <p>—</p>
+        }
+      </div>
+
+      <div class="order-detail__card">
+        <h3>Evento</h3>
+        <dl>
+          <dt>Fecha</dt>
+          <dd>{{ formatDateTime(order.scheduledFor) }}</dd>
+          <dt>Personas</dt>
+          <dd>{{ order.peopleCount }}</dd>
+          <dt>Notas</dt>
+          <dd>{{ order.notes || '—' }}</dd>
+          <dt>Creado</dt>
+          <dd>{{ formatDateTime(order.createdAt) }}</dd>
+        </dl>
+      </div>
+
+      <div class="order-detail__card">
+        <h3>Pago</h3>
+        @if (order.paymentId) {
+          <dl data-testid="payment-info">
+            <dt>Operación</dt>
+            <dd>{{ order.paymentId }}</dd>
+            <dt>Método</dt>
+            <dd>{{ order.paymentMethod ?? '—' }}</dd>
+            <dt>Aprobado</dt>
+            <dd>{{ order.paidAt ? formatDateTime(order.paidAt) : 'No' }}</dd>
+          </dl>
+        } @else {
+          <p class="order-detail__muted">Sin pago registrado.</p>
+        }
+      </div>
+    </div>
+
+    <div class="order-detail__card">
+      <h3>Platillos</h3>
+      <table class="order-detail__items">
+        <thead>
+          <tr>
+            <th>Platillo</th>
+            <th class="order-detail__numeric">Cantidad</th>
+            <th class="order-detail__numeric">Precio (al pedir)</th>
+            <th class="order-detail__numeric">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of order.items; track item.id) {
+            <tr>
+              <td>{{ item.menuItemName || item.menuItemId }}</td>
+              <td class="order-detail__numeric">{{ item.quantity }}</td>
+              <td class="order-detail__numeric">{{ formatPrice(item.unitPrice) }}</td>
+              <td class="order-detail__numeric">{{ formatPrice(item.subtotal) }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3">Total</td>
+            <td class="order-detail__numeric" data-testid="order-total">
+              {{ formatPrice(order.total) }}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  }
+</section>

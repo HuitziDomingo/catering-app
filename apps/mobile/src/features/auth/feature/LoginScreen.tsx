@@ -13,8 +13,16 @@ import { styles } from './LoginScreen.styles';
  * state/useSessionStore. Se usa tanto como ruta propia (app/login.tsx) como
  * embebida dentro de los tabs Chat/Perfil cuando no hay sesión (ver
  * ChatScreen.tsx, ProfileScreen.tsx) -- no depende de ser la ruta actual.
+ *
+ * `onLoggedIn` (opcional): si se pasa, reemplaza la redirección a /menu --
+ * lo usa el checkout del carrito para que, al iniciar sesión, el cliente se
+ * quede donde estaba y continúe con su pedido.
  */
-export const LoginScreen = () => {
+type LoginScreenProps = {
+  onLoggedIn?: () => void;
+};
+
+export const LoginScreen = ({ onLoggedIn }: LoginScreenProps = {}) => {
   const login = useSessionStore((state) => state.login);
   const theme = useTheme();
   const router = useRouter();
@@ -26,7 +34,11 @@ export const LoginScreen = () => {
     setError(null);
     try {
       await login(value);
-      router.replace('/menu');
+      if (onLoggedIn) {
+        onLoggedIn();
+      } else {
+        router.replace('/menu');
+      }
     } catch (err) {
       setError(extractErrorMessage(err));
     } finally {

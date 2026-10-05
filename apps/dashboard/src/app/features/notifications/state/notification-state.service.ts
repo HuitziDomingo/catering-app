@@ -1,7 +1,8 @@
-import { effect, inject, Injectable, signal } from '@angular/core';
+import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { TuiNotificationService } from '@taiga-ui/core';
 import { RoleName, type NewOrderEvent } from '@catering-app/shared-types';
 import { AuthStateService } from '../../auth/state/auth-state.service';
+import { NotificationHistoryService } from '../data-access/notification-history.service';
 import { NotificationSocketService } from '../data-access/notification-socket.service';
 
 /** Roles que reciben notificaciones en vivo de pedidos (mismo criterio que WsJwtGuard en la API). */
@@ -19,6 +20,11 @@ const MAX_RECENT = 20;
  * desconecta el socket según la sesión, mantiene el historial reciente y el
  * contador de no leídas, y dispara el toast (TuiNotificationService).
  *
+ * Al conectar carga también lo llegado mientras el dashboard estaba cerrado
+ * (NotificationHistoryService, ADR-027): el contador arranca con esos pedidos
+ * y markAllRead() mueve lastSeenAt a "ahora". La primera vez en un navegador
+ * (sin lastSeenAt) no se carga nada, para no marcar todo el histórico.
+ *
  * Cualquier feature de pedidos que se agregue a futuro puede suscribirse a
  * `newOrder$` (re-expuesto acá) para refrescar su propia lista, siguiendo el
  * mismo patrón de "refresh tras evento" que MenuStateService usa tras cada
@@ -27,6 +33,7 @@ const MAX_RECENT = 20;
 @Injectable({ providedIn: 'root' })
 export class NotificationStateService {
   private readonly socket = inject(NotificationSocketService);
+  private readonly history = inject(NotificationHistoryService);
   private readonly auth = inject(AuthStateService);
   private readonly notifications = inject(TuiNotificationService);
 
@@ -37,6 +44,10 @@ export class NotificationStateService {
   readonly unreadCount = this._unreadCount.asReadonly();
   readonly newOrder$ = this.socket.newOrder$;
 
+  // El effect se re-ejecuta con cada refresh del access token; el historial
+  // solo se carga una vez por sesión.
+  private historyLoaded = false;
+
   constructor() {
     this.socket.newOrder$.subscribe((event) => this.handleNewOrder(event));
 
@@ -45,17 +56,48 @@ export class NotificationStateService {
       const role = this.auth.user()?.role;
       if (token && role && NOTIFIABLE_ROLES.includes(role)) {
         this.socket.connect(token);
+        untracked(() => this.loadMissedOrders());
       } else {
         this.socket.disconnect();
+        this.historyLoaded = false;
       }
     });
   }
 
   markAllRead(): void {
     this._unreadCount.set(0);
+    this.history.saveLastSeenAt(new Date().toISOString());
+  }
+
+  private loadMissedOrders(): void {
+    if (this.historyLoaded) {
+      return;
+    }
+    this.historyLoaded = true;
+
+    const lastSeenAt = this.history.readLastSeenAt();
+    if (!lastSeenAt) {
+      this.history.saveLastSeenAt(new Date().toISOString());
+      return;
+    }
+
+    this.history.findCreatedSince(lastSeenAt, MAX_RECENT).subscribe({
+      next: ({ events, total }) => {
+        // Un new-order por WebSocket pudo llegar antes que esta respuesta.
+        const known = new Set(this._recent().map((event) => event.id));
+        const missed = events.filter((event) => !known.has(event.id));
+        this._recent.update((list) => [...list, ...missed].slice(0, MAX_RECENT));
+        this._unreadCount.update((count) => count + total - (events.length - missed.length));
+      },
+      // Sin historial la campanita sigue funcionando con los eventos en vivo.
+      error: () => (this.historyLoaded = false),
+    });
   }
 
   private handleNewOrder(event: NewOrderEvent): void {
+    if (this._recent().some((item) => item.id === event.id)) {
+      return;
+    }
     this._recent.update((list) => [event, ...list].slice(0, MAX_RECENT));
     this._unreadCount.update((count) => count + 1);
     this.notifications

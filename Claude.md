@@ -14,7 +14,7 @@ Repo language note: code, comments, and docs are mostly in Spanish (ADRs, `ARCHI
 
 ```
 apps/
-  api/        NestJS — REST API + WebSocket Gateway + MCP server + PDF generation
+  api/        NestJS — REST API + WebSocket Gateway + MCP server (PDF generation pending)
   dashboard/  Angular + Taiga UI — operator/admin dashboard
   mobile/     React Native (Expo) + UI Kitten + Moti — customer-facing app
   landing/    Astro + Pico.css — public marketing page
@@ -70,6 +70,9 @@ pnpm nx affected -t test
 pnpm nx affected -t build --exclude=mobile   # mobile's inferred build is an EAS cloud build, not runnable in CI
 pnpm nx affected -t export    # mobile's JS/TS bundle only (Metro), no native compile
 ```
+Only `dashboard` currently has a `lint` target — `api` and `mobile` don't, so `nx lint api`/`nx lint mobile` fail with "Cannot find configuration" and CI doesn't lint them. Until that's set up, lint changed files directly with the root config: `npx eslint apps/api/src/<path>`.
+
+Type-checking mobile outside Nx: use `npx tsc -b tsconfig.app.json` from `apps/mobile` (project references to shared-types). `tsc -p` reads the prebuilt `.d.ts` in `dist/out-tsc`, which can be stale and report bogus errors.
 
 Database migrations (TypeORM, run from repo root):
 ```bash
@@ -85,7 +88,7 @@ CI (`.github/workflows/ci.yml`) runs on PRs/pushes to `main`: `nx affected` for 
 
 ### Backend (`apps/api`) — NestJS, feature/module-based
 
-Modules: `auth/` (own JWT auth, see below), `menu/`, `orders/`, `mcp/`, `notifications/` (WebSocket gateway), `database/` (TypeORM entities + migrations). Each feature module follows standard Nest layering (controller → service → DTOs), which already satisfies the project's separation-of-concerns goals — no additional architectural pattern is imposed on the backend (see ADR-020).
+Modules: `auth/` (own JWT auth, see below), `menu/`, `orders/`, `payments/` (Mercado Pago Checkout Pro, ADR-024), `mcp/`, `notifications/` (WebSocket gateway + `whatsapp/` Twilio service, ADR-026), `database/` (TypeORM entities + migrations). There is no `PdfModule` yet (see below). Each feature module follows standard Nest layering (controller → service → DTOs), which already satisfies the project's separation-of-concerns goals — no additional architectural pattern is imposed on the backend (see ADR-020).
 
 **Auth (ADR-010):** NestJS is the sole identity provider — bcrypt/argon2 password hashing + self-issued JWT access/refresh tokens, via `@nestjs/passport` + `@nestjs/jwt`. Supabase is *only* hosted Postgres, never an auth provider (this reversed an earlier, since-superseded plan in ADR-001). Two separate secrets for access vs. refresh tokens (`JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET`); see `apps/api/.env.example`. Route protection uses `JwtAuthGuard` + a `@Roles()` decorator/`RolesGuard` for RBAC; WebSocket connections use a parallel `WsJwtGuard`.
 
@@ -95,9 +98,11 @@ Modules: `auth/` (own JWT auth, see below), `menu/`, `orders/`, `mcp/`, `notific
 
 Every tool invocation is logged to `mcp_tool_logs` (tool name, caller, params, result, timestamp) — see `mcp-tool-logs.service.ts`. When adding a new MCP tool, register it following the same pattern as the existing tools in `apps/api/src/mcp/tools/`, and add an ADR addendum documenting it (per ADR-002's stated process).
 
-**Order flow (end-to-end):** mobile app builds an order → `POST /orders` → API validates against `menu_items`, computes totals, persists `orders` + `order_items` (with a **price snapshot** per item, so historical reports stay correct even after prices change) → API emits a WebSocket event so the dashboard reflects new orders live → in parallel: `PdfModule` generates a receipt, WhatsApp (Twilio) notifies the customer with the PDF attached, WhatsApp notifies the admins, and everything is logged to `order_documents`/`notifications`.
+**Order flow (end-to-end):** mobile app builds an order → `POST /orders` → API validates against `menu_items`, computes totals, persists `orders` + `order_items` (with a **price snapshot** per item, so historical reports stay correct even after prices change) → API emits a WebSocket `new-order` event so the dashboard reflects new orders live → WhatsApp (Twilio) text notifications to the business and the customer → payment via `POST /payments/preferences` (Checkout Pro) and the signed webhook, which re-queries the payment and stores its details. **Not implemented yet** (planned for branch `feat/storage-images-receipts`): the `PdfModule` receipt, its storage (Supabase Storage) and the `order_documents` table; WhatsApp will then attach the receipt URL. The `notifications` table doesn't exist either.
 
-**Database (ADR-006, full ER diagram in `docs/database-design.pdf`):** UUID primary keys, soft deletes on `users`, price snapshots in `order_items`, JSONB for flexible menu attributes, audit trails in dedicated tables (`menu_item_price_history`, `notifications`, `mcp_tool_logs`). Core tables: `roles`, `users`, `menu_categories`, `menu_items`, `menu_item_price_history`, `orders`, `order_items`, `order_documents`, `notifications`, `mcp_tool_logs`.
+**Order management (ADR-027):** `GET /orders/mine` (customer), `GET /orders` (staff, filters + pagination), `PATCH /orders/:id/status` (validated against `ORDER_STATUS_TRANSITIONS` in shared-types) and `PATCH /orders/:id/review` (approve/reject/adjust `needsReview` orders). Order responses always go through `orders/order-response.mapper.ts` — never return the TypeORM entity directly (numeric columns arrive as strings, and loaded relations would leak fields like `password_hash`).
+
+**Database (ADR-006, full ER diagram in `docs/database-design.pdf`):** UUID primary keys, soft deletes on `users`, price snapshots in `order_items`, JSONB for flexible menu attributes, audit trails in dedicated tables (`menu_item_price_history`, `mcp_tool_logs`; `notifications` is designed but not implemented). Implemented tables: `roles`, `users`, `menu_categories`, `menu_items`, `menu_item_price_history`, `orders`, `order_items`, `mcp_tool_logs`. Designed in ADR-006 but still pending: `order_documents`, `notifications` (they exist only as types in shared-types).
 
 **Rate limiting:** global per-IP throttle (`ThrottlerGuard`, 100 req/min) is intentionally lax so it doesn't affect public menu browsing; sensitive endpoints (auth) apply a stricter limit locally via `@Throttle`.
 

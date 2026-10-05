@@ -62,10 +62,23 @@ export class Order {
   @Column({ name: 'payment_preference_id', type: 'varchar', length: 255, nullable: true })
   paymentPreferenceId?: string | null;
 
+  // Detalle del pago de Mercado Pago, tomado de la re-consulta del webhook
+  // (ADR-024, ADR-027) -- nunca del payload recibido. null mientras no haya
+  // pago, o si el staff confirmó a mano un pago por transferencia/efectivo.
+  @Column({ name: 'payment_id', type: 'varchar', length: 64, nullable: true })
+  paymentId?: string | null;
+
+  @Column({ name: 'payment_method', type: 'varchar', length: 50, nullable: true })
+  paymentMethod?: string | null;
+
+  @Column({ name: 'paid_at', type: 'timestamptz', nullable: true })
+  paidAt?: Date | null;
+
   @OneToMany(() => OrderItem, (item) => item.order)
   items!: OrderItem[];
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  @Index()
   createdAt!: Date;
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })

@@ -4,8 +4,14 @@ export class OrderItemResponseDto {
   @ApiProperty({ description: 'id de la línea de pedido.' })
   id!: number;
 
+  @ApiProperty({ description: 'id (uuid) del pedido.' })
+  orderId!: string;
+
   @ApiProperty({ description: 'id (uuid) del platillo de menú.' })
   menuItemId!: string;
+
+  @ApiProperty({ description: 'Nombre del platillo (vigente, no snapshot).' })
+  menuItemName!: string;
 
   @ApiProperty({ description: 'Cantidad solicitada.' })
   quantity!: number;

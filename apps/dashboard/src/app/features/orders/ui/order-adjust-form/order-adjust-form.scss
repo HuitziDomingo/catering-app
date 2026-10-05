@@ -1,0 +1,27 @@
+.order-adjust-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  tui-textfield {
+    inline-size: 100%;
+  }
+
+  &__hint {
+    margin: 0;
+    font: var(--tui-typography-body-s);
+    color: var(--tui-text-secondary);
+  }
+
+  &__error {
+    margin: 0;
+    color: var(--tui-text-negative);
+    font: var(--tui-typography-ui-xs);
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+}

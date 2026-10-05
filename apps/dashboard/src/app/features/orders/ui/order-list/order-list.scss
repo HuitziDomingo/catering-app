@@ -1,0 +1,76 @@
+.order-list {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font: var(--tui-typography-body-s);
+  color: var(--tui-text-primary);
+
+  thead {
+    background: var(--tui-background-base-alt);
+  }
+
+  th {
+    text-align: start;
+    padding: 0.75rem 1rem;
+    font: var(--tui-typography-ui-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--tui-text-secondary);
+    border-block-end: 1px solid var(--tui-border-normal);
+  }
+
+  td {
+    padding: 0.75rem 1rem;
+    border-block-end: 1px solid var(--tui-border-normal);
+  }
+
+  tbody tr[data-testid='order-row'] {
+    cursor: pointer;
+
+    &:hover {
+      background: var(--tui-background-base-alt);
+    }
+  }
+
+  &__strong {
+    font-weight: 600;
+  }
+
+  &__muted {
+    color: var(--tui-text-tertiary);
+  }
+
+  & &__numeric {
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__flags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  &__flag {
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--tui-radius-xl);
+    font: var(--tui-typography-ui-xs);
+    font-weight: 600;
+    background: var(--tui-status-warning-pale);
+
+    &--refund {
+      background: var(--tui-status-negative);
+      color: #fff;
+    }
+  }
+
+  &__actions {
+    text-align: end;
+  }
+
+  &__empty {
+    padding-block: 2rem;
+    text-align: center;
+    color: var(--tui-text-tertiary);
+  }
+}

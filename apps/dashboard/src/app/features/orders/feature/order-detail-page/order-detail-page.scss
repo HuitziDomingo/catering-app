@@ -1,0 +1,119 @@
+.order-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  color: var(--tui-text-primary);
+  font: var(--tui-typography-body-s);
+
+  &__back {
+    color: var(--tui-text-action);
+    text-decoration: none;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    h2 {
+      margin: 0;
+      font: var(--tui-typography-heading-h5);
+    }
+  }
+
+  &__alert {
+    padding: 0.875rem 1rem;
+    border-radius: var(--tui-radius-m);
+    border: 1px solid var(--tui-status-negative);
+    background: var(--tui-status-negative-pale);
+  }
+
+  &__review {
+    padding: 0.875rem 1rem;
+    border-radius: var(--tui-radius-m);
+    background: var(--tui-status-warning-pale);
+
+    p {
+      margin: 0 0 0.75rem;
+    }
+  }
+
+  &__error {
+    margin: 0;
+    color: var(--tui-text-negative);
+  }
+
+  &__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1rem;
+  }
+
+  &__card {
+    padding: 1rem;
+    border: 1px solid var(--tui-border-normal);
+    border-radius: var(--tui-radius-l);
+    background: var(--tui-background-elevation-1);
+
+    h3 {
+      margin: 0 0 0.75rem;
+      font: var(--tui-typography-ui-s);
+      font-weight: 600;
+      color: var(--tui-text-secondary);
+    }
+
+    dl {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.375rem 1rem;
+      margin: 0;
+    }
+
+    dt {
+      color: var(--tui-text-secondary);
+    }
+
+    dd {
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__muted {
+    margin: 0;
+    color: var(--tui-text-tertiary);
+  }
+
+  &__items {
+    inline-size: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+      padding: 0.5rem;
+      text-align: start;
+      border-block-end: 1px solid var(--tui-border-normal);
+    }
+
+    th {
+      font: var(--tui-typography-ui-xs);
+      color: var(--tui-text-secondary);
+    }
+
+    tfoot td {
+      font-weight: 600;
+      border-block-end: none;
+    }
+  }
+
+  &__numeric {
+    text-align: end !important;
+    font-variant-numeric: tabular-nums;
+  }
+}

@@ -1,16 +1,21 @@
 import {
+  BadRequestException,
   Body,
   Controller,
+  Get,
   Headers,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Query,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import type { Request } from 'express';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import type { Request, Response } from 'express';
+import { PAYMENT_RETURN_RESULTS, type PaymentReturnResult } from '@catering-app/shared-types';
 import { ErrorResponseDto } from '../auth/dto/error-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { JwtPayload } from '../auth/jwt-payload.interface';
@@ -92,5 +97,36 @@ export class PaymentsController {
     @Body('type') type: string | undefined,
   ): Promise<void> {
     await this.payments.processWebhook({ xSignature, xRequestId, dataId, type });
+  }
+
+  @Get('return/:result')
+  @ApiOperation({
+    summary:
+      'back_url de Checkout Pro (público, sin JWT: lo abre el navegador del cliente al ' +
+      'volver de Mercado Pago, ver addendum 01 de ADR-024). Redirige (302) al deep link ' +
+      'de la app (MOBILE_PAYMENT_RETURN_URL) con orderId y el status de Mercado Pago como ' +
+      'pista -- el status real del pedido lo fija el webhook, la app lo re-consulta.',
+  })
+  @ApiParam({ name: 'result', enum: PAYMENT_RETURN_RESULTS })
+  @ApiResponse({ status: HttpStatus.FOUND, description: 'Redirect al deep link de la app.' })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'result no es success/failure/pending.',
+    type: ErrorResponseDto,
+  })
+  paymentReturn(
+    @Param('result') result: string,
+    @Query('external_reference') externalReference: string | undefined,
+    @Query('status') paymentStatus: string | undefined,
+    @Res() res: Response,
+  ): void {
+    if (!PAYMENT_RETURN_RESULTS.includes(result as PaymentReturnResult)) {
+      throw new BadRequestException('result debe ser success, failure o pending.');
+    }
+    const url = this.payments.buildAppReturnUrl(result as PaymentReturnResult, {
+      orderId: externalReference,
+      paymentStatus,
+    });
+    res.redirect(HttpStatus.FOUND, url);
   }
 }

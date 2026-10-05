@@ -1,0 +1,49 @@
+<form class="order-filters" [formGroup]="form" (ngSubmit)="submit()">
+  <label class="order-filters__field">
+    <span>Evento desde</span>
+    <input type="date" formControlName="from" data-testid="filter-from" />
+  </label>
+
+  <label class="order-filters__field">
+    <span>Evento hasta</span>
+    <input type="date" formControlName="to" data-testid="filter-to" />
+  </label>
+
+  <label class="order-filters__field">
+    <span>Status</span>
+    <select formControlName="status" data-testid="filter-status">
+      <option value="">Todos</option>
+      @for (option of statusOptions; track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+  </label>
+
+  <label class="order-filters__field">
+    <span>Ordenar por</span>
+    <select formControlName="sort" data-testid="filter-sort">
+      <option value="createdAt">Fecha de creación</option>
+      <option value="scheduledFor">Fecha del evento</option>
+    </select>
+  </label>
+
+  <label class="order-filters__field">
+    <span>Dirección</span>
+    <select formControlName="direction" data-testid="filter-direction">
+      <option value="desc">Más recientes primero</option>
+      <option value="asc">Más antiguos primero</option>
+    </select>
+  </label>
+
+  <label class="order-filters__check">
+    <input type="checkbox" formControlName="needsReview" data-testid="filter-needs-review" />
+    Solo los que requieren revisión
+  </label>
+
+  <div class="order-filters__actions">
+    <button tuiButton type="button" size="s" appearance="outline" (click)="reset()">
+      Limpiar
+    </button>
+    <button tuiButton type="submit" size="s" data-testid="filter-apply">Aplicar</button>
+  </div>
+</form>

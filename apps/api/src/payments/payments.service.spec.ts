@@ -47,8 +47,8 @@ describe('PaymentsService', () => {
   let service: PaymentsService;
   let ordersService: {
     findByIdForRequester: jest.Mock;
-    findById: jest.Mock;
     updateStatus: jest.Mock;
+    recordPaymentResult: jest.Mock;
     attachPaymentPreference: jest.Mock;
   };
   let config: { get: jest.Mock };
@@ -68,8 +68,8 @@ describe('PaymentsService', () => {
   beforeEach(() => {
     ordersService = {
       findByIdForRequester: jest.fn(),
-      findById: jest.fn(),
       updateStatus: jest.fn(),
+      recordPaymentResult: jest.fn(),
       attachPaymentPreference: jest.fn(),
     };
     config = {
@@ -143,6 +143,53 @@ describe('PaymentsService', () => {
       );
 
       expect(mockPreferenceCreate).not.toHaveBeenCalled();
+    });
+
+    it('reintento tras un pago rechazado: regresa el pedido payment_failed a pending y crea una preferencia nueva', async () => {
+      ordersService.findByIdForRequester.mockResolvedValue({
+        ...pendingOrder,
+        status: OrderStatus.PAYMENT_FAILED,
+      });
+      mockPreferenceCreate.mockResolvedValue({ id: 'pref-2', init_point: 'https://mp/pref-2' });
+
+      await expect(service.createPreference(orderId, requester)).resolves.toBe('https://mp/pref-2');
+
+      expect(ordersService.updateStatus).toHaveBeenCalledWith(orderId, OrderStatus.PENDING);
+      expect(ordersService.attachPaymentPreference).toHaveBeenCalledWith(orderId, 'pref-2');
+    });
+
+    it('arma back_urls HTTPS a la API (con auto_return) cuando API_PUBLIC_URL está definida', async () => {
+      config.get.mockImplementation((key: string) => {
+        if (key === 'MERCADOPAGO_ACCESS_TOKEN') return 'TEST-token';
+        if (key === 'API_PUBLIC_URL') return 'https://abc.ngrok-free.app/';
+        return undefined;
+      });
+      ordersService.findByIdForRequester.mockResolvedValue(pendingOrder);
+      mockPreferenceCreate.mockResolvedValue({ id: 'pref-1', init_point: 'https://mp/pref-1' });
+
+      await service.createPreference(orderId, requester);
+
+      expect(mockPreferenceCreate).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          back_urls: {
+            success: 'https://abc.ngrok-free.app/api/payments/return/success',
+            failure: 'https://abc.ngrok-free.app/api/payments/return/failure',
+            pending: 'https://abc.ngrok-free.app/api/payments/return/pending',
+          },
+          auto_return: 'approved',
+        }),
+      });
+    });
+
+    it('omite back_urls (flujo previo) cuando API_PUBLIC_URL no está definida', async () => {
+      ordersService.findByIdForRequester.mockResolvedValue(pendingOrder);
+      mockPreferenceCreate.mockResolvedValue({ id: 'pref-1', init_point: 'https://mp/pref-1' });
+
+      await service.createPreference(orderId, requester);
+
+      const body = mockPreferenceCreate.mock.calls[0][0].body;
+      expect(body.back_urls).toBeUndefined();
+      expect(body.auto_return).toBeUndefined();
     });
 
     it('lanza InternalServerErrorException si Mercado Pago no devuelve id/init_point', async () => {
@@ -225,27 +272,45 @@ describe('PaymentsService', () => {
       expect(mockPaymentGet).not.toHaveBeenCalled();
     });
 
-    it('marca el pedido como confirmed cuando el pago re-consultado está approved', async () => {
-      mockPaymentGet.mockResolvedValue({ status: 'approved', external_reference: orderId });
-      ordersService.findById.mockResolvedValue(pendingOrder);
+    it('marca el pedido como confirmed y guarda el detalle del pago re-consultado cuando está approved', async () => {
+      mockPaymentGet.mockResolvedValue({
+        id: 123456789,
+        status: 'approved',
+        external_reference: orderId,
+        payment_method_id: 'visa',
+        date_approved: '2026-10-03T15:30:00.000-06:00',
+      });
 
       await service.processWebhook(validHeaders);
 
       expect(mockPaymentGet).toHaveBeenCalledWith({ id: 'payment-1' });
-      expect(ordersService.updateStatus).toHaveBeenCalledWith(orderId, OrderStatus.CONFIRMED);
+      expect(ordersService.recordPaymentResult).toHaveBeenCalledWith(
+        orderId,
+        OrderStatus.CONFIRMED,
+        {
+          paymentId: '123456789',
+          paymentMethod: 'visa',
+          paidAt: new Date('2026-10-03T15:30:00.000-06:00'),
+        },
+      );
     });
 
     it.each(['rejected', 'cancelled'])(
-      'marca el pedido como payment_failed cuando el pago re-consultado está %s',
+      'marca el pedido como payment_failed (sin paidAt) cuando el pago re-consultado está %s',
       async (status) => {
-        mockPaymentGet.mockResolvedValue({ status, external_reference: orderId });
-        ordersService.findById.mockResolvedValue(pendingOrder);
+        mockPaymentGet.mockResolvedValue({
+          id: 987,
+          status,
+          external_reference: orderId,
+          payment_method_id: 'master',
+        });
 
         await service.processWebhook(validHeaders);
 
-        expect(ordersService.updateStatus).toHaveBeenCalledWith(
+        expect(ordersService.recordPaymentResult).toHaveBeenCalledWith(
           orderId,
           OrderStatus.PAYMENT_FAILED,
+          { paymentId: '987', paymentMethod: 'master', paidAt: null },
         );
       },
     );
@@ -257,20 +322,23 @@ describe('PaymentsService', () => {
 
         await service.processWebhook(validHeaders);
 
-        expect(ordersService.updateStatus).not.toHaveBeenCalled();
+        expect(ordersService.recordPaymentResult).not.toHaveBeenCalled();
       },
     );
 
     it('no confía en el payload del webhook: siempre re-consulta el pago contra la API antes de decidir', async () => {
       mockPaymentGet.mockResolvedValue({ status: 'approved', external_reference: orderId });
-      ordersService.findById.mockResolvedValue(pendingOrder);
 
       await service.processWebhook(validHeaders);
 
       // La única fuente para status/external_reference es la respuesta de
       // paymentClient.get -- el webhook de entrada no trae más que el id.
       expect(mockPaymentGet).toHaveBeenCalledTimes(1);
-      expect(ordersService.updateStatus).toHaveBeenCalledWith(orderId, OrderStatus.CONFIRMED);
+      expect(ordersService.recordPaymentResult).toHaveBeenCalledWith(
+        orderId,
+        OrderStatus.CONFIRMED,
+        expect.objectContaining({ paymentId: 'payment-1' }),
+      );
     });
 
     it('descarta la notificación si el pago no trae external_reference', async () => {
@@ -278,23 +346,35 @@ describe('PaymentsService', () => {
 
       await service.processWebhook(validHeaders);
 
-      expect(ordersService.findById).not.toHaveBeenCalled();
-      expect(ordersService.updateStatus).not.toHaveBeenCalled();
-    });
-
-    it('descarta la notificación si el pedido referenciado no existe', async () => {
-      mockPaymentGet.mockResolvedValue({ status: 'approved', external_reference: orderId });
-      ordersService.findById.mockResolvedValue(null);
-
-      await service.processWebhook(validHeaders);
-
-      expect(ordersService.updateStatus).not.toHaveBeenCalled();
+      expect(ordersService.recordPaymentResult).not.toHaveBeenCalled();
     });
 
     it('descarta notificaciones de tipo "payment" sin data.id', async () => {
       await service.processWebhook({ ...validHeaders, dataId: undefined });
 
       expect(mockPaymentGet).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('buildAppReturnUrl — redirect de back_urls al deep link', () => {
+    it('usa mobile://payment por default y reenvía orderId y el status de Mercado Pago', () => {
+      expect(
+        service.buildAppReturnUrl('success', { orderId, paymentStatus: 'approved' }),
+      ).toBe(`mobile://payment/success?orderId=${orderId}&paymentStatus=approved`);
+    });
+
+    it('respeta MOBILE_PAYMENT_RETURN_URL (ej. Expo web) y codifica los parámetros', () => {
+      config.get.mockImplementation((key: string) =>
+        key === 'MOBILE_PAYMENT_RETURN_URL' ? 'http://localhost:8081/payment/' : undefined,
+      );
+
+      expect(service.buildAppReturnUrl('failure', { orderId: 'a&b=c' })).toBe(
+        'http://localhost:8081/payment/failure?orderId=a%26b%3Dc',
+      );
+    });
+
+    it('no agrega query string si Mercado Pago no mandó parámetros', () => {
+      expect(service.buildAppReturnUrl('pending', {})).toBe('mobile://payment/pending');
     });
   });
 });

@@ -22,5 +22,19 @@ export const appRoutes: Route[] = [
         (m) => m.MenuManagement,
       ),
   },
+  {
+    path: 'orders',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/orders/feature/orders-page/orders-page').then((m) => m.OrdersPage),
+  },
+  {
+    path: 'orders/:id',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/orders/feature/order-detail-page/order-detail-page').then(
+        (m) => m.OrderDetailPage,
+      ),
+  },
   { path: '', pathMatch: 'full', redirectTo: 'menu' },
 ];

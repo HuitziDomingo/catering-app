@@ -1,0 +1,45 @@
+.order-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-block-end: 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--tui-border-normal);
+  border-radius: var(--tui-radius-l);
+  background: var(--tui-background-elevation-1);
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font: var(--tui-typography-ui-xs);
+    color: var(--tui-text-secondary);
+
+    input,
+    select {
+      min-block-size: var(--tui-height-s);
+      padding: 0 0.5rem;
+      border: 1px solid var(--tui-border-normal);
+      border-radius: var(--tui-radius-m);
+      background: var(--tui-background-base);
+      color: var(--tui-text-primary);
+      font: var(--tui-typography-ui-s);
+    }
+  }
+
+  &__check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-block-size: var(--tui-height-s);
+    font: var(--tui-typography-ui-s);
+    color: var(--tui-text-primary);
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-inline-start: auto;
+  }
+}

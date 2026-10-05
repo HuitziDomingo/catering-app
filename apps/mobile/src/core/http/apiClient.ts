@@ -1,5 +1,7 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import { Platform } from 'react-native';
 import { useSessionStore } from '../../features/auth/state/useSessionStore';
+import { defaultApiUrl } from './defaultApiUrl';
 import { notifySessionExpired } from './sessionExpiry';
 
 // Instancia HTTP única compartida entre features (auth, menu -- ver
@@ -11,9 +13,10 @@ import { notifySessionExpired } from './sessionExpiry';
 // dashboard, adaptado a los interceptors de axios (RN no tiene el
 // HttpInterceptorFn de Angular). mcpClient.ts no usa esta instancia (necesita
 // fetch crudo para leer la respuesta SSE) pero replica la misma lógica de
-// retry -- ver ese archivo.
-const DEFAULT_API_URL = 'http://localhost:3000/api';
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_API_URL;
+// retry -- ver ese archivo. MCP_URL (mcpClient.ts) se deriva de esta misma
+// base, así que el default por plataforma también lo cubre.
+
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? defaultApiUrl(Platform.OS);
 
 export const apiClient = axios.create({ baseURL: API_BASE_URL });
 

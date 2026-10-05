@@ -1,4 +1,8 @@
 import { z } from 'zod';
+import {
+  isFutureDate,
+  SCHEDULED_FOR_IN_PAST_MESSAGE,
+} from '../../orders/scheduled-for.validation';
 
 /**
  * MCP Tool: crear_pedido (ADR-023)
@@ -30,8 +34,10 @@ export const crearPedidoInputSchema = z.object({
   scheduledFor: z
     .string()
     .datetime({ offset: true })
-    .refine((value) => new Date(value).getTime() > Date.now(), {
-      message: 'scheduledFor debe ser una fecha futura',
+    // Misma regla que OrdersService.createOrder (scheduled-for.validation.ts):
+    // aquí solo rechaza antes de llegar al servicio.
+    .refine((value) => isFutureDate(value), {
+      message: SCHEDULED_FOR_IN_PAST_MESSAGE,
     })
     .describe('Fecha y hora programada del evento (ISO 8601), debe ser futura'),
   notes: z.string().optional().describe('Notas adicionales del pedido'),

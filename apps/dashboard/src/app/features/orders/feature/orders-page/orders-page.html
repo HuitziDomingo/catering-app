@@ -1,0 +1,47 @@
+<section class="orders-page">
+  <header class="orders-page__header">
+    <h2>Pedidos</h2>
+    <span class="orders-page__total" data-testid="orders-total">{{ state.total() }} en total</span>
+  </header>
+
+  <app-order-filters [filters]="state.filters()" (apply)="state.applyFilters($event)" />
+
+  @if (state.status() === 'loading') {
+    <p data-testid="orders-loading">Cargando…</p>
+  }
+
+  @if (state.status() === 'error') {
+    <p class="orders-page__error" data-testid="orders-error">{{ state.error() }}</p>
+    <button tuiButton type="button" appearance="outline" (click)="state.load()">Reintentar</button>
+  }
+
+  @if (state.status() === 'success') {
+    <app-order-list [orders]="state.orders()" (open)="openOrder($event)" />
+
+    @if (state.totalPages() > 1) {
+      <nav class="orders-page__pagination" aria-label="Paginación">
+        <button
+          tuiButton
+          type="button"
+          size="s"
+          appearance="outline"
+          [disabled]="state.page() <= 1"
+          (click)="state.goToPage(state.page() - 1)"
+        >
+          Anterior
+        </button>
+        <span>Página {{ state.page() }} de {{ state.totalPages() }}</span>
+        <button
+          tuiButton
+          type="button"
+          size="s"
+          appearance="outline"
+          [disabled]="state.page() >= state.totalPages()"
+          (click)="state.goToPage(state.page() + 1)"
+        >
+          Siguiente
+        </button>
+      </nav>
+    }
+  }
+</section>

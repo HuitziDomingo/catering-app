@@ -15,6 +15,7 @@ import { AddOrderItems1752537600004 } from './migrations/1752537600004-AddOrderI
 import { AddMenuItemServesRange1752537600005 } from './migrations/1752537600005-AddMenuItemServesRange';
 import { AddOrderNeedsReview1752537600006 } from './migrations/1752537600006-AddOrderNeedsReview';
 import { AddPaymentsToOrders1752537600007 } from './migrations/1752537600007-AddPaymentsToOrders';
+import { AddPaymentDetailsToOrders1752537600008 } from './migrations/1752537600008-AddPaymentDetailsToOrders';
 
 /**
  * Construye las opciones de conexión de TypeORM a partir de variables de
@@ -61,6 +62,7 @@ export function buildDataSourceOptions(
       AddMenuItemServesRange1752537600005,
       AddOrderNeedsReview1752537600006,
       AddPaymentsToOrders1752537600007,
+      AddPaymentDetailsToOrders1752537600008,
     ],
     synchronize: false,
     migrationsRun: false,
