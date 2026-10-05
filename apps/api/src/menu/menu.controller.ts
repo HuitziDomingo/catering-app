@@ -13,6 +13,7 @@ import {
   Query,
   Req,
   UploadedFile,
+  UseFilters,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -38,6 +39,7 @@ import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { MenuCategoryResponseDto } from './dto/menu-category-response.dto';
 import { MenuItemResponseDto } from './dto/menu-item-response.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
+import { MenuImageUploadFilter } from './menu-image-upload.filter';
 import { MAX_MENU_IMAGE_BYTES } from './menu-image.processor';
 import { toMenuItemResponse } from './menu-item-response.mapper';
 import { MenuService } from './menu.service';
@@ -173,6 +175,9 @@ export class MenuController {
   @Post('items/:id/image')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(...MENU_WRITE_ROLES)
+  // Traduce al español los errores de multer (413 "File too large", campo
+  // equivocado...); debe envolver al interceptor, que es quien los lanza.
+  @UseFilters(MenuImageUploadFilter)
   @UseInterceptors(
     FileInterceptor('image', {
       limits: { fileSize: MAX_MENU_IMAGE_BYTES, files: 1 },
@@ -228,7 +233,7 @@ export class MenuController {
   })
   @ApiResponse({
     status: HttpStatus.PAYLOAD_TOO_LARGE,
-    description: 'El archivo excede 5 MB.',
+    description: 'El archivo excede 5 MB ("La imagen excede el tamaño máximo de 5 MB.").',
     type: ErrorResponseDto,
   })
   async uploadItemImage(

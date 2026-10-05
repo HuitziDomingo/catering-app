@@ -9,6 +9,10 @@ import { MenuCategory } from '../database/entities/menu-category.entity';
 import { MenuItem } from '../database/entities/menu-item.entity';
 import { MenuItemPriceHistory } from '../database/entities/menu-item-price-history.entity';
 import { StorageService } from '../storage/storage.service';
+import {
+  MENU_IMAGE_BAD_MULTIPART_MESSAGE,
+  MENU_IMAGE_TOO_LARGE_MESSAGE,
+} from './menu-image-upload.filter';
 import { MAX_MENU_IMAGE_BYTES } from './menu-image.processor';
 import { MenuController } from './menu.controller';
 import { MenuService } from './menu.service';
@@ -118,7 +122,18 @@ describe('POST /menu/items/:id/image (integration)', () => {
       .attach('image', Buffer.alloc(MAX_MENU_IMAGE_BYTES + 1), 'enorme.jpg');
 
     expect(res.status).toBe(413);
+    expect(res.body.message).toBe(MENU_IMAGE_TOO_LARGE_MESSAGE);
+    expect(res.body.message).toBe('La imagen excede el tamaño máximo de 5 MB.');
     expect(storage.putObject).not.toHaveBeenCalled();
+  });
+
+  it('responde 400 en español si el archivo llega en otro campo', async () => {
+    const res = await request(app.getHttpServer())
+      .post(`/menu/items/${itemId}/image`)
+      .attach('foto', await png(10, 10), 'foto.png');
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toBe(MENU_IMAGE_BAD_MULTIPART_MESSAGE);
   });
 
   it('responde 400 si el contenido no es imagen aunque la extensión diga .jpg', async () => {
@@ -130,7 +145,19 @@ describe('POST /menu/items/:id/image (integration)', () => {
       });
 
     expect(res.status).toBe(400);
+    expect(res.body.message).toMatch(/^La imagen debe ser JPG, PNG o WebP/);
     expect(storage.putObject).not.toHaveBeenCalled();
+  });
+
+  it('deja pasar los demás errores sin cambios (404 si el platillo no existe)', async () => {
+    itemsRepo.findOne.mockResolvedValue(null);
+
+    const res = await request(app.getHttpServer())
+      .post(`/menu/items/${itemId}/image`)
+      .attach('image', await png(10, 10), 'foto.png');
+
+    expect(res.status).toBe(404);
+    expect(res.body.message).toBe('El platillo indicado no existe.');
   });
 
   it('responde 400 si falta el archivo', async () => {
