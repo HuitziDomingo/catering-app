@@ -15,6 +15,9 @@ docs {
   superadmin puede consultar cualquiera (ver
   OrdersService.findByIdForRequester).
 
+  Cada línea trae `menuItemName` y `menuItemImageUrl` (URL pública de la
+  imagen vigente del platillo, o `null` si no tiene o está dado de baja).
+
   Usa `orderId` (variable runtime poblada por Create Order). Corré este
   request después de Payments > Create Preference y de pagar en el
   checkout para confirmar que `status` pasó de "pending" a "confirmed"

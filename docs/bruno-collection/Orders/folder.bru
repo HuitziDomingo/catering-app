@@ -12,8 +12,10 @@ docs {
     ese rol.
 
   Las respuestas pasan por `order-response.mapper.ts`: numéricos como
-  number, `customer` resumido y datos del pago (`paymentId`,
-  `paymentMethod`, `paidAt`).
+  number, `customer` resumido, datos del pago (`paymentId`,
+  `paymentMethod`, `paidAt`) y, por línea, `menuItemName` y
+  `menuItemImageUrl` (imagen vigente del platillo, ADR-028; `null` si no
+  tiene imagen o si el platillo está dado de baja, nunca un error).
  Create Order guarda el id
   del pedido creado en la variable runtime `orderId`, que usa tanto Get
   Order By Id como Payments > Create Preference -- así podés correr

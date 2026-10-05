@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class OrderItemResponseDto {
   @ApiProperty({ description: 'id de la línea de pedido.' })
@@ -12,6 +12,14 @@ export class OrderItemResponseDto {
 
   @ApiProperty({ description: 'Nombre del platillo (vigente, no snapshot).' })
   menuItemName!: string;
+
+  @ApiPropertyOptional({
+    description:
+      'URL pública de la imagen vigente del platillo (ADR-028). null si no ' +
+      'tiene imagen o si el platillo está dado de baja.',
+    nullable: true,
+  })
+  menuItemImageUrl!: string | null;
 
   @ApiProperty({ description: 'Cantidad solicitada.' })
   quantity!: number;

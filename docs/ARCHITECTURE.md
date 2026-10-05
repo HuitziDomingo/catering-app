@@ -188,6 +188,14 @@ Tampoco existe todavía la tabla `notifications`.
   acepta en `POST /menu/items` ni `PATCH /menu/items/:id`. Las respuestas
   de menú pasan por `menu/menu-item-response.mapper.ts` (arma `imageUrl`,
   `basePrice` como number).
+- Las líneas de pedido traen `menuItemImageUrl` (imagen vigente del
+  platillo; `null` si no tiene o está dado de baja), para las miniaturas
+  de "Mis pedidos".
+- Móvil: `core/ui/DishImage` (expo-image, caché en memoria y disco,
+  fundido al cargar, placeholder sin imagen o si falla) en menú, detalle,
+  carrito y "Mis pedidos". El carrito resuelve la imagen desde el menú
+  cargado por `menuItemId`; la URL guardada en la línea es solo respaldo,
+  porque al reemplazar una imagen la API borra el objeto viejo.
 
 ## Pagos (ADR-022, ADR-024)
 

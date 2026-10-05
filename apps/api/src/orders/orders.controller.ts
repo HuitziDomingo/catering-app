@@ -29,6 +29,7 @@ import { ListOrdersQueryDto, MyOrdersQueryDto } from './dto/list-orders-query.dt
 import { OrderResponseDto, PaginatedOrdersResponseDto } from './dto/order-response.dto';
 import { ReviewOrderDto } from './dto/review-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { StorageService } from '../storage/storage.service';
 import { toOrderResponse } from './order-response.mapper';
 import { OrdersService } from './orders.service';
 
@@ -38,7 +39,10 @@ const ORDER_MANAGE_ROLES = ['staff', 'admin', 'superadmin'];
 @ApiTags('orders')
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly orders: OrdersService) {}
+  constructor(
+    private readonly orders: OrdersService,
+    private readonly storage: StorageService,
+  ) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -75,7 +79,10 @@ export class OrdersController {
     @Req() req: Request,
   ): Promise<OrderResponseDto> {
     const user = req.user as JwtPayload;
-    return toOrderResponse(await this.orders.createOrder(user.sub, dto));
+    return toOrderResponse(
+      await this.orders.createOrder(user.sub, dto),
+      this.storage,
+    );
   }
 
   @Get()
@@ -108,7 +115,10 @@ export class OrdersController {
     @Query() query: ListOrdersQueryDto,
   ): Promise<PaginatedOrdersResponseDto> {
     const page = await this.orders.findForStaff(query);
-    return { ...page, items: page.items.map(toOrderResponse) };
+    return {
+      ...page,
+      items: page.items.map((order) => toOrderResponse(order, this.storage)),
+    };
   }
 
   // Declarada antes de GET :id para que "mine" no se interprete como un id.
@@ -132,7 +142,10 @@ export class OrdersController {
   ): Promise<PaginatedOrdersResponseDto> {
     const user = req.user as JwtPayload;
     const page = await this.orders.findMine(user.sub, query);
-    return { ...page, items: page.items.map(toOrderResponse) };
+    return {
+      ...page,
+      items: page.items.map((order) => toOrderResponse(order, this.storage)),
+    };
   }
 
   @Get(':id')
@@ -173,7 +186,7 @@ export class OrdersController {
       userId: user.sub,
       role: user.role,
     });
-    return toOrderResponse(order);
+    return toOrderResponse(order, this.storage);
   }
 
   @Patch(':id/status')
@@ -218,7 +231,7 @@ export class OrdersController {
     @Body() dto: UpdateOrderStatusDto,
   ): Promise<OrderResponseDto> {
     await this.orders.updateStatus(id, dto.status);
-    return toOrderResponse(await this.orders.findDetailById(id));
+    return toOrderResponse(await this.orders.findDetailById(id), this.storage);
   }
 
   @Patch(':id/review')
@@ -262,6 +275,9 @@ export class OrdersController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ReviewOrderDto,
   ): Promise<OrderResponseDto> {
-    return toOrderResponse(await this.orders.reviewOrder(id, dto));
+    return toOrderResponse(
+      await this.orders.reviewOrder(id, dto),
+      this.storage,
+    );
   }
 }

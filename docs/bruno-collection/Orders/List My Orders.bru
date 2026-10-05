@@ -34,5 +34,7 @@ docs {
     preparing, delivered, cancelled, payment_failed).
   - `page` (desde 1) y `pageSize` (máx. 100, default 20).
 
-  Respuesta `Paginated<Order>`: `items`, `total`, `page`, `pageSize`.
+  Respuesta `Paginated<Order>`: `items`, `total`, `page`, `pageSize`. Cada
+  línea de pedido trae `menuItemImageUrl` (miniatura en "Mis pedidos";
+  `null` si el platillo no tiene imagen o está dado de baja).
 }

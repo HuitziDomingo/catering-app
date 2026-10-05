@@ -30,6 +30,7 @@ export const sampleOrder: OrderDetail = {
       orderId: 'order-1',
       menuItemId: 'item-1',
       menuItemName: 'Chilaquiles',
+      menuItemImageUrl: null,
       quantity: 10,
       unitPrice: 95,
       subtotal: 950,

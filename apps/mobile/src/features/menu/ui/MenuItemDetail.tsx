@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Image, ScrollView, StyleSheet, View } from 'react-native';
-import { Icon, Text, useTheme } from '@ui-kitten/components';
+import React from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Text, useTheme } from '@ui-kitten/components';
 import type { MenuItem } from '@catering-app/shared-types';
+import { DishImage } from '../../../core/ui/DishImage';
 import { formatServesRange } from '../util/formatServesRange';
 
 type MenuItemDetailProps = {
@@ -19,8 +20,6 @@ const currencyFormatter = new Intl.NumberFormat('es-MX', {
 // llama a data-access ni al store directamente.
 export const MenuItemDetail = ({ item, categoryName }: MenuItemDetailProps) => {
   const theme = useTheme();
-  const [imageFailed, setImageFailed] = useState(false);
-  const showImage = Boolean(item.imageUrl) && !imageFailed;
 
   return (
     <ScrollView
@@ -28,26 +27,13 @@ export const MenuItemDetail = ({ item, categoryName }: MenuItemDetailProps) => {
       contentContainerStyle={styles.content}
       style={{ backgroundColor: theme['background-basic-color-2'] }}
     >
-      {showImage ? (
-        <Image
-          testID="menu-item-detail-image"
-          source={{ uri: item.imageUrl as string }}
-          style={styles.image}
-          resizeMode="cover"
-          onError={() => setImageFailed(true)}
-        />
-      ) : (
-        <View
-          testID="menu-item-detail-image-placeholder"
-          style={[styles.image, { backgroundColor: theme['background-basic-color-3'] }]}
-        >
-          <Icon
-            name="image-outline"
-            fill={theme['text-hint-color']}
-            style={styles.placeholderIcon}
-          />
-        </View>
-      )}
+      <DishImage
+        uri={item.imageUrl}
+        style={styles.image}
+        iconSize={56}
+        accessibilityLabel={item.name}
+        testID="menu-item-detail-image"
+      />
 
       <View style={styles.body}>
         {categoryName ? (
@@ -93,10 +79,6 @@ const styles = StyleSheet.create({
     height: 240,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  placeholderIcon: {
-    width: 56,
-    height: 56,
   },
   body: {
     padding: 20,

@@ -45,6 +45,8 @@ describe('líneas del carrito', () => {
         servesMin: 300,
         servesMax: 500,
         quantity: 2,
+        // Respaldo para cuando el menú no está cargado (ver resolveCartLineImage).
+        imageUrl: null,
       },
     ]);
   });

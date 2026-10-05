@@ -19,6 +19,14 @@ export type CartLine = {
   servesMin: number;
   servesMax: number;
   quantity: number;
+  /**
+   * Imagen al momento de agregar: solo respaldo para cuando el menú no está
+   * cargado. La que se muestra sale del menú vigente (resolveCartLineImage),
+   * porque si el staff reemplaza la imagen la API borra el objeto viejo y
+   * esta URL deja de existir. Opcional: los carritos guardados antes de este
+   * campo no la tienen.
+   */
+  imageUrl?: string | null;
 };
 
 export type PlaceOrderInput = {
@@ -80,6 +88,7 @@ export const useCartStore = create<CartState>()(
               servesMin: item.servesMin,
               servesMax: item.servesMax,
               quantity: clampQuantity(quantity),
+              imageUrl: item.imageUrl,
             },
           ],
         });

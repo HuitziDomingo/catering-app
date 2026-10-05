@@ -26,6 +26,8 @@ module.exports = {
     '^expo-blur$': '<rootDir>/src/test-mocks/expo-blur.tsx',
     // Igual que expo-blur: módulo nativo sin mock propio (ver el archivo).
     '^expo-web-browser$': '<rootDir>/src/test-mocks/expo-web-browser.ts',
+    // Igual que expo-blur: módulo nativo (ExpoImage) sin mock propio.
+    '^expo-image$': '<rootDir>/src/test-mocks/expo-image.tsx',
   },
   transform: {
     '[.][jt]sx?$': [

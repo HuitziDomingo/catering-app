@@ -19,6 +19,8 @@ export interface OrderCustomerSummary {
 /** Línea de pedido tal como la devuelve la API: con el nombre del platillo. */
 export interface OrderLine extends OrderItem {
   menuItemName: string;
+  /** Imagen vigente del platillo (ADR-028); null si no tiene o está dado de baja. */
+  menuItemImageUrl: string | null;
 }
 
 /**
