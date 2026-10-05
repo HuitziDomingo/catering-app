@@ -38,7 +38,7 @@ pnpm nx serve dashboard    # Angular dashboard
 pnpm nx serve landing      # Astro landing page
 ```
 
-Local Postgres for dev: `docker-compose up -d` (Postgres 16 on port **5433**, not 5432 — see ADR-014). In production, Supabase-hosted Postgres is used purely as hosting, not for auth (ADR-001, ADR-010).
+Local Postgres + file storage for dev: `docker-compose up -d` (Postgres 16 on port **5433**, not 5432 — see ADR-014; SeaweedFS S3 storage on port **8333**, buckets created by the one-shot `storage-init` container — see ADR-028). In production, Supabase-hosted Postgres is used purely as hosting, not for auth (ADR-001, ADR-010).
 
 Mobile (Expo) — **do not use `pnpm nx start mobile`**: the Nx Expo executor has a known stdio-passthrough bug that breaks interaction with the Expo CLI. Run Expo directly instead:
 ```bash

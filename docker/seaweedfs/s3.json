@@ -1,0 +1,18 @@
+{
+  "identities": [
+    {
+      "name": "catering-api",
+      "credentials": [
+        {
+          "accessKey": "catering_dev",
+          "secretKey": "catering_dev_storage_secret"
+        }
+      ],
+      "actions": ["Admin", "Read", "List", "Tagging", "Write"]
+    },
+    {
+      "name": "anonymous",
+      "actions": ["Read:menu-images"]
+    }
+  ]
+}

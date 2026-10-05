@@ -1,15 +1,19 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { randomUUID } from 'node:crypto';
 import { Repository } from 'typeorm';
 import { MenuCategory } from '../database/entities/menu-category.entity';
 import { MenuItem } from '../database/entities/menu-item.entity';
 import { MenuItemPriceHistory } from '../database/entities/menu-item-price-history.entity';
+import { StorageService } from '../storage/storage.service';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
+import { processMenuImage } from './menu-image.processor';
 
 /**
  * Servicio del catálogo de menú (ver ADR-006). Cada cambio de basePrice en
@@ -18,6 +22,8 @@ import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
  */
 @Injectable()
 export class MenuService {
+  private readonly logger = new Logger(MenuService.name);
+
   constructor(
     @InjectRepository(MenuCategory)
     private readonly categories: Repository<MenuCategory>,
@@ -25,6 +31,7 @@ export class MenuService {
     private readonly items: Repository<MenuItem>,
     @InjectRepository(MenuItemPriceHistory)
     private readonly priceHistory: Repository<MenuItemPriceHistory>,
+    private readonly storage: StorageService,
   ) {}
 
   findActiveCategories(): Promise<MenuCategory[]> {
@@ -53,7 +60,6 @@ export class MenuService {
       servesMin: dto.servesMin,
       servesMax: dto.servesMax,
       attributes: dto.attributes ?? {},
-      imageUrl: dto.imageUrl ?? null,
       isActive: dto.isActive ?? true,
     });
     return this.items.save(item);
@@ -105,6 +111,72 @@ export class MenuService {
     const item = await this.findItemOrThrow(id);
     item.isActive = false;
     await this.items.save(item);
+  }
+
+  /**
+   * Sube (o reemplaza) la imagen de un platillo (ver ADR-028): se valida y
+   * normaliza a webp, se guarda con una llave nueva y, ya guardado el
+   * platillo, se borra la anterior. Llave nueva en cada subida = URL nueva,
+   * así que ningún caché muestra la imagen vieja.
+   */
+  async setItemImage(id: string, file: Buffer): Promise<MenuItem> {
+    const item = await this.findItemOrThrow(id);
+    const image = await processMenuImage(file);
+
+    const newKey = `menu-items/${item.id}/${randomUUID()}.webp`;
+    await this.storage.putObject(
+      'menuImages',
+      newKey,
+      image.buffer,
+      image.contentType,
+    );
+
+    const previousKey = item.imageKey ?? null;
+    item.imageKey = newKey;
+    let saved: MenuItem;
+    try {
+      saved = await this.items.save(item);
+    } catch (error) {
+      // Sin fila que la apunte, la imagen recién subida quedaría huérfana.
+      await this.deleteImageQuietly(newKey);
+      throw error;
+    }
+
+    if (previousKey) {
+      await this.deleteImageQuietly(previousKey);
+    }
+    return saved;
+  }
+
+  /** Quita la imagen de un platillo. Sin imagen, no hace nada (idempotente). */
+  async removeItemImage(id: string): Promise<MenuItem> {
+    const item = await this.findItemOrThrow(id);
+    const previousKey = item.imageKey ?? null;
+    if (!previousKey) {
+      return item;
+    }
+
+    item.imageKey = null;
+    const saved = await this.items.save(item);
+    await this.deleteImageQuietly(previousKey);
+    return saved;
+  }
+
+  /**
+   * Borrar el objeto viejo es limpieza, no parte de la operación: si falla,
+   * se registra y se sigue. Un objeto huérfano en el bucket es preferible a
+   * un platillo sin imagen o a un error 500 después de haber guardado.
+   */
+  private async deleteImageQuietly(key: string): Promise<void> {
+    try {
+      await this.storage.deleteObject('menuImages', key);
+    } catch (error) {
+      this.logger.warn(
+        `No se pudo borrar la imagen ${key} del almacenamiento: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
   }
 
   private async findItemOrThrow(id: string): Promise<MenuItem> {

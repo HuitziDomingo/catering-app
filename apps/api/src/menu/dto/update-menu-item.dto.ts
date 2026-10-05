@@ -68,11 +68,6 @@ export class UpdateMenuItemDto {
   @IsObject()
   attributes?: Record<string, unknown>;
 
-  @ApiPropertyOptional({ description: 'URL de la imagen del platillo.' })
-  @IsOptional()
-  @IsString()
-  imageUrl?: string | null;
-
   @ApiPropertyOptional({
     description: 'Si el platillo está activo (visible en el menú).',
   })

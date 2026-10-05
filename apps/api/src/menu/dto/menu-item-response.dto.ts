@@ -27,8 +27,13 @@ export class MenuItemResponseDto {
   })
   attributes!: Record<string, unknown>;
 
-  @ApiPropertyOptional({ description: 'URL de la imagen del platillo.', nullable: true })
-  imageUrl?: string | null;
+  @ApiPropertyOptional({
+    description:
+      'URL pública de la imagen del platillo (null si no tiene). Solo se ' +
+      'pone subiéndola con POST /menu/items/:id/image (ver ADR-028).',
+    nullable: true,
+  })
+  imageUrl!: string | null;
 
   @ApiProperty({ description: 'Si el platillo está activo (visible en el menú).' })
   isActive!: boolean;

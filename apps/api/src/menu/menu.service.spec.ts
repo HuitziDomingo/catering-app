@@ -4,7 +4,18 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MenuCategory } from '../database/entities/menu-category.entity';
 import { MenuItem } from '../database/entities/menu-item.entity';
 import { MenuItemPriceHistory } from '../database/entities/menu-item-price-history.entity';
+import { StorageService } from '../storage/storage.service';
 import { MenuService } from './menu.service';
+import { processMenuImage } from './menu-image.processor';
+
+// sharp se prueba en menu-image.processor.spec.ts y en el integration spec;
+// aquí solo importa qué hace el servicio con el resultado.
+jest.mock('./menu-image.processor', () => ({
+  processMenuImage: jest.fn(),
+}));
+const mockProcessMenuImage = processMenuImage as jest.MockedFunction<
+  typeof processMenuImage
+>;
 
 type MockRepo<T extends object> = {
   [K in keyof T]?: jest.Mock;
@@ -15,6 +26,12 @@ describe('MenuService', () => {
   let itemsRepo: MockRepo<MenuItem>;
   let categoriesRepo: MockRepo<MenuCategory>;
   let priceHistoryRepo: MockRepo<MenuItemPriceHistory>;
+  let storage: {
+    putObject: jest.Mock;
+    deleteObject: jest.Mock;
+    getPublicUrl: jest.Mock;
+    getSignedUrl: jest.Mock;
+  };
 
   const categoryId = '11111111-1111-1111-1111-111111111111';
   const itemId = '22222222-2222-2222-2222-222222222222';
@@ -36,9 +53,17 @@ describe('MenuService', () => {
       save: jest.fn((data) => Promise.resolve(data)),
     };
 
+    storage = {
+      putObject: jest.fn().mockResolvedValue(undefined),
+      deleteObject: jest.fn().mockResolvedValue(undefined),
+      getPublicUrl: jest.fn(),
+      getSignedUrl: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         MenuService,
+        { provide: StorageService, useValue: storage },
         { provide: getRepositoryToken(MenuCategory), useValue: categoriesRepo },
         { provide: getRepositoryToken(MenuItem), useValue: itemsRepo },
         {
@@ -338,6 +363,150 @@ describe('MenuService', () => {
         where: { isActive: true },
         order: { name: 'ASC' },
       });
+    });
+  });
+
+  describe('setItemImage', () => {
+    const processed = {
+      buffer: Buffer.from('webp'),
+      contentType: 'image/webp' as const,
+    };
+    const keyPattern = new RegExp(`^menu-items/${itemId}/[0-9a-f-]{36}\\.webp$`);
+
+    beforeEach(() => {
+      mockProcessMenuImage.mockResolvedValue(processed);
+    });
+
+    it('uploads the processed image under a new key and saves it on the item', async () => {
+      itemsRepo.findOne.mockResolvedValue({ id: itemId, imageKey: null });
+
+      const saved = await service.setItemImage(itemId, Buffer.from('raw'));
+
+      expect(mockProcessMenuImage).toHaveBeenCalledWith(Buffer.from('raw'));
+      const [bucket, key, body, contentType] = storage.putObject.mock.calls[0];
+      expect(bucket).toBe('menuImages');
+      expect(key).toMatch(keyPattern);
+      expect(body).toBe(processed.buffer);
+      expect(contentType).toBe('image/webp');
+      expect(saved.imageKey).toBe(key);
+      expect(storage.deleteObject).not.toHaveBeenCalled();
+    });
+
+    it('deletes the previous image only after saving the new one', async () => {
+      itemsRepo.findOne.mockResolvedValue({
+        id: itemId,
+        imageKey: 'menu-items/old.webp',
+      });
+      const order: string[] = [];
+      itemsRepo.save.mockImplementation((data) => {
+        order.push('save');
+        return Promise.resolve(data);
+      });
+      storage.deleteObject.mockImplementation(() => {
+        order.push('delete');
+        return Promise.resolve();
+      });
+
+      await service.setItemImage(itemId, Buffer.from('raw'));
+
+      expect(storage.deleteObject).toHaveBeenCalledWith(
+        'menuImages',
+        'menu-items/old.webp',
+      );
+      expect(order).toEqual(['save', 'delete']);
+    });
+
+    it('gives a different key on every upload (no stale caches)', async () => {
+      itemsRepo.findOne.mockResolvedValue({ id: itemId, imageKey: null });
+
+      await service.setItemImage(itemId, Buffer.from('a'));
+      await service.setItemImage(itemId, Buffer.from('b'));
+
+      const [first, second] = storage.putObject.mock.calls.map((c) => c[1]);
+      expect(first).not.toBe(second);
+    });
+
+    it('still succeeds if deleting the previous image fails', async () => {
+      itemsRepo.findOne.mockResolvedValue({
+        id: itemId,
+        imageKey: 'menu-items/old.webp',
+      });
+      storage.deleteObject.mockRejectedValue(new Error('storage down'));
+
+      const saved = await service.setItemImage(itemId, Buffer.from('raw'));
+
+      expect(saved.imageKey).toMatch(keyPattern);
+    });
+
+    it('removes the just-uploaded object if saving the item fails', async () => {
+      itemsRepo.findOne.mockResolvedValue({
+        id: itemId,
+        imageKey: 'menu-items/old.webp',
+      });
+      itemsRepo.save.mockRejectedValue(new Error('db down'));
+
+      await expect(
+        service.setItemImage(itemId, Buffer.from('raw')),
+      ).rejects.toThrow('db down');
+
+      const newKey = storage.putObject.mock.calls[0][1];
+      expect(storage.deleteObject).toHaveBeenCalledTimes(1);
+      expect(storage.deleteObject).toHaveBeenCalledWith('menuImages', newKey);
+    });
+
+    it('does not upload anything if the image is invalid', async () => {
+      itemsRepo.findOne.mockResolvedValue({ id: itemId, imageKey: null });
+      mockProcessMenuImage.mockRejectedValue(new BadRequestException());
+
+      await expect(
+        service.setItemImage(itemId, Buffer.from('raw')),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(storage.putObject).not.toHaveBeenCalled();
+      expect(itemsRepo.save).not.toHaveBeenCalled();
+    });
+
+    it('throws NotFoundException for an unknown item without processing the file', async () => {
+      itemsRepo.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.setItemImage(itemId, Buffer.from('raw')),
+      ).rejects.toBeInstanceOf(NotFoundException);
+      expect(mockProcessMenuImage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('removeItemImage', () => {
+    it('clears the key, saves, and deletes the object', async () => {
+      itemsRepo.findOne.mockResolvedValue({
+        id: itemId,
+        imageKey: 'menu-items/old.webp',
+      });
+
+      const saved = await service.removeItemImage(itemId);
+
+      expect(saved.imageKey).toBeNull();
+      expect(itemsRepo.save).toHaveBeenCalledTimes(1);
+      expect(storage.deleteObject).toHaveBeenCalledWith(
+        'menuImages',
+        'menu-items/old.webp',
+      );
+    });
+
+    it('is a no-op when the item has no image', async () => {
+      itemsRepo.findOne.mockResolvedValue({ id: itemId, imageKey: null });
+
+      await service.removeItemImage(itemId);
+
+      expect(itemsRepo.save).not.toHaveBeenCalled();
+      expect(storage.deleteObject).not.toHaveBeenCalled();
+    });
+
+    it('throws NotFoundException for an unknown item', async () => {
+      itemsRepo.findOne.mockResolvedValue(null);
+
+      await expect(service.removeItemImage(itemId)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
     });
   });
 });

@@ -19,5 +19,48 @@ services:
       timeout: 5s
       retries: 5
 
+  # Almacenamiento de archivos S3 compatible para desarrollo (ADR-028): en
+  # produccion es Supabase Storage. SeaweedFS en vez de MinIO porque MinIO
+  # dejo de publicar imagenes de Docker. Permisos en docker/seaweedfs/s3.json:
+  # la API escribe en todo; el anonimo solo lee menu-images.
+  storage:
+    image: chrislusf/seaweedfs:4.48
+    container_name: catering-app-storage-dev
+    restart: unless-stopped
+    command: >
+      server -dir=/data -s3 -s3.port=8333
+      -s3.config=/etc/seaweedfs/s3.json
+      -volume.max=0 -master.volumeSizeLimitMB=256
+    ports:
+      - '8333:8333'
+    volumes:
+      - catering_storage_dev_data:/data
+      - ./docker/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro
+
+  # Crea los buckets la primera vez (idempotente) y termina. En produccion
+  # los buckets se crean a mano en el panel de Supabase (ADR-028).
+  storage-init:
+    image: amazon/aws-cli:2.31.0
+    container_name: catering-app-storage-init
+    depends_on:
+      - storage
+    environment:
+      AWS_ACCESS_KEY_ID: catering_dev
+      AWS_SECRET_ACCESS_KEY: catering_dev_storage_secret
+      AWS_DEFAULT_REGION: us-east-1
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - |
+        for i in $$(seq 1 30); do
+          aws --endpoint-url http://storage:8333 s3api list-buckets > /dev/null 2>&1 && break
+          sleep 1
+        done
+        for bucket in menu-images order-documents; do
+          aws --endpoint-url http://storage:8333 s3api head-bucket --bucket "$$bucket" 2>/dev/null \
+            || aws --endpoint-url http://storage:8333 s3api create-bucket --bucket "$$bucket"
+        done
+        echo "Buckets listos"
+
 volumes:
   catering_postgres_dev_data:
+  catering_storage_dev_data:
