@@ -1,0 +1,417 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Catering App — arquitectura",
+    "output": "architecture-diagram.html",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1390,
+      560
+    ],
+    "views": [
+      {
+        "id": "pedido",
+        "label": "Pedido y pago",
+        "focus": [
+          "mobile",
+          "orders",
+          "payments",
+          "mercadopago",
+          "postgres"
+        ],
+        "note": "El cliente pide desde la app, paga en Checkout Pro y el webhook firmado confirma el pedido."
+      },
+      {
+        "id": "operacion",
+        "label": "Operación del negocio",
+        "focus": [
+          "dashboard",
+          "auth",
+          "menu",
+          "orders",
+          "ws"
+        ],
+        "note": "El staff gestiona menú y pedidos; los pedidos nuevos llegan en vivo por WebSocket."
+      },
+      {
+        "id": "archivos",
+        "label": "Imágenes y recibos",
+        "focus": [
+          "menu",
+          "storage",
+          "objectstore",
+          "pdf"
+        ],
+        "note": "Imágenes del menú en bucket público; recibos PDF (en progreso) en bucket privado con URL firmada."
+      },
+      {
+        "id": "agente",
+        "label": "Chat MCP",
+        "focus": [
+          "mobile",
+          "mcp",
+          "orders"
+        ],
+        "note": "El chat de la app usa el servidor MCP propio, que reutiliza OrdersService."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "landing",
+      "type": "frontend",
+      "label": "Landing",
+      "sublabel": "Astro + Pico.css",
+      "pos": [
+        40,
+        440
+      ],
+      "size": [
+        170,
+        64
+      ],
+      "tag": "estática"
+    },
+    {
+      "id": "dashboard",
+      "type": "frontend",
+      "label": "Dashboard",
+      "sublabel": "Angular + Taiga UI",
+      "brand": "angular",
+      "pos": [
+        40,
+        180
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "mobile",
+      "type": "frontend",
+      "label": "App móvil",
+      "sublabel": "Expo (React Native)",
+      "pos": [
+        40,
+        310
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "auth",
+      "type": "security",
+      "label": "auth",
+      "sublabel": "JWT propio (ADR-010)",
+      "pos": [
+        800,
+        440
+      ],
+      "size": [
+        170,
+        64
+      ],
+      "tag": "JwtAuthGuard"
+    },
+    {
+      "id": "ws",
+      "type": "messagebus",
+      "label": "notifications",
+      "sublabel": "WebSocket gateway",
+      "pos": [
+        420,
+        180
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "pdf",
+      "type": "backend",
+      "label": "PdfModule",
+      "sublabel": "recibos · EN PROGRESO",
+      "pos": [
+        800,
+        180
+      ],
+      "size": [
+        170,
+        64
+      ],
+      "tag": "en progreso"
+    },
+    {
+      "id": "menu",
+      "type": "backend",
+      "label": "menu",
+      "sublabel": "CRUD + imágenes",
+      "pos": [
+        420,
+        50
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "orders",
+      "type": "backend",
+      "label": "orders",
+      "sublabel": "pedidos (ADR-027)",
+      "pos": [
+        420,
+        310
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "storage",
+      "type": "backend",
+      "label": "storage",
+      "sublabel": "puerto S3 (ADR-028)",
+      "pos": [
+        800,
+        50
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "mcp",
+      "type": "backend",
+      "label": "mcp",
+      "sublabel": "servidor MCP",
+      "pos": [
+        420,
+        440
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "payments",
+      "type": "backend",
+      "label": "payments",
+      "sublabel": "Checkout Pro · /return",
+      "pos": [
+        800,
+        310
+      ],
+      "size": [
+        170,
+        64
+      ],
+      "tag": "/payments/return"
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "label": "PostgreSQL",
+      "sublabel": "Docker local / Supabase",
+      "brand": "postgresql",
+      "pos": [
+        1180,
+        440
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "whatsapp",
+      "type": "external",
+      "label": "Twilio WhatsApp",
+      "sublabel": "PENDIENTE (deshabilitado)",
+      "brand": "whatsapp",
+      "pos": [
+        1180,
+        180
+      ],
+      "size": [
+        170,
+        64
+      ],
+      "tag": "pendiente"
+    },
+    {
+      "id": "objectstore",
+      "type": "cloud",
+      "label": "Almacenamiento S3",
+      "sublabel": "SeaweedFS / Supabase Storage",
+      "pos": [
+        1180,
+        50
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "mercadopago",
+      "type": "external",
+      "label": "Mercado Pago",
+      "sublabel": "pagos (externo)",
+      "pos": [
+        1180,
+        310
+      ],
+      "size": [
+        170,
+        64
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "API NestJS (apps/api)",
+      "wraps": [
+        "auth",
+        "ws",
+        "pdf",
+        "menu",
+        "orders",
+        "storage",
+        "mcp",
+        "payments"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "dashboard-menu",
+      "from": "dashboard",
+      "to": "menu",
+      "label": "REST + JWT",
+      "variant": "emphasis",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "menu-storage",
+      "from": "menu",
+      "to": "storage",
+      "label": "imágenes"
+    },
+    {
+      "id": "storage-objectstore",
+      "from": "storage",
+      "to": "objectstore",
+      "label": "S3"
+    },
+    {
+      "id": "pdf-storage",
+      "from": "pdf",
+      "to": "storage",
+      "label": "recibos",
+      "variant": "dashed"
+    },
+    {
+      "id": "orders-ws",
+      "from": "orders",
+      "to": "ws",
+      "label": "new-order",
+      "labelDx": -34
+    },
+    {
+      "id": "ws-dashboard",
+      "from": "ws",
+      "to": "dashboard",
+      "label": "en vivo"
+    },
+    {
+      "id": "mobile-orders",
+      "from": "mobile",
+      "to": "orders",
+      "label": "POST /orders",
+      "variant": "emphasis"
+    },
+    {
+      "id": "payments-orders",
+      "from": "payments",
+      "to": "orders",
+      "label": "pago"
+    },
+    {
+      "id": "payments-mp",
+      "from": "payments",
+      "to": "mercadopago",
+      "label": "webhook firmado"
+    },
+    {
+      "id": "mobile-mcp",
+      "from": "mobile",
+      "to": "mcp",
+      "label": "chat",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "mcp-orders",
+      "from": "mcp",
+      "to": "orders",
+      "label": "crear_pedido"
+    },
+    {
+      "id": "orders-postgres",
+      "from": "orders",
+      "to": "postgres",
+      "label": "TypeORM",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "orders-whatsapp",
+      "from": "orders",
+      "to": "whatsapp",
+      "label": "texto",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Clientes",
+      "items": [
+        "Dashboard Angular para staff/admin",
+        "App Expo para clientes, con chat MCP",
+        "Landing Astro estática"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "API NestJS",
+      "items": [
+        "Pedidos con transiciones validadas (ADR-027)",
+        "Checkout Pro + webhook firmado + /payments/return",
+        "Imágenes en bucket público, recibos en privado (ADR-028)"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Pendiente",
+      "items": [
+        "PdfModule y order_documents: en progreso",
+        "WhatsApp vía Twilio: deshabilitado hasta tener cuenta"
+      ]
+    }
+  ]
+}

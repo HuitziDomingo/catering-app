@@ -64,14 +64,22 @@ más tools MCP (reportes automáticos). Crear pedidos vía agente ya existe
 apps/
   dashboard/     # Angular + Taiga UI — panel de operación y super usuario
   mobile/        # React Native (Expo) + UI Kitten + Moti — app de clientes
-  api/           # NestJS: REST API + WebSocket Gateway + servidor MCP + PdfModule + AuthModule
+  api/           # NestJS: REST API + WebSocket Gateway + servidor MCP + AuthModule + StorageModule (PdfModule en progreso)
+  landing/       # Astro + Pico.css — página pública
 libs/
   shared-types/  # DTOs e interfaces TypeScript compartidas entre apps
 docs/
   adr/           # Decisiones de arquitectura (ADR-001 a ADR-012 y siguientes)
   ARCHITECTURE.md
+  architecture-diagram.html        # diagrama interactivo, generado con archify
+  architecture.architecture.json   # fuente del diagrama (se edita esto y se regenera)
   database-design.pdf
 ```
+
+El diagrama de `docs/architecture-diagram.html` se genera desde
+`docs/architecture.architecture.json` con la skill archify
+(`.claude/skills/archify`). Si un cambio altera la arquitectura, se
+actualiza el JSON y se regenera el HTML (ver `Claude.md`).
 
 ## Base de datos
 
