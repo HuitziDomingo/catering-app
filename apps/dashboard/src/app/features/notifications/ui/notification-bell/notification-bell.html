@@ -21,7 +21,9 @@
     <ul class="notification-bell__list" data-testid="notification-list">
       @for (item of recent(); track item.id) {
         <li>
-          Pedido {{ item.id.slice(0, 8) }} — {{ item.peopleCount }} personas — ${{ item.total }}
+          <a [routerLink]="['/orders', item.id]" (click)="open.set(false)">
+            Pedido {{ item.id.slice(0, 8) }} — {{ item.peopleCount }} personas — ${{ item.total }}
+          </a>
         </li>
       } @empty {
         <li class="notification-bell__empty">Sin notificaciones recientes.</li>

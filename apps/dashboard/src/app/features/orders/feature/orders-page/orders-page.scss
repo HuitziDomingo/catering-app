@@ -1,0 +1,34 @@
+.orders-page {
+  &__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-block-end: 1rem;
+  }
+
+  &__header h2 {
+    margin: 0;
+    font: var(--tui-typography-heading-h5);
+    color: var(--tui-text-primary);
+  }
+
+  &__total {
+    font: var(--tui-typography-body-s);
+    color: var(--tui-text-secondary);
+  }
+
+  &__error {
+    color: var(--tui-text-negative);
+    font: var(--tui-typography-body-s);
+  }
+
+  &__pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-block-start: 1.5rem;
+    font: var(--tui-typography-body-s);
+    color: var(--tui-text-secondary);
+  }
+}

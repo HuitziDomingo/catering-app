@@ -148,6 +148,11 @@ Tampoco existe todavía la tabla `notifications`.
   como number, nombre del platillo por línea, cliente resumido).
 - Campanita del dashboard: `GET /orders?createdSince=<lastSeenAt>`, con
   `lastSeenAt` en `localStorage`.
+- Dashboard (`features/orders/`): lista `/orders` con filtros, orden y
+  paginación (se refresca con `new-order`), y detalle `/orders/:id` con
+  cambio de status y revisión. Un pedido `cancelled` con `paidAt` se marca
+  "Pagado: reembolsar" en lista y detalle: el reembolso es manual en
+  Mercado Pago.
 
 ## Pagos (ADR-022, ADR-024)
 
@@ -169,8 +174,10 @@ status.
 - `apps/api`: `auth`, `menu`, `orders` (creación, listados, status,
   revisión), `payments` (Checkout Pro + webhook), `mcp` (2 tools),
   `notifications` (WebSocket gateway + WhatsApp). Sin `PdfModule` todavía.
-- `apps/dashboard`: features `auth`, `menu`, `notifications` (campanita).
-  Gestión de pedidos en curso (`feat/order-flow`).
+- `apps/dashboard`: features `auth`, `menu`, `notifications` (campanita
+  con historial persistente) y `orders` (lista, detalle, status y
+  revisión). El PDF del comprobante en el detalle queda para
+  `feat/storage-images-receipts`.
 - `apps/mobile`: features `auth`, `menu`, `chat`, `session`, `theme`,
   `navigation`, `cart` (carrito persistido en AsyncStorage + checkout que
   crea un pedido con todos los platillos, con aviso de rango

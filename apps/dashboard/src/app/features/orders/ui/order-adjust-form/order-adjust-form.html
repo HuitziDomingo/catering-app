@@ -1,0 +1,44 @@
+<form class="order-adjust-form" [formGroup]="form" (ngSubmit)="submit()">
+  @if (error()) {
+    <p class="order-adjust-form__error" data-testid="adjust-error">{{ error() }}</p>
+  }
+
+  <p class="order-adjust-form__hint">
+    Si con el ajuste el pedido sigue fuera del rango de los platillos, la marca de revisión se
+    queda. Para cambiar platillos, rechaza el pedido y que el cliente pida de nuevo.
+  </p>
+
+  <tui-textfield>
+    <input
+      tuiInput
+      id="order-adjust-people"
+      type="number"
+      step="1"
+      formControlName="peopleCount"
+      data-testid="adjust-people-input"
+    />
+    <label tuiLabel for="order-adjust-people">Personas</label>
+  </tui-textfield>
+  @if (form.controls.peopleCount.invalid && form.controls.peopleCount.touched) {
+    <p class="order-adjust-form__error">Debe ser al menos 1 persona.</p>
+  }
+
+  <tui-textfield>
+    <textarea
+      id="order-adjust-notes"
+      tuiTextarea
+      formControlName="notes"
+      data-testid="adjust-notes-input"
+    ></textarea>
+    <label tuiLabel for="order-adjust-notes">Notas</label>
+  </tui-textfield>
+
+  <div class="order-adjust-form__actions">
+    <button tuiButton type="button" appearance="outline" [disabled]="saving()" (click)="cancel()">
+      Cancelar
+    </button>
+    <button tuiButton type="submit" [disabled]="saving()" data-testid="adjust-submit">
+      Guardar ajuste
+    </button>
+  </div>
+</form>

@@ -1,16 +1,18 @@
 import { Component, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { TuiButton } from '@taiga-ui/core';
 import { TuiBadgeNotification, TuiBadgedContentComponent } from '@taiga-ui/kit';
 import { NotificationStateService } from '../../state/notification-state.service';
 
 /**
  * Componente de presentación pura (ver ADR-020): campana con contador de no
- * leídas + lista simple de los últimos pedidos notificados. No es un centro
+ * leídas + lista simple de los últimos pedidos notificados (cada uno lleva a
+ * su detalle en /orders/:id). No es un centro
  * de notificaciones completo -- alcanza para la v1 (ver ADR-004).
  */
 @Component({
   selector: 'app-notification-bell',
-  imports: [TuiButton, TuiBadgeNotification, TuiBadgedContentComponent],
+  imports: [RouterLink, TuiButton, TuiBadgeNotification, TuiBadgedContentComponent],
   templateUrl: './notification-bell.html',
   styleUrl: './notification-bell.scss',
 })

@@ -2,6 +2,16 @@
   <div class="app-shell">
     <header class="app-shell__header">
       <h1 class="app-shell__title">Catering — Dashboard</h1>
+      @if (auth.isAuthenticated()) {
+        <nav class="app-shell__nav" aria-label="Secciones">
+          <a routerLink="/orders" routerLinkActive="app-shell__link--active" class="app-shell__link">
+            Pedidos
+          </a>
+          <a routerLink="/menu" routerLinkActive="app-shell__link--active" class="app-shell__link">
+            Menú
+          </a>
+        </nav>
+      }
       <div class="app-shell__actions">
         <app-theme-toggle />
         @if (showNotifications()) {

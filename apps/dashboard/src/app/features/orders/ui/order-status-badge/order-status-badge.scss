@@ -1,0 +1,36 @@
+.order-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: var(--tui-radius-xl);
+  font: var(--tui-typography-ui-xs);
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--tui-background-neutral-1);
+  color: var(--tui-text-secondary);
+
+  &[data-status='pending'] {
+    background: var(--tui-status-warning-pale);
+    color: var(--tui-text-primary);
+  }
+
+  &[data-status='payment_failed'] {
+    background: var(--tui-status-negative-pale);
+    color: var(--tui-text-negative);
+  }
+
+  &[data-status='confirmed'],
+  &[data-status='preparing'] {
+    background: var(--tui-status-info-pale);
+    color: var(--tui-text-action);
+  }
+
+  &[data-status='delivered'] {
+    background: var(--tui-status-positive-pale);
+    color: var(--tui-text-positive);
+  }
+
+  &[data-status='cancelled'] {
+    color: var(--tui-text-tertiary);
+  }
+}
