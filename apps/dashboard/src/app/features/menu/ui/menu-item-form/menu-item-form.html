@@ -30,6 +30,18 @@
   </section>
 
   <section class="menu-item-form__section">
+    <h4 class="menu-item-form__section-title">Imagen</h4>
+
+    <app-menu-image-picker
+      [currentUrl]="item()?.imageUrl ?? null"
+      [itemName]="form.controls.name.value"
+      [disabled]="saving()"
+      [progress]="uploadProgress()"
+      (changed)="onImageChanged($event)"
+    />
+  </section>
+
+  <section class="menu-item-form__section">
     <h4 class="menu-item-form__section-title">Categoría y precio</h4>
 
     <div class="menu-item-form__field">
@@ -142,7 +154,7 @@
         Cancelar
       </button>
       <button tuiButton type="submit" [disabled]="saving()" data-testid="submit-button">
-        {{ item ? 'Guardar cambios' : 'Crear platillo' }}
+        {{ item() ? 'Guardar cambios' : 'Crear platillo' }}
       </button>
     </div>
   </section>

@@ -202,7 +202,9 @@ status.
   (creación, listados, status, revisión), `payments` (Checkout Pro +
   webhook), `mcp` (2 tools), `notifications` (WebSocket gateway +
   WhatsApp), `storage` (ADR-028). Sin `PdfModule` todavía.
-- `apps/dashboard`: features `auth`, `menu`, `notifications` (campanita
+- `apps/dashboard`: features `auth`, `menu` (CRUD + imagen del platillo:
+  selector con vista previa y validación previa con las reglas de
+  shared-types, miniatura en la tabla), `notifications` (campanita
   con historial persistente) y `orders` (lista, detalle, status y
   revisión). El PDF del comprobante en el detalle queda para
   `feat/storage-images-receipts`.

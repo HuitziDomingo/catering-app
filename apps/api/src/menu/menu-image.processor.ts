@@ -1,8 +1,13 @@
 import { BadRequestException } from '@nestjs/common';
+import { MENU_IMAGE_MAX_BYTES } from '@catering-app/shared-types';
 import sharp from 'sharp';
 
-/** Tamaño máximo del archivo subido (lo aplica multer: excederlo es 413). */
-export const MAX_MENU_IMAGE_BYTES = 5 * 1024 * 1024;
+/**
+ * Tamaño máximo del archivo subido (lo aplica multer: excederlo es 413). La
+ * regla vive en shared-types porque el dashboard valida lo mismo antes de
+ * subir.
+ */
+export const MAX_MENU_IMAGE_BYTES = MENU_IMAGE_MAX_BYTES;
 
 /** Lado mayor máximo de la imagen guardada (ADR-028). */
 export const MENU_IMAGE_MAX_SIDE = 1200;

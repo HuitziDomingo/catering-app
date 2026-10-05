@@ -1,6 +1,7 @@
 <table class="menu-item-list">
   <thead>
     <tr>
+      <th class="menu-item-list__image-header"><span class="menu-item-list__sr-only">Imagen</span></th>
       <th>Nombre</th>
       <th>Categoría</th>
       <th class="menu-item-list__numeric">Precio</th>
@@ -12,6 +13,9 @@
   <tbody>
     @for (item of items(); track item.id) {
       <tr>
+        <td class="menu-item-list__image">
+          <app-menu-item-thumbnail [url]="item.imageUrl" [alt]="item.name" />
+        </td>
         <td class="menu-item-list__name">{{ item.name }}</td>
         <td>{{ categoryName(item.categoryId) }}</td>
         <td class="menu-item-list__numeric">{{ formatPrice(item.basePrice) }}</td>
@@ -38,7 +42,7 @@
       </tr>
     } @empty {
       <tr>
-        <td class="menu-item-list__empty" colspan="6">No hay platillos todavía.</td>
+        <td class="menu-item-list__empty" colspan="7">No hay platillos todavía.</td>
       </tr>
     }
   </tbody>

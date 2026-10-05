@@ -25,3 +25,4 @@ export * from './websocket/new-order-event';
 export * from './api/pagination';
 export * from './api/orders';
 export * from './api/payments';
+export * from './api/menu';

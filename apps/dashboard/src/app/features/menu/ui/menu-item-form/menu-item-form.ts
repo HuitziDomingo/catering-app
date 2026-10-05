@@ -3,9 +3,11 @@ import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Va
 import { TuiButton, TuiInput, type TuiDialogContext } from '@taiga-ui/core';
 import { TuiSwitch, TuiTextareaComponent } from '@taiga-ui/kit';
 import { injectContext } from '@taiga-ui/polymorpheus';
-import type { Observable } from 'rxjs';
+import { filter, map, type Observable, of, switchMap, tap } from 'rxjs';
 import type { CreateMenuItemDto, MenuCategory, MenuItem } from '@catering-app/shared-types';
 import { extractErrorMessage } from '../../../../core/http/extract-error-message';
+import type { MenuImageChange, MenuImageUploadEvent } from '../../util/menu-image';
+import { MenuImagePicker } from '../menu-image-picker/menu-image-picker';
 
 // servesMax debe ser >= servesMin (ver ADR-021, validación de rango).
 function servesRangeValidator(control: AbstractControl): ValidationErrors | null {
@@ -25,7 +27,10 @@ function servesRangeValidator(control: AbstractControl): ValidationErrors | null
 export interface MenuItemFormDialogData {
   readonly item: MenuItem | null;
   readonly categories: MenuCategory[];
-  readonly save: (dto: CreateMenuItemDto) => Observable<MenuItem>;
+  /** `id` null = crear; si no, actualizar ese platillo. */
+  readonly save: (dto: CreateMenuItemDto, id: string | null) => Observable<MenuItem>;
+  readonly uploadImage: (id: string, file: File) => Observable<MenuImageUploadEvent>;
+  readonly removeImage: (id: string) => Observable<MenuItem>;
 }
 
 /**
@@ -40,7 +45,14 @@ export interface MenuItemFormDialogData {
  */
 @Component({
   selector: 'app-menu-item-form',
-  imports: [ReactiveFormsModule, TuiButton, TuiInput, TuiSwitch, TuiTextareaComponent],
+  imports: [
+    ReactiveFormsModule,
+    TuiButton,
+    TuiInput,
+    TuiSwitch,
+    TuiTextareaComponent,
+    MenuImagePicker,
+  ],
   templateUrl: './menu-item-form.html',
   styleUrl: './menu-item-form.scss',
 })
@@ -49,9 +61,13 @@ export class MenuItemForm {
   protected readonly context = injectContext<TuiDialogContext<void, MenuItemFormDialogData>>();
 
   protected readonly categories = this.context.data.categories;
-  protected readonly item = this.context.data.item;
+  // Signal porque cambia si se crea el platillo y luego falla la imagen: el
+  // siguiente intento debe actualizar ese platillo, no crear otro.
+  protected readonly item = signal(this.context.data.item);
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
+  protected readonly uploadProgress = signal<number | null>(null);
+  private imageChange: MenuImageChange = { kind: 'keep' };
 
   protected readonly form = this.fb.nonNullable.group(
     {
@@ -67,7 +83,7 @@ export class MenuItemForm {
   );
 
   constructor() {
-    const current = this.item;
+    const current = this.item();
     if (current) {
       this.form.patchValue({
         name: current.name,
@@ -99,13 +115,57 @@ export class MenuItemForm {
 
     this.error.set(null);
     this.saving.set(true);
-    this.context.data.save(dto).subscribe({
-      next: () => this.context.completeWith(),
-      error: (err: unknown) => {
-        this.saving.set(false);
-        this.error.set(extractErrorMessage(err));
-      },
-    });
+    // La imagen se sube después de guardar porque un platillo nuevo todavía
+    // no tiene id (la API solo acepta la imagen en /menu/items/:id/image).
+    let savedItem = false;
+    this.context.data
+      .save(dto, this.item()?.id ?? null)
+      .pipe(
+        tap((saved) => {
+          savedItem = true;
+          this.item.set(saved);
+        }),
+        switchMap((saved) => this.applyImageChange(saved)),
+      )
+      .subscribe({
+        next: () => this.context.completeWith(),
+        error: (err: unknown) => {
+          this.saving.set(false);
+          this.uploadProgress.set(null);
+          const message = extractErrorMessage(err);
+          this.error.set(
+            savedItem
+              ? `El platillo se guardó, pero la imagen no se pudo actualizar: ${message}`
+              : message,
+          );
+        },
+      });
+  }
+
+  protected onImageChanged(change: MenuImageChange): void {
+    this.imageChange = change;
+  }
+
+  private applyImageChange(saved: MenuItem): Observable<unknown> {
+    const change = this.imageChange;
+    if (change.kind === 'remove') {
+      return this.context.data
+        .removeImage(saved.id)
+        .pipe(tap(() => (this.imageChange = { kind: 'keep' })));
+    }
+    if (change.kind === 'replace') {
+      this.uploadProgress.set(0);
+      return this.context.data.uploadImage(saved.id, change.file).pipe(
+        tap((event) => {
+          if (event.type === 'progress') {
+            this.uploadProgress.set(event.percent);
+          }
+        }),
+        filter((event) => event.type === 'done'),
+        map(() => (this.imageChange = { kind: 'keep' })),
+      );
+    }
+    return of(null);
   }
 
   protected cancel(): void {
