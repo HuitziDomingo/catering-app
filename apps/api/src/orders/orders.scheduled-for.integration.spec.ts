@@ -8,6 +8,7 @@ import { Order } from '../database/entities/order.entity';
 import { User } from '../database/entities/user.entity';
 import { NotificationGateway } from '../notifications/notification.gateway';
 import { WhatsAppService } from '../notifications/whatsapp/whatsapp.service';
+import { StorageService } from '../storage/storage.service';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
 import { SCHEDULED_FOR_IN_PAST_MESSAGE } from './scheduled-for.validation';
@@ -44,6 +45,7 @@ describe('POST /orders — scheduledFor futura (integration)', () => {
         { provide: NotificationGateway, useValue: { emitNewOrder: jest.fn() } },
         { provide: WhatsAppService, useValue: { sendMessage: jest.fn() } },
         { provide: ConfigService, useValue: { get: jest.fn() } },
+        { provide: StorageService, useValue: { getPublicUrl: jest.fn() } },
       ],
     })
       // Sin JWT real: el guard inyecta un cliente autenticado.

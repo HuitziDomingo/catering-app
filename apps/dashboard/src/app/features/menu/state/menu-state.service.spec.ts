@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import type { MenuCategory, MenuItem } from '@catering-app/shared-types';
 import { MenuDataAccessService } from '../data-access/menu-data-access.service';
 import { MenuStateService } from './menu-state.service';
@@ -35,6 +35,8 @@ describe('MenuStateService', () => {
     createItem: jest.Mock;
     updateItem: jest.Mock;
     deleteItem: jest.Mock;
+    uploadItemImage: jest.Mock;
+    removeItemImage: jest.Mock;
   };
   let state: MenuStateService;
 
@@ -45,6 +47,8 @@ describe('MenuStateService', () => {
       createItem: jest.fn(),
       updateItem: jest.fn(),
       deleteItem: jest.fn(),
+      uploadItemImage: jest.fn(),
+      removeItemImage: jest.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -117,5 +121,58 @@ describe('MenuStateService', () => {
 
     expect(dataAccess.deleteItem).toHaveBeenCalledWith(item.id);
     expect(state.items()).toEqual([]);
+  });
+
+  it('uploadItemImage() passes progress through and refreshes the list only when done', () => {
+    state.load();
+    const withImage: MenuItem = { ...item, imageUrl: 'http://storage.test/a.webp' };
+    const upload$ = new Subject<
+      { type: 'progress'; percent: number } | { type: 'done'; item: MenuItem }
+    >();
+    dataAccess.uploadItemImage.mockReturnValue(upload$);
+    dataAccess.findActiveItems.mockClear();
+    dataAccess.findActiveItems.mockReturnValue(of([withImage]));
+    const file = new File(['x'], 'a.png', { type: 'image/png' });
+    const seen: unknown[] = [];
+
+    state.uploadItemImage(item.id, file).subscribe((event) => seen.push(event));
+    upload$.next({ type: 'progress', percent: 40 });
+
+    expect(dataAccess.uploadItemImage).toHaveBeenCalledWith(item.id, file);
+    expect(dataAccess.findActiveItems).not.toHaveBeenCalled();
+
+    upload$.next({ type: 'done', item: withImage });
+
+    expect(seen).toEqual([
+      { type: 'progress', percent: 40 },
+      { type: 'done', item: withImage },
+    ]);
+    expect(state.items()).toEqual([withImage]);
+  });
+
+  it('removeItemImage() refreshes the list after removing', () => {
+    state.load();
+    dataAccess.removeItemImage.mockReturnValue(of(item));
+    dataAccess.findActiveItems.mockReturnValue(of([item]));
+    dataAccess.findActiveItems.mockClear();
+
+    state.removeItemImage(item.id).subscribe();
+
+    expect(dataAccess.removeItemImage).toHaveBeenCalledWith(item.id);
+    expect(dataAccess.findActiveItems).toHaveBeenCalledTimes(1);
+  });
+
+  it('load() cancels a previous load still in flight so a stale response cannot win', () => {
+    const stale$ = new Subject<MenuItem[]>();
+    const withImage: MenuItem = { ...item, imageUrl: 'http://storage.test/a.webp' };
+    dataAccess.findActiveItems.mockReturnValueOnce(stale$).mockReturnValueOnce(of([withImage]));
+
+    state.load();
+    state.load();
+    // La primera respuesta (sin imagen) llega tarde: ya no debe aplicarse.
+    stale$.next([item]);
+    stale$.complete();
+
+    expect(state.items()).toEqual([withImage]);
   });
 });

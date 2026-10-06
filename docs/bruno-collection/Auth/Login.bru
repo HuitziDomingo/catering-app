@@ -16,24 +16,39 @@ headers {
 
 body:json {
   {
-    "email": "cliente.prueba@example.com",
-    "password": "contrasena-segura-123"
+    "email": "{{loginEmail}}",
+    "password": "{{loginPassword}}"
   }
 }
 
 script:post-response {
-  bru.setVar("accessToken", res.body.accessToken);
-  bru.setVar("refreshToken", res.body.refreshToken);
+  // Guarda el par de tokens para el resto de la colección (auth: inherit en
+  // collection.bru). Variable runtime, no de entorno: no escribe tokens en
+  // environments/Local.bru, que está versionado.
+  if (res.status === 200 && res.body && res.body.accessToken) {
+    bru.setVar("token", res.body.accessToken);
+    bru.setVar("refreshToken", res.body.refreshToken);
+  }
+}
+
+tests {
+  test("login 200 y devuelve accessToken", function () {
+    expect(res.status).to.equal(200);
+    expect(res.body.accessToken).to.be.a("string");
+  });
 }
 
 docs {
-  Autentica un usuario existente. Guarda `accessToken`/`refreshToken` como
+  Autentica un usuario existente. Guarda `token`/`refreshToken` como
   variables runtime -- todas las demás requests de la colección heredan
-  este accessToken automáticamente (auth: inherit → Bearer, ver
+  este `token` automáticamente (auth: inherit → Bearer, ver
   collection.bru).
 
-  Ajustá email/password a una cuenta real: la que creaste con
-  **Auth > Register**, o cualquiera que ya uses en la app.
+  Email y contraseña salen de las variables `loginEmail`/`loginPassword`
+  del environment (vienen con la cuenta de ejemplo de **Auth > Register**).
+  Para los endpoints de staff (Menu > escritura, Orders > gestión) cambialas
+  a una cuenta staff/admin/superadmin **solo en tu copia local**: no
+  commitees contraseñas reales en `environments/Local.bru`.
 
   Límite: 5 requests/min por IP.
 }

@@ -3,7 +3,7 @@ auth {
 }
 
 auth:bearer {
-  token: {{accessToken}}
+  token: {{token}}
 }
 
 docs {
@@ -14,9 +14,10 @@ docs {
   ## Auth compartido
 
   Todas las requests heredan (`auth: inherit`) este Bearer token de la
-  variable **runtime** `accessToken`, poblada automáticamente por
+  variable **runtime** `token`, poblada automáticamente por
   `Auth > Login` (o `Auth > Register`). Las requests públicas (Register,
-  Login, Refresh, Payments > Webhook) declaran `auth: none` explícitamente.
+  Login, Refresh, Menu > List Categories/Items, Payments > Webhook,
+  Payments > Payment Return, Health) declaran `auth: none` explícitamente.
 
   ## Por qué `bru.setVar` y no `bru.setEnvVar`
 

@@ -1,0 +1,44 @@
+meta {
+  name: Payment Return
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/payments/return/success?external_reference={{orderId}}&status=approved
+  body: none
+  auth: none
+}
+
+params:query {
+  external_reference: {{orderId}}
+  status: approved
+}
+
+settings {
+  encodeUrl: true
+  followRedirects: false
+}
+
+tests {
+  test("302 al deep link de la app", function () {
+    expect(res.status).to.equal(302);
+    expect(res.headers.location).to.match(/orderId=/);
+  });
+}
+
+docs {
+  back_url de Checkout Pro (addendum 01 de ADR-024). Público, sin JWT: lo
+  abre el navegador del cliente al volver de Mercado Pago.
+
+  - `:result` en la URL: `success`, `failure` o `pending` (otro valor: 400).
+  - Responde **302** al deep link de la app:
+    `${MOBILE_PAYMENT_RETURN_URL}/{result}?orderId=...&paymentStatus=...`
+    (default `mobile://payment`). El destino sale de configuración, nunca
+    de la query.
+  - Es solo navegación: el status real del pedido lo fija el webhook y la
+    app lo re-consulta con `GET /orders/:id`.
+
+  `followRedirects: false` para ver el 302 y su header `Location` en vez de
+  que Bruno intente abrir `mobile://...`.
+}

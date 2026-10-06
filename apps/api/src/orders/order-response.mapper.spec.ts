@@ -1,6 +1,13 @@
 import { Order } from '../database/entities/order.entity';
 import { toOrderResponse } from './order-response.mapper';
 
+// La URL pública la arma el almacenamiento (ADR-028); aquí basta un stub.
+const storage = {
+  getPublicUrl: jest.fn(
+    (bucket: string, key: string) => `http://storage.test/${bucket}/${key}`,
+  ),
+};
+
 describe('toOrderResponse', () => {
   const baseOrder = {
     id: 'order-1',
@@ -36,13 +43,19 @@ describe('toOrderResponse', () => {
         quantity: 2,
         unitPrice: '625.25',
         subtotal: '1250.50',
-        menuItem: { id: 'item-1', name: 'Chilaquiles', basePrice: '700.00' },
+        menuItem: {
+          id: 'item-1',
+          name: 'Chilaquiles',
+          basePrice: '700.00',
+          isActive: true,
+          imageKey: 'menu-items/item-1/abc.webp',
+        },
       },
     ],
   } as unknown as Order;
 
   it('convierte los numeric (string del driver pg) a number, también en las líneas', () => {
-    const dto = toOrderResponse(baseOrder);
+    const dto = toOrderResponse(baseOrder, storage);
 
     expect(dto.subtotal).toBe(1250.5);
     expect(dto.total).toBe(1250.5);
@@ -51,6 +64,8 @@ describe('toOrderResponse', () => {
       orderId: 'order-1',
       menuItemId: 'item-1',
       menuItemName: 'Chilaquiles',
+      menuItemImageUrl:
+        'http://storage.test/menuImages/menu-items/item-1/abc.webp',
       quantity: 2,
       unitPrice: 625.25,
       subtotal: 1250.5,
@@ -58,11 +73,11 @@ describe('toOrderResponse', () => {
   });
 
   it('el unitPrice es el snapshot de la línea, no el basePrice vigente del platillo', () => {
-    expect(toOrderResponse(baseOrder).items[0].unitPrice).toBe(625.25);
+    expect(toOrderResponse(baseOrder, storage).items[0].unitPrice).toBe(625.25);
   });
 
   it('solo expone el resumen del cliente: nunca passwordHash ni roleId', () => {
-    const dto = toOrderResponse(baseOrder);
+    const dto = toOrderResponse(baseOrder, storage);
 
     expect(dto.customer).toEqual({
       id: 'customer-1',
@@ -75,7 +90,7 @@ describe('toOrderResponse', () => {
   });
 
   it('incluye el detalle del pago', () => {
-    const dto = toOrderResponse(baseOrder);
+    const dto = toOrderResponse(baseOrder, storage);
 
     expect(dto.paymentId).toBe('123');
     expect(dto.paymentMethod).toBe('visa');
@@ -83,20 +98,66 @@ describe('toOrderResponse', () => {
   });
 
   it('sin relaciones cargadas devuelve customer null, items [] y campos de pago null', () => {
-    const dto = toOrderResponse({
-      ...baseOrder,
-      customer: undefined,
-      items: undefined,
-      paymentPreferenceId: undefined,
-      paymentId: undefined,
-      paymentMethod: undefined,
-      paidAt: undefined,
-    } as unknown as Order);
+    const dto = toOrderResponse(
+      {
+        ...baseOrder,
+        customer: undefined,
+        items: undefined,
+        paymentPreferenceId: undefined,
+        paymentId: undefined,
+        paymentMethod: undefined,
+        paidAt: undefined,
+      } as unknown as Order,
+      storage,
+    );
 
     expect(dto.customer).toBeNull();
     expect(dto.items).toEqual([]);
     expect(dto.paymentPreferenceId).toBeNull();
     expect(dto.paymentId).toBeNull();
     expect(dto.paidAt).toBeNull();
+  });
+
+  describe('menuItemImageUrl', () => {
+    const withMenuItem = (menuItem: Record<string, unknown> | undefined) =>
+      ({
+        ...baseOrder,
+        items: [{ ...baseOrder.items[0], menuItem }],
+      }) as unknown as Order;
+
+    it('es null, sin error, si el platillo está dado de baja aunque conserve su imagen', () => {
+      const dto = toOrderResponse(
+        withMenuItem({
+          id: 'item-1',
+          name: 'Chilaquiles',
+          isActive: false,
+          imageKey: 'menu-items/item-1/abc.webp',
+        }),
+        storage,
+      );
+
+      expect(dto.items[0].menuItemImageUrl).toBeNull();
+      expect(dto.items[0].menuItemName).toBe('Chilaquiles');
+    });
+
+    it('es null si el platillo no tiene imagen', () => {
+      const dto = toOrderResponse(
+        withMenuItem({
+          id: 'item-1',
+          name: 'Chilaquiles',
+          isActive: true,
+          imageKey: null,
+        }),
+        storage,
+      );
+
+      expect(dto.items[0].menuItemImageUrl).toBeNull();
+    });
+
+    it('es null si la relación menuItem no viene cargada', () => {
+      const dto = toOrderResponse(withMenuItem(undefined), storage);
+
+      expect(dto.items[0].menuItemImageUrl).toBeNull();
+    });
   });
 });

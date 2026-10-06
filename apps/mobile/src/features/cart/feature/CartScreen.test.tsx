@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { fireEvent } from '@testing-library/react-native';
 import { renderWithProviders } from '../../../test-utils';
+import { useMenuStore } from '../../menu/state/useMenuStore';
 import { useCartStore } from '../state/useCartStore';
 import { CartScreen } from './CartScreen';
 
@@ -26,6 +27,8 @@ const tamales = { ...baseItem, id: 'item-b', name: 'Tamales', basePrice: 50, ser
 
 beforeEach(() => {
   useCartStore.setState({ lines: [], submitStatus: 'idle', submitError: null, lastOrder: null });
+  // Menú ya cargado: CartScreen solo lo pide si está en 'idle'.
+  useMenuStore.setState({ items: [], status: 'success' });
   jest.clearAllMocks();
 });
 
@@ -68,4 +71,30 @@ test('"Continuar" lleva al checkout', () => {
   fireEvent.press(utils.getByTestId('cart-checkout'));
 
   expect(mockPush).toHaveBeenCalledWith('/carrito/checkout');
+});
+
+test('la imagen de cada línea sale del menú vigente, no de la URL guardada al agregar', () => {
+  useCartStore
+    .getState()
+    .addItem({ ...chilaquiles, imageUrl: 'http://storage.test/vieja.webp' }, 1);
+  useMenuStore.setState({
+    items: [{ ...chilaquiles, imageUrl: 'http://storage.test/nueva.webp' }],
+    status: 'success',
+  });
+
+  const utils = renderWithProviders(<CartScreen />);
+
+  expect(utils.getByTestId('cart-line-item-a-image-img').props.source).toEqual({
+    uri: 'http://storage.test/nueva.webp',
+  });
+});
+
+test('con un carrito guardado y el menú sin cargar, pide el menú', () => {
+  const load = jest.fn().mockResolvedValue(undefined);
+  useMenuStore.setState({ items: [], status: 'idle', load });
+  useCartStore.getState().addItem(chilaquiles, 1);
+
+  renderWithProviders(<CartScreen />);
+
+  expect(load).toHaveBeenCalledTimes(1);
 });

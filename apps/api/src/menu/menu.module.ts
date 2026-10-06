@@ -3,12 +3,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MenuCategory } from '../database/entities/menu-category.entity';
 import { MenuItem } from '../database/entities/menu-item.entity';
 import { MenuItemPriceHistory } from '../database/entities/menu-item-price-history.entity';
+import { StorageModule } from '../storage/storage.module';
 import { MenuController } from './menu.controller';
 import { MenuService } from './menu.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([MenuCategory, MenuItem, MenuItemPriceHistory]),
+    StorageModule,
   ],
   controllers: [MenuController],
   providers: [MenuService],

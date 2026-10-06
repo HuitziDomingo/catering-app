@@ -1,0 +1,44 @@
+meta {
+  name: List Orders (staff)
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/orders
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~status: pending,confirmed
+  ~from: 2026-10-01T00:00:00.000Z
+  ~to: 2026-12-31T23:59:59.999Z
+  ~needsReview: true
+  ~createdSince: 2026-10-01T00:00:00.000Z
+  ~sort: scheduledFor
+  ~direction: asc
+  ~page: 1
+  ~pageSize: 20
+}
+
+docs {
+  Lista de pedidos del dashboard (ADR-027). Requiere rol
+  staff/admin/superadmin (403 para customer).
+
+  Filtros opcionales (todos deshabilitados por default, prefijo `~`;
+  habilítalos en el panel de params):
+  - `status`: uno o varios, separados por coma.
+  - `from` / `to`: fecha del **evento** (`scheduledFor`), ISO 8601
+    inclusive.
+  - `needsReview`: `true` para ver solo pedidos fuera del rango
+    serves_min/serves_max (ADR-021, ADR-023).
+  - `createdSince`: creados después de esta fecha (lo usa la campanita del
+    dashboard).
+  - `sort`: `scheduledFor` o `createdAt` (default); `direction`: `asc` o
+    `desc` (default).
+  - `page` / `pageSize` (máx. 100).
+
+  Cada pedido trae `customer` resumido (sin password_hash), `paymentId`,
+  `paymentMethod`, `paidAt` y `items[].menuItemName`.
+}

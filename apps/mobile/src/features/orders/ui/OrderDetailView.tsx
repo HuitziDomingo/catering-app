@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Card, Text, useTheme } from '@ui-kitten/components';
 import type { OrderDetail } from '@catering-app/shared-types';
+import { DishImage } from '../../../core/ui/DishImage';
 import { formatCurrency } from '../../../core/ui/formatCurrency';
 import { formatPaymentMethod } from '../util/orderStatus';
 import { OrderStatusBadge } from './OrderStatusBadge';
@@ -41,7 +42,14 @@ export const OrderDetailView = ({ order }: OrderDetailViewProps) => {
 
       <View style={section}>
         {order.items.map((item) => (
-          <View key={item.id} style={styles.line}>
+          <View key={item.id} style={[styles.line, styles.itemLine]}>
+            <DishImage
+              uri={item.menuItemImageUrl}
+              style={styles.thumbnail}
+              iconSize={20}
+              accessibilityLabel={item.menuItemName}
+              testID={`order-detail-line-${item.id}-image`}
+            />
             <Text category="p2" style={styles.lineName}>
               {`${item.quantity} × ${item.menuItemName}`}
             </Text>
@@ -98,6 +106,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 8,
+  },
+  itemLine: {
+    alignItems: 'center',
+  },
+  thumbnail: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
   },
   lineName: {
     flex: 1,

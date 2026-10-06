@@ -1,0 +1,43 @@
+meta {
+  name: Update Order Status
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}/orders/{{orderId}}/status
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "status": "confirmed"
+  }
+}
+
+docs {
+  Cambio manual de status (ADR-027). Requiere rol staff/admin/superadmin.
+
+  El staff solo puede poner `confirmed`, `preparing`, `delivered` o
+  `cancelled` (400 con cualquier otro). La transición se valida contra
+  `ORDER_STATUS_TRANSITIONS` (shared-types):
+
+  | Desde | Hacia |
+  |---|---|
+  | pending | confirmed, payment_failed, cancelled |
+  | payment_failed | pending, confirmed, cancelled |
+  | confirmed | preparing, cancelled |
+  | preparing | delivered, cancelled |
+  | delivered / cancelled | (finales) |
+
+  Transición inválida: 409. Mismo status que ya tiene: no-op (200, sin
+  reenviar WhatsApp). `pending -> confirmed` manual cubre pagos por
+  transferencia o efectivo.
+
+  Usa `orderId` (lo deja Orders > Create Order).
+}

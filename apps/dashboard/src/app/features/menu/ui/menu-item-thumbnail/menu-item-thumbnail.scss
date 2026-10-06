@@ -1,0 +1,42 @@
+:host {
+  --thumbnail-size: 2.75rem;
+
+  display: inline-flex;
+  flex-shrink: 0;
+  inline-size: var(--thumbnail-size);
+  block-size: var(--thumbnail-size);
+  border-radius: var(--tui-radius-m);
+  overflow: hidden;
+  background: var(--tui-background-neutral-1);
+}
+
+:host([data-size='l']) {
+  --thumbnail-size: 8rem;
+
+  border-radius: var(--tui-radius-l);
+}
+
+.thumbnail__image {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.thumbnail__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  block-size: 100%;
+  color: var(--tui-text-tertiary);
+
+  svg {
+    inline-size: 50%;
+    block-size: 50%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}

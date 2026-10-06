@@ -1,104 +1,90 @@
 # Catering App API — colección Bruno
 
-Colección [Bruno](https://www.usebruno.com/) (formato `.bru` clásico,
-verificado contra el parser real de la app) con todos los endpoints de
-`apps/api`, organizados por dominio.
+Colección [Bruno](https://www.usebruno.com/) (formato `.bru` clásico) con
+todos los endpoints de `apps/api`, organizada por feature. La fuente de
+verdad son los controllers de la API (`apps/api/src/**/*.controller.ts`):
+si agregas o quitas un endpoint, actualiza también esta colección.
 
 ## Abrir la colección
 
-1. Instalá [Bruno](https://www.usebruno.com/downloads) (app de escritorio).
-2. **Open Collection** → seleccioná esta carpeta (`docs/bruno-collection/`).
-3. Arriba a la derecha, elegí el environment **Local** (ya viene
-   seleccionable; `baseUrl` apunta a `http://localhost:3000/api`).
-4. Arrancá la API (`pnpm nx serve api`, con Postgres corriendo vía
-   `docker compose up -d`) antes de mandar requests.
+1. Instala [Bruno](https://www.usebruno.com/downloads) (app de escritorio).
+2. **Open Collection** → selecciona esta carpeta (`docs/bruno-collection/`).
+3. Arriba a la derecha, elige el environment **Local** (`baseUrl` apunta a
+   `http://localhost:3000/api`).
+4. Levanta Postgres y el almacenamiento (`docker compose up -d`) y la API
+   (`pnpm nx serve api`) antes de mandar requests.
 
 ## Estructura
 
 ```
 docs/bruno-collection/
-  bruno.json          # raíz de la colección
-  collection.bru       # auth compartido (Bearer heredado) + docs de diseño
+  bruno.json            # raíz de la colección
+  collection.bru        # auth compartido (Bearer {{token}} heredado) + docs
   environments/
-    Local.bru           # baseUrl + placeholders documentados
-  Auth/                 # register, login, refresh, me
-  Menu/                 # categorías (lectura), platillos (CRUD)
-  Orders/               # crear pedido, consultar por id
-  MCP/                  # handshake JSON-RPC completo (1 a 5, correr en orden)
-  Payments/             # crear preferencia de pago; webhook documentado (no ejecutable)
+    Local.bru           # baseUrl, credenciales de ejemplo y variables vacías
+  fixtures/
+    platillo-ejemplo.jpg  # imagen generada para Menu > Upload Item Image
+  Auth/       register, login, refresh, me
+  Menu/       categorías y platillos (lectura pública), CRUD e imagen (staff)
+  Orders/     crear, ver, "mis pedidos"; lista, status y revisión (staff, ADR-027)
+  MCP/        handshake JSON-RPC completo (1 a 5, correr en orden)
+  Payments/   preferencia de Checkout Pro, webhook (documentado), back_url /return
+  Health/     GET /api
 ```
 
-## Cómo fluyen las variables (sin copiar/pegar tokens a mano)
+## Variables
 
-`Auth/Login` (y `Register`/`Refresh`) corren un script post-response que
-guarda `accessToken`/`refreshToken` como **variables runtime** (en memoria,
-via `bru.setVar`, no se escriben en `environments/Local.bru`). El resto de
-las requests heredan ese Bearer token automáticamente (`auth: inherit`,
-configurado una vez en `collection.bru`).
+| Variable | Quién la llena | Para qué |
+|---|---|---|
+| `baseUrl` | environment | `http://localhost:3000/api` |
+| `loginEmail` / `loginPassword` | environment | Cuenta de ejemplo que crea Auth > Register. **Cámbialas solo en tu copia local** para usar una cuenta staff; no commitees contraseñas reales. |
+| `token` / `refreshToken` | Auth > Login, Register, Refresh (script post-response) | Bearer que heredan todas las requests (`auth: inherit`) |
+| `categoryId` | Menu > List Categories (si está vacía) | Menu > Create Item |
+| `menuItemId` | Menu > List Items (si está vacía) | Platillo activo para Orders y MCP |
+| `createdMenuItemId` | Menu > Create Item | Platillo de prueba para Update, imagen y Delete |
+| `orderId` | Orders > Create Order | Get Order, status, review, Create Preference, Payment Return |
+| `mcpSessionId` | MCP > 1 - Initialize | Header `Mcp-Session-Id` del resto del handshake |
+| `checkoutUrl` | Payments > Create Preference | URL de Checkout Pro para pagar en el navegador |
 
-Mismo patrón para encadenar pedidos y pagos:
+Los scripts usan `bru.setVar` (variable **runtime**, en memoria) y no
+`bru.setEnvVar`: así nunca se escriben tokens en `environments/Local.bru`,
+que está versionado.
+
+## Flujo típico
 
 ```
-Auth/Login  →  Orders/Create Order  →  Payments/Create Preference
-   (accessToken)      (orderId)              (checkoutUrl)
+Auth/Login → Menu/List Items → Orders/Create Order → Payments/Create Preference
+  (token)       (menuItemId)        (orderId)              (checkoutUrl)
 ```
 
-`Create Order` guarda el `id` del pedido creado en la variable runtime
-`orderId`; `Create Preference` la usa directamente en el body. Para correr
-esta secuencia:
-
-- **A mano**: abrí Login → Send, después Create Order → Send, después
-  Create Preference → Send, en ese orden (mismo tab de la app, para que las
-  variables runtime persistan).
-- **Con el Runner** (ícono de "Run" en la colección): seleccioná Auth >
-  Login, Orders > Create Order y Payments > Create Preference (o corré la
-  carpeta completa) y ejecutá -- corren en el orden dado por `seq`.
-- **Por CLI** (`@usebruno/cli`, `npx @usebruno/cli run ...`): pasá los
-  archivos en el orden deseado en un solo comando, ej.:
+- **A mano**: manda los requests en ese orden (mismo tab de la app, para
+  que las variables runtime persistan).
+- **Con el Runner**: corre la colección o una carpeta; el orden lo da `seq`.
+- **Por CLI** (`@usebruno/cli`):
   ```
-  npx @usebruno/cli run "Auth/Login.bru" "Orders/Create Order.bru" \
-    "Payments/Create Preference.bru" --env Local
+  npx @usebruno/cli run "Auth/Login.bru" "Menu/List Items.bru" \
+    "Orders/Create Order.bru" "Payments/Create Preference.bru" --env Local
   ```
-  (cada invocación de `bru run` es un proceso nuevo -- las variables
-  runtime solo persisten *dentro* de un mismo comando, no entre comandos
-  separados).
+  Las variables runtime solo viven dentro de un mismo comando.
 
-## Variables que necesitás setear a mano al menos una vez
+## Requests que necesitan rol staff/admin/superadmin
 
-- `menuItemId`: no hay endpoint para crear categorías, así que necesitás un
-  `menuItemId` real para Orders/Create Order, MCP > Crear Pedido, y
-  Menu > Update/Delete Item. Corré `Menu > List Items` y copiá un `id` a la
-  variable de entorno `menuItemId` (o usá `Menu > Create Item` si tu
-  usuario tiene rol staff/admin/superadmin -- el registro público siempre
-  crea rol "customer").
-- `categoryId`: igual, sacalo de `Menu > List Categories` si querés usar
-  `Menu > Create Item`.
+Menu > Create/Update/Delete Item y Upload/Remove Item Image; Orders > List
+Orders (staff), Update Order Status y Review Order. Con la cuenta de
+ejemplo (rol `customer`) responden 403, que es lo esperado. Para probarlos,
+cambia `loginEmail`/`loginPassword` en tu copia local a una cuenta staff.
 
-## MCP: no es REST
+## Notas por feature
 
-`POST /mcp` habla JSON-RPC 2.0 sobre Streamable HTTP (protocolo MCP real,
-mismo que usa el chat de la app móvil), no un contrato REST. La carpeta
-`MCP/` tiene el handshake completo numerado (1 - Initialize hasta
-5 - Crear Pedido) -- corré esas 5 requests **en orden**, comparten una
-sesión (`Mcp-Session-Id`, capturada automáticamente del header de
-respuesta del paso 1). Ver `MCP/folder.bru` para el detalle.
-
-## Payments/Webhook: documentado, no ejecutable con datos falsos
-
-`Payments/Webhook (no correr manualmente).bru` existe para que el
-catálogo de endpoints esté completo, pero **no tiene sentido correrlo a
-mano**: el handler valida la firma HMAC contra `MERCADOPAGO_WEBHOOK_SECRET`
-y además siempre re-consulta el pago real contra la API de Mercado Pago
-(nunca confía en el payload del webhook, ver ADR-024) -- un `data.id`
-inventado falla en cualquiera de los dos pasos. Ver los docs de ese
-request, y la sección "Pagos (Mercado Pago)" del README raíz del repo,
-para cómo probar el flujo completo de verdad (con ngrok + una tarjeta de
-prueba de Mercado Pago).
-
-## Validado contra la API real
-
-Toda la colección (las 15 requests ejecutables, sin contar el webhook
-documentado) corrió exitosamente vía `@usebruno/cli` contra
-`apps/api` en local antes de commitear esto, incluyendo la cadena completa
-Login → Create Order → Create Preference (con un `checkoutUrl` real de
-Mercado Pago de vuelta) y el handshake MCP de 5 pasos.
+- **Menu > imagen (ADR-028):** multipart con un solo archivo en el campo
+  `image` (JPG, PNG o WebP, máx. 5 MB). La base guarda `image_key`; las
+  respuestas traen `imageUrl`. `imageUrl` ya no se acepta en Create/Update
+  Item.
+- **MCP no es REST:** `POST /mcp` habla JSON-RPC 2.0 sobre Streamable HTTP.
+  Corre `MCP/1` a `MCP/5` en orden: comparten el `Mcp-Session-Id` del paso 1.
+  Las respuestas llegan como Server-Sent Events.
+- **Payments > Webhook:** documentado, no simulable con datos inventados
+  (firma HMAC real + re-consulta del pago a Mercado Pago, ADR-024). Ver
+  los docs del request.
+- **Payments > Payment Return:** `followRedirects: false` para ver el 302
+  al deep link de la app (`mobile://payment/...`).

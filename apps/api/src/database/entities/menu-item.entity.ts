@@ -52,8 +52,10 @@ export class MenuItem {
   @Column({ type: 'jsonb', default: {} })
   attributes!: Record<string, unknown>;
 
-  @Column({ name: 'image_url', type: 'varchar', length: 500, nullable: true })
-  imageUrl?: string | null;
+  // Llave del objeto en el bucket de imágenes, no la URL (ver ADR-028): la
+  // URL pública se arma en cada respuesta (menu-item-response.mapper.ts).
+  @Column({ name: 'image_key', type: 'varchar', length: 500, nullable: true })
+  imageKey?: string | null;
 
   @Column({ name: 'is_active', type: 'boolean', default: true })
   @Index()

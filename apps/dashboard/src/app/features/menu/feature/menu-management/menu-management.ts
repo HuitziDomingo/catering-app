@@ -47,7 +47,11 @@ export class MenuManagement {
     const data: MenuItemFormDialogData = {
       item,
       categories: this.state.categories(),
-      save: (dto) => (item ? this.state.updateItem(item.id, dto) : this.state.createItem(dto)),
+      // El formulario manda el id vigente: si crea el platillo y falla la
+      // imagen, el reintento actualiza ese mismo platillo en vez de duplicarlo.
+      save: (dto, id) => (id ? this.state.updateItem(id, dto) : this.state.createItem(dto)),
+      uploadImage: (id, file) => this.state.uploadItemImage(id, file),
+      removeImage: (id) => this.state.removeItemImage(id),
     };
 
     this.dialogs

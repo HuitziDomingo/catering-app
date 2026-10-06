@@ -7,6 +7,7 @@ import { ROLES_KEY } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtPayload } from '../auth/jwt-payload.interface';
+import { StorageService } from '../storage/storage.service';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
 
@@ -37,7 +38,10 @@ describe('OrdersController', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [OrdersController],
-      providers: [{ provide: OrdersService, useValue: ordersService }],
+      providers: [
+        { provide: OrdersService, useValue: ordersService },
+        { provide: StorageService, useValue: { getPublicUrl: jest.fn() } },
+      ],
     }).compile();
 
     controller = module.get<OrdersController>(OrdersController);

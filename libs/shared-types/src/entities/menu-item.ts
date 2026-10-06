@@ -9,6 +9,8 @@ export interface MenuItem {
   servesMin: number;
   servesMax: number;
   attributes: Record<string, unknown>;
+  // URL pública armada por la API; se pone solo subiendo la imagen
+  // (POST /menu/items/:id/image, ADR-028), nunca en create/update.
   imageUrl: string | null;
   isActive: boolean;
   createdAt: string;
@@ -23,7 +25,6 @@ export interface CreateMenuItemDto {
   servesMin: number;
   servesMax: number;
   attributes?: Record<string, unknown>;
-  imageUrl?: string | null;
   isActive?: boolean;
 }
 
@@ -35,6 +36,5 @@ export interface UpdateMenuItemDto {
   servesMin?: number;
   servesMax?: number;
   attributes?: Record<string, unknown>;
-  imageUrl?: string | null;
   isActive?: boolean;
 }

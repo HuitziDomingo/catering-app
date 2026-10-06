@@ -1,0 +1,42 @@
+meta {
+  name: Upload Item Image
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/menu/items/{{createdMenuItemId}}/image
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  image: @file(fixtures/platillo-ejemplo.jpg)
+}
+
+
+docs {
+  Sube o reemplaza la imagen de un platillo (ADR-028). Requiere rol
+  staff/admin/superadmin. Usa `createdMenuItemId` (el platillo de prueba de
+  Create Item); para otro platillo, setéala a mano.
+
+  - Multipart con **un solo archivo en el campo `image`**. Bruno manda el
+    `Content-Type: multipart/form-data` con su boundary solo; no lo pongas
+    a mano.
+  - JPG, PNG o WebP de máximo 5 MB (y 40 megapíxeles). El formato se
+    valida por el contenido, no por la extensión.
+  - La API la convierte a webp de máx. 1200 px, sin metadatos, y la guarda
+    en el bucket `menu-images` con una llave nueva. La imagen anterior se
+    borra.
+  - La base guarda la llave (`menu_items.image_key`); la respuesta trae
+    `imageUrl` armada con `STORAGE_PUBLIC_URL`. La llave nunca sale de la API.
+
+  Errores (en español): 400 si no es imagen válida, si falta el archivo o
+  si llega en otro campo; 413 "La imagen excede el tamaño máximo de 5 MB.";
+  404 si el platillo no existe.
+
+  Necesita el almacenamiento local levantado (`docker compose up -d`,
+  SeaweedFS en :8333) y las variables `STORAGE_*` en `apps/api/.env`.
+  `fixtures/platillo-ejemplo.jpg` es una imagen generada, cámbiala por la
+  que quieras probar.
+}

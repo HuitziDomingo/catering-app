@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
-import { Icon, Text, useTheme } from '@ui-kitten/components';
+import React from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Text, useTheme } from '@ui-kitten/components';
 import type { MenuItem } from '@catering-app/shared-types';
+import { DishImage } from '../../../core/ui/DishImage';
 import { formatServesRange } from '../util/formatServesRange';
 
 type MenuItemCardProps = {
@@ -19,10 +20,6 @@ const currencyFormatter = new Intl.NumberFormat('es-MX', {
 // store directamente.
 export const MenuItemCard = ({ item, onPress }: MenuItemCardProps) => {
   const theme = useTheme();
-  // menu_items.image_url es opcional (ADR-006) y puede fallar en runtime
-  // (URL rota, sin conexión) -- en ambos casos se cae al placeholder.
-  const [imageFailed, setImageFailed] = useState(false);
-  const showImage = Boolean(item.imageUrl) && !imageFailed;
 
   return (
     <Pressable
@@ -30,26 +27,14 @@ export const MenuItemCard = ({ item, onPress }: MenuItemCardProps) => {
       onPress={() => onPress?.(item)}
       style={[styles.card, { backgroundColor: theme['background-basic-color-1'] }]}
     >
-      {showImage ? (
-        <Image
-          testID="menu-item-image"
-          source={{ uri: item.imageUrl as string }}
-          style={styles.image}
-          resizeMode="cover"
-          onError={() => setImageFailed(true)}
-        />
-      ) : (
-        <View
-          testID="menu-item-image-placeholder"
-          style={[styles.image, { backgroundColor: theme['background-basic-color-3'] }]}
-        >
-          <Icon
-            name="image-outline"
-            fill={theme['text-hint-color']}
-            style={styles.placeholderIcon}
-          />
-        </View>
-      )}
+      {/* Sin imagen o si falla la carga, DishImage muestra el placeholder. */}
+      <DishImage
+        uri={item.imageUrl}
+        style={styles.image}
+        iconSize={36}
+        accessibilityLabel={item.name}
+        testID="menu-item-image"
+      />
 
       <View style={styles.body}>
         <Text category="h6" numberOfLines={2}>
@@ -94,10 +79,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  placeholderIcon: {
-    width: 36,
-    height: 36,
   },
   body: {
     paddingHorizontal: 16,

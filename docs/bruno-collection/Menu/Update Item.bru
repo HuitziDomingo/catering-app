@@ -5,7 +5,7 @@ meta {
 }
 
 patch {
-  url: {{baseUrl}}/menu/items/{{menuItemId}}
+  url: {{baseUrl}}/menu/items/{{createdMenuItemId}}
   body: json
   auth: inherit
 }
@@ -26,6 +26,9 @@ docs {
   campos de UpdateMenuItemDto es válido -- este ejemplo solo cambia el
   precio.
 
-  Usa `menuItemId` (variable runtime poblada por Menu > Create Item, o
-  seteala a mano con un id existente).
+  Usa `createdMenuItemId` (variable runtime poblada por Menu > Create
+  Item; para editar otro platillo, setéala a mano con su id).
+
+  `imageUrl` ya no se acepta aquí (ADR-028): la imagen solo se cambia con
+  **Menu > Upload Item Image** / **Remove Item Image**.
 }

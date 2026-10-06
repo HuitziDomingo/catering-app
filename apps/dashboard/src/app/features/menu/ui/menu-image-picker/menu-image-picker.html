@@ -1,0 +1,78 @@
+<div class="image-picker">
+  <app-menu-item-thumbnail size="l" [url]="displayedUrl()" [alt]="itemName()" />
+
+  <div class="image-picker__controls">
+    <input
+      #fileInput
+      class="image-picker__input"
+      type="file"
+      [accept]="accept"
+      data-testid="image-file-input"
+      (change)="onFileSelected($event)"
+    />
+
+    <div class="image-picker__buttons">
+      <button
+        tuiButton
+        type="button"
+        size="s"
+        appearance="secondary"
+        data-testid="image-choose-button"
+        [disabled]="disabled()"
+        (click)="fileInput.click()"
+      >
+        {{ displayedUrl() ? 'Reemplazar' : 'Elegir imagen' }}
+      </button>
+      @if (displayedUrl()) {
+        <button
+          tuiButton
+          type="button"
+          size="s"
+          appearance="outline-destructive"
+          data-testid="image-remove-button"
+          [disabled]="disabled()"
+          (click)="remove()"
+        >
+          Quitar
+        </button>
+      }
+      @if (change().kind !== 'keep') {
+        <button
+          tuiButton
+          type="button"
+          size="s"
+          appearance="flat"
+          data-testid="image-undo-button"
+          [disabled]="disabled()"
+          (click)="undo()"
+        >
+          Deshacer
+        </button>
+      }
+    </div>
+
+    <p class="image-picker__hint">JPG, PNG o WebP, máximo 5 MB.</p>
+
+    @switch (change().kind) {
+      @case ('replace') {
+        <p class="image-picker__pending" data-testid="image-pending">Se subirá al guardar.</p>
+      }
+      @case ('remove') {
+        <p class="image-picker__pending" data-testid="image-pending">Se quitará al guardar.</p>
+      }
+    }
+
+    @if (progress() !== null) {
+      <div class="image-picker__progress" data-testid="image-progress">
+        <progress tuiProgressBar size="s" max="100" [value]="progress()"></progress>
+        <span>Subiendo imagen… {{ progress() }}%</span>
+      </div>
+    }
+
+    @if (error()) {
+      <div tuiNotification appearance="negative" size="s" data-testid="image-error">
+        {{ error() }}
+      </div>
+    }
+  </div>
+</div>

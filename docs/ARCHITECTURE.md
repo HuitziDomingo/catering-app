@@ -42,6 +42,7 @@ más tools MCP (reportes automáticos). Crear pedidos vía agente ya existe
 | Generación de PDF | pdfkit, dentro de un `PdfModule` del backend NestJS — **pendiente** (rama `feat/storage-images-receipts`) | ADR-007 |
 | Notificaciones | WhatsApp vía Twilio (`WhatsAppService`) + WebSocket al dashboard | ADR-007, ADR-026 |
 | Pagos | Mercado Pago Checkout Pro | ADR-022, ADR-024 |
+| Almacenamiento de archivos | Supabase Storage (S3) en producción, SeaweedFS en desarrollo; procesado de imágenes con sharp | ADR-028 |
 | ORM | TypeORM | ADR-007 |
 | Estado (React Native) | Zustand (cliente) | ADR-007 |
 | Cliente HTTP (React Native) | axios | ADR-007 |
@@ -63,14 +64,22 @@ más tools MCP (reportes automáticos). Crear pedidos vía agente ya existe
 apps/
   dashboard/     # Angular + Taiga UI — panel de operación y super usuario
   mobile/        # React Native (Expo) + UI Kitten + Moti — app de clientes
-  api/           # NestJS: REST API + WebSocket Gateway + servidor MCP + PdfModule + AuthModule
+  api/           # NestJS: REST API + WebSocket Gateway + servidor MCP + AuthModule + StorageModule (PdfModule en progreso)
+  landing/       # Astro + Pico.css — página pública
 libs/
   shared-types/  # DTOs e interfaces TypeScript compartidas entre apps
 docs/
   adr/           # Decisiones de arquitectura (ADR-001 a ADR-012 y siguientes)
   ARCHITECTURE.md
+  architecture-diagram.html        # diagrama interactivo, generado con archify
+  architecture.architecture.json   # fuente del diagrama (se edita esto y se regenera)
   database-design.pdf
 ```
+
+El diagrama de `docs/architecture-diagram.html` se genera desde
+`docs/architecture.architecture.json` con la skill archify
+(`.claude/skills/archify`). Si un cambio altera la arquitectura, se
+actualiza el JSON y se regenera el HTML (ver `Claude.md`).
 
 ## Base de datos
 
@@ -98,6 +107,10 @@ atributos flexibles de menú, auditoría separada en tablas dedicadas
 Columnas agregadas a `orders` después de ADR-006: `needs_review`
 (ADR-023), `payment_preference_id` (ADR-024), y `payment_id`,
 `payment_method`, `paid_at` (ADR-027).
+
+`menu_items.image_url` (ADR-006) se renombró a `image_key` (ADR-028): la
+base guarda la llave del objeto y la API arma la URL pública en cada
+respuesta.
 
 ## Servidor MCP (`apps/api`)
 
@@ -154,6 +167,36 @@ Tampoco existe todavía la tabla `notifications`.
   "Pagado: reembolsar" en lista y detalle: el reembolso es manual en
   Mercado Pago.
 
+## Almacenamiento e imágenes del menú (ADR-028)
+
+- `StorageModule` (`apps/api/src/storage/`): puerto `StorageService`
+  (`putObject`, `deleteObject`, `getPublicUrl`, `getSignedUrl`) con un
+  adaptador S3. En local habla con SeaweedFS (`docker compose up -d`,
+  puerto 8333); en producción con el endpoint S3 de Supabase Storage.
+- Buckets: `menu-images` (lectura pública) y `order-documents` (privado,
+  URLs firmadas; lo usarán los recibos PDF).
+- Dos URLs configurables: `STORAGE_ENDPOINT` (lo que usa la API) y
+  `STORAGE_PUBLIC_URL` (lo que reciben dashboard y app). Para probar en
+  simulador, emulador o teléfono físico, ver la tabla de ADR-028 y
+  `apps/api/.env.example`.
+- `POST /menu/items/:id/image` (multipart, campo `image`, máx. 5 MB) y
+  `DELETE /menu/items/:id/image`, solo staff/admin/superadmin. sharp valida
+  el formato por contenido (jpg/png/webp), aplica la orientación EXIF,
+  quita metadatos y guarda webp de máx. 1200 px. Cada subida usa una llave
+  nueva y se borra la anterior.
+- La única forma de poner una imagen es subirla: `imageUrl` ya no se
+  acepta en `POST /menu/items` ni `PATCH /menu/items/:id`. Las respuestas
+  de menú pasan por `menu/menu-item-response.mapper.ts` (arma `imageUrl`,
+  `basePrice` como number).
+- Las líneas de pedido traen `menuItemImageUrl` (imagen vigente del
+  platillo; `null` si no tiene o está dado de baja), para las miniaturas
+  de "Mis pedidos".
+- Móvil: `core/ui/DishImage` (expo-image, caché en memoria y disco,
+  fundido al cargar, placeholder sin imagen o si falla) en menú, detalle,
+  carrito y "Mis pedidos". El carrito resuelve la imagen desde el menú
+  cargado por `menuItemId`; la URL guardada en la línea es solo respaldo,
+  porque al reemplazar una imagen la API borra el objeto viejo.
+
 ## Pagos (ADR-022, ADR-024)
 
 Checkout Pro: la API crea la preferencia (`POST /payments/preferences`) y
@@ -171,10 +214,13 @@ status.
 
 ## Estado actual
 
-- `apps/api`: `auth`, `menu`, `orders` (creación, listados, status,
-  revisión), `payments` (Checkout Pro + webhook), `mcp` (2 tools),
-  `notifications` (WebSocket gateway + WhatsApp). Sin `PdfModule` todavía.
-- `apps/dashboard`: features `auth`, `menu`, `notifications` (campanita
+- `apps/api`: `auth`, `menu` (incluye subir/quitar imagen), `orders`
+  (creación, listados, status, revisión), `payments` (Checkout Pro +
+  webhook), `mcp` (2 tools), `notifications` (WebSocket gateway +
+  WhatsApp), `storage` (ADR-028). Sin `PdfModule` todavía.
+- `apps/dashboard`: features `auth`, `menu` (CRUD + imagen del platillo:
+  selector con vista previa y validación previa con las reglas de
+  shared-types, miniatura en la tabla), `notifications` (campanita
   con historial persistente) y `orders` (lista, detalle, status y
   revisión). El PDF del comprobante en el detalle queda para
   `feat/storage-images-receipts`.

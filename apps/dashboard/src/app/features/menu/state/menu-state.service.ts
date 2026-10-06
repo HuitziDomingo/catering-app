@@ -1,5 +1,5 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { forkJoin, Observable, tap } from 'rxjs';
+import { forkJoin, Observable, Subscription, tap } from 'rxjs';
 import type {
   CreateMenuItemDto,
   MenuCategory,
@@ -8,6 +8,7 @@ import type {
 } from '@catering-app/shared-types';
 import { extractErrorMessage } from '../../../core/http/extract-error-message';
 import { MenuDataAccessService } from '../data-access/menu-data-access.service';
+import type { MenuImageUploadEvent } from '../util/menu-image';
 
 export type MenuStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -21,10 +22,16 @@ export class MenuStateService {
   readonly status = signal<MenuStatus>('idle');
   readonly error = signal<string | null>(null);
 
+  private loadSubscription?: Subscription;
+
   load(): void {
+    // Guardar un platillo y luego su imagen dispara dos recargas seguidas: se
+    // cancela la anterior para que una respuesta vieja que llegue tarde no
+    // pise la lista nueva (se vería el platillo sin su imagen recién subida).
+    this.loadSubscription?.unsubscribe();
     this.status.set('loading');
     this.error.set(null);
-    forkJoin([
+    this.loadSubscription = forkJoin([
       this.dataAccess.findActiveCategories(),
       this.dataAccess.findActiveItems(),
     ]).subscribe({
@@ -50,5 +57,19 @@ export class MenuStateService {
 
   deleteItem(id: string): Observable<void> {
     return this.dataAccess.deleteItem(id).pipe(tap(() => this.load()));
+  }
+
+  uploadItemImage(id: string, file: File): Observable<MenuImageUploadEvent> {
+    return this.dataAccess.uploadItemImage(id, file).pipe(
+      tap((event) => {
+        if (event.type === 'done') {
+          this.load();
+        }
+      }),
+    );
+  }
+
+  removeItemImage(id: string): Observable<MenuItem> {
+    return this.dataAccess.removeItemImage(id).pipe(tap(() => this.load()));
   }
 }

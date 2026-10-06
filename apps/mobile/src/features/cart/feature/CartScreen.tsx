@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Text, useTheme } from '@ui-kitten/components';
 import { useRouter } from 'expo-router';
 import { formatCurrency } from '../../../core/ui/formatCurrency';
+import { useMenuStore } from '../../menu/state/useMenuStore';
 import { selectSubtotal, useCartStore } from '../state/useCartStore';
 import { CartLineItem } from '../ui/CartLineItem';
+import { resolveCartLineImage } from '../util/resolveCartLineImage';
 
 // Pantalla del carrito (ADR-020): conecta useCartStore con las líneas de
 // ui/. El subtotal es un estimado con los precios al agregar; el total real
@@ -15,8 +17,21 @@ export const CartScreen = () => {
   const subtotal = useCartStore(selectSubtotal);
   const setQuantity = useCartStore((state) => state.setQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
+  const menuItems = useMenuStore((state) => state.items);
+  const menuStatus = useMenuStore((state) => state.status);
+  const loadMenu = useMenuStore((state) => state.load);
   const theme = useTheme();
   const router = useRouter();
+
+  // El carrito persiste entre aperturas de la app: si se abre directo aquí,
+  // el menú no está cargado y las imágenes guardadas pueden estar vencidas.
+  // Cargarlo trae las vigentes (resolveCartLineImage).
+  const hasLines = lines.length > 0;
+  useEffect(() => {
+    if (hasLines && menuStatus === 'idle') {
+      void loadMenu();
+    }
+  }, [hasLines, menuStatus, loadMenu]);
 
   return (
     <SafeAreaView
@@ -46,6 +61,7 @@ export const CartScreen = () => {
             renderItem={({ item: line }) => (
               <CartLineItem
                 line={line}
+                imageUrl={resolveCartLineImage(line, menuItems)}
                 onChangeQuantity={(quantity) => setQuantity(line.menuItemId, quantity)}
                 onRemove={() => removeItem(line.menuItemId)}
               />

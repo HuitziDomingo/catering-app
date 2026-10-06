@@ -57,6 +57,7 @@ const createdOrder = {
       orderId: 'order-1',
       menuItemId: 'item-a',
       menuItemName: 'Chilaquiles',
+      menuItemImageUrl: null,
       quantity: 2,
       unitPrice: 1500,
       subtotal: 3000,
