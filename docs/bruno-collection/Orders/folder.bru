@@ -6,7 +6,8 @@ meta {
 docs {
   Pedidos de catering (ver ADR-006, ADR-023, ADR-027).
 
-  - Cliente: Create Order, Get Order By Id, List My Orders.
+  - Cliente: Create Order, Get Order By Id, List My Orders y Get Order
+    Receipt (recibo PDF por URL firmada, ADR-028; staff también puede).
   - Staff/admin/superadmin: List Orders (filtros y paginación), Update
     Order Status y Review Order -- correr Auth > Login con una cuenta de
     ese rol.
@@ -16,9 +17,10 @@ docs {
   `paymentMethod`, `paidAt`) y, por línea, `menuItemName` y
   `menuItemImageUrl` (imagen vigente del platillo, ADR-028; `null` si no
   tiene imagen o si el platillo está dado de baja, nunca un error).
- Create Order guarda el id
-  del pedido creado en la variable runtime `orderId`, que usa tanto Get
-  Order By Id como Payments > Create Preference -- así podés correr
+
+  Create Order guarda el id
+  del pedido creado en la variable runtime `orderId`, que usan Get Order
+  By Id, Get Order Receipt y Payments > Create Preference -- así podés correr
   Login → Create Order → Create Preference en secuencia sin copiar nada a
   mano.
 }

@@ -43,7 +43,7 @@
           "objectstore",
           "pdf"
         ],
-        "note": "Imágenes del menú en bucket público; recibos PDF (en progreso) en bucket privado con URL firmada."
+        "note": "Imágenes del menú en bucket público; recibos PDF en bucket privado con URL firmada de 15 minutos."
       },
       {
         "id": "agente",
@@ -135,7 +135,7 @@
       "id": "pdf",
       "type": "backend",
       "label": "PdfModule",
-      "sublabel": "recibos · EN PROGRESO",
+      "sublabel": "recibos · pdfkit",
       "pos": [
         800,
         180
@@ -144,7 +144,7 @@
         170,
         64
       ],
-      "tag": "en progreso"
+      "tag": "order_documents"
     },
     {
       "id": "menu",
@@ -319,8 +319,13 @@
       "id": "pdf-storage",
       "from": "pdf",
       "to": "storage",
-      "label": "recibos",
-      "variant": "dashed"
+      "label": "recibos"
+    },
+    {
+      "id": "orders-pdf",
+      "from": "orders",
+      "to": "pdf",
+      "label": "al confirmar"
     },
     {
       "id": "orders-ws",
@@ -346,7 +351,8 @@
       "id": "payments-orders",
       "from": "payments",
       "to": "orders",
-      "label": "pago"
+      "label": "pago",
+      "labelDy": 12
     },
     {
       "id": "payments-mp",
@@ -402,15 +408,15 @@
       "items": [
         "Pedidos con transiciones validadas (ADR-027)",
         "Checkout Pro + webhook firmado + /payments/return",
-        "Imágenes en bucket público, recibos en privado (ADR-028)"
+        "Recibo PDF al confirmar, URL firmada 15 min (ADR-028)"
       ]
     },
     {
       "dot": "amber",
       "title": "Pendiente",
       "items": [
-        "PdfModule y order_documents: en progreso",
-        "WhatsApp vía Twilio: deshabilitado hasta tener cuenta"
+        "WhatsApp vía Twilio: deshabilitado hasta tener cuenta",
+        "WhatsApp aún no adjunta la URL del recibo"
       ]
     }
   ]
