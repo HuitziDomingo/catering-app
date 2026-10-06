@@ -13,6 +13,7 @@ import { Order } from '../database/entities/order.entity';
 import { User } from '../database/entities/user.entity';
 import { NotificationGateway } from '../notifications/notification.gateway';
 import { WhatsAppService } from '../notifications/whatsapp/whatsapp.service';
+import { ReceiptsService } from '../pdf/receipts.service';
 import { OrdersService } from './orders.service';
 import { SCHEDULED_FOR_IN_PAST_MESSAGE } from './scheduled-for.validation';
 
@@ -39,6 +40,7 @@ describe('OrdersService', () => {
   let notificationGateway: { emitNewOrder: jest.Mock };
   let whatsAppService: { sendMessage: jest.Mock };
   let config: { get: jest.Mock };
+  let receipts: { ensureReceipt: jest.Mock };
 
   const customerId = '11111111-1111-1111-1111-111111111111';
   const otherCustomerId = '99999999-9999-9999-9999-999999999999';
@@ -98,6 +100,8 @@ describe('OrdersService', () => {
       ),
     };
 
+    receipts = { ensureReceipt: jest.fn().mockResolvedValue({ id: 'doc-1' }) };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OrdersService,
@@ -106,6 +110,7 @@ describe('OrdersService', () => {
         { provide: NotificationGateway, useValue: notificationGateway },
         { provide: WhatsAppService, useValue: whatsAppService },
         { provide: ConfigService, useValue: config },
+        { provide: ReceiptsService, useValue: receipts },
       ],
     }).compile();
 
@@ -689,6 +694,67 @@ describe('OrdersService', () => {
       await expect(service.updateStatus(orderId, OrderStatus.CONFIRMED)).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  describe('updateStatus — recibo PDF al confirmar (ADR-028)', () => {
+    const pendingOrder = () =>
+      ({
+        id: orderId,
+        customerId,
+        status: OrderStatus.PENDING,
+        scheduledFor: new Date(FUTURE_EVENT_ISO),
+      }) as unknown as Order;
+
+    it('genera el recibo con el pedido completo cuando pasa a confirmed', async () => {
+      ordersRepo.findOne.mockResolvedValue(pendingOrder());
+
+      await service.updateStatus(orderId, OrderStatus.CONFIRMED);
+
+      expect(receipts.ensureReceipt).toHaveBeenCalledTimes(1);
+      expect(receipts.ensureReceipt).toHaveBeenCalledWith(
+        expect.objectContaining({ id: orderId, status: OrderStatus.CONFIRMED }),
+      );
+      // El recibo necesita líneas y cliente: se recarga con findDetailById.
+      expect(ordersRepo.findOne).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          relations: { items: { menuItem: true }, customer: true },
+        }),
+      );
+    });
+
+    it('no genera recibo en otros cambios de status', async () => {
+      ordersRepo.findOne.mockResolvedValue({ ...pendingOrder(), status: OrderStatus.CONFIRMED });
+
+      await service.updateStatus(orderId, OrderStatus.PREPARING);
+
+      expect(receipts.ensureReceipt).not.toHaveBeenCalled();
+    });
+
+    it('un fallo al generar el recibo no revierte la confirmación ni lanza', async () => {
+      ordersRepo.findOne.mockResolvedValue(pendingOrder());
+      receipts.ensureReceipt.mockRejectedValue(new Error('storage caído'));
+
+      const saved = await service.updateStatus(orderId, OrderStatus.CONFIRMED);
+
+      expect(saved.status).toBe(OrderStatus.CONFIRMED);
+      expect(ordersRepo.save).toHaveBeenCalledWith(
+        expect.objectContaining({ status: OrderStatus.CONFIRMED }),
+      );
+    });
+
+    it('el webhook de pago (recordPaymentResult) no falla si el recibo falla', async () => {
+      ordersRepo.findOne.mockResolvedValue(pendingOrder());
+      receipts.ensureReceipt.mockRejectedValue(new Error('pdf roto'));
+
+      await expect(
+        service.recordPaymentResult(orderId, OrderStatus.CONFIRMED, {
+          paymentId: '123',
+          paymentMethod: 'visa',
+          paidAt: new Date('2026-10-03T21:30:00.000Z'),
+        }),
+      ).resolves.toBeUndefined();
+      expect(receipts.ensureReceipt).toHaveBeenCalledTimes(1);
     });
   });
 

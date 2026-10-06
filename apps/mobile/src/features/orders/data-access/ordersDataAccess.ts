@@ -2,6 +2,7 @@ import type {
   CreateOrderDto,
   MyOrdersQuery,
   OrderDetail,
+  OrderReceiptResponse,
   Paginated,
 } from '@catering-app/shared-types';
 import { apiClient } from '../../../core/http/apiClient';
@@ -31,5 +32,14 @@ export async function fetchMyOrders(query: MyOrdersQuery = {}): Promise<Paginate
 /** GET /orders/:id (la API solo devuelve pedidos propios a un cliente). */
 export async function fetchOrder(orderId: string): Promise<OrderDetail> {
   const { data } = await apiClient.get<OrderDetail>(`/orders/${orderId}`);
+  return data;
+}
+
+/**
+ * GET /orders/:id/receipt: URL firmada (15 minutos) del recibo PDF. La API lo
+ * genera si el pedido está pagado y todavía no lo tiene (ADR-028).
+ */
+export async function fetchOrderReceipt(orderId: string): Promise<OrderReceiptResponse> {
+  const { data } = await apiClient.get<OrderReceiptResponse>(`/orders/${orderId}/receipt`);
   return data;
 }

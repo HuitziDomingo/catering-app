@@ -30,19 +30,5 @@ export function isPayable(status: OrderStatus): boolean {
   return status === OrderStatus.PENDING || status === OrderStatus.PAYMENT_FAILED;
 }
 
-const PAYMENT_METHOD_LABELS: Record<string, string> = {
-  visa: 'Visa',
-  master: 'Mastercard',
-  amex: 'American Express',
-  debvisa: 'Visa débito',
-  debmaster: 'Mastercard débito',
-  oxxo: 'OXXO',
-  spei: 'Transferencia SPEI',
-  account_money: 'Saldo de Mercado Pago',
-};
-
-/** payment_method_id de Mercado Pago → texto legible (o el id tal cual si no se conoce). */
-export function formatPaymentMethod(paymentMethod: string | null): string | null {
-  if (!paymentMethod) return null;
-  return PAYMENT_METHOD_LABELS[paymentMethod] ?? paymentMethod;
-}
+// Compartido con el recibo PDF de la API (mismas etiquetas en los dos lados).
+export { formatPaymentMethod } from '@catering-app/shared-types';

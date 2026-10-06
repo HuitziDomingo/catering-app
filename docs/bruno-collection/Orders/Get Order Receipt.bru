@@ -1,0 +1,42 @@
+meta {
+  name: Get Order Receipt
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/orders/{{orderId}}/receipt
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("200 con URL firmada de 15 minutos", function () {
+    expect(res.status).to.equal(200);
+    expect(res.body.url).to.include("X-Amz-Expires=900");
+    const minutes = (new Date(res.body.expiresAt) - Date.now()) / 60000;
+    expect(minutes).to.be.within(14, 15.1);
+  });
+}
+
+docs {
+  Recibo PDF del pedido (ADR-028). Responde `{ url, expiresAt }`: `url` es
+  una URL firmada del bucket privado `order-documents` que caduca a los 15
+  minutos. Se abre sin header Authorization (pegala en el navegador); pasado
+  ese tiempo, el almacenamiento responde 403 y hay que volver a pedirla.
+
+  Permisos: el cliente dueño del pedido, o staff/admin/superadmin. Otro
+  cliente recibe 403 (mismo criterio que Get Order By Id).
+
+  El recibo se genera solo al pasar el pedido a `confirmed` (webhook de
+  Mercado Pago o confirmación manual). Si eso falló, o el pedido se
+  confirmó antes de que existiera esta función, este request lo genera al
+  vuelo. Es idempotente: pedirlo varias veces no crea recibos nuevos.
+
+  - 409: el pedido no está pagado (pending o payment_failed).
+  - 404: el pedido no existe.
+
+  Usa `orderId` (variable runtime poblada por Create Order). Corré antes
+  Payments > Create Preference y pagá en el checkout, o confirmá el pedido
+  a mano con Update Order Status (cuenta staff).
+}

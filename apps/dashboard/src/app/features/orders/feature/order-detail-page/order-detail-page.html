@@ -125,8 +125,28 @@
             <dt>Aprobado</dt>
             <dd>{{ order.paidAt ? formatDateTime(order.paidAt) : 'No' }}</dd>
           </dl>
+        } @else if (hasReceipt()) {
+          <p class="order-detail__muted">Confirmado a mano (transferencia o efectivo).</p>
         } @else {
           <p class="order-detail__muted">Sin pago registrado.</p>
+        }
+        @if (hasReceipt()) {
+          <div class="order-detail__receipt">
+            <button
+              tuiButton
+              type="button"
+              size="s"
+              appearance="outline"
+              data-testid="receipt-button"
+              [disabled]="openingReceipt()"
+              (click)="openReceipt(order)"
+            >
+              {{ openingReceipt() ? 'Abriendo…' : 'Ver o descargar recibo (PDF)' }}
+            </button>
+            @if (receiptError()) {
+              <p class="order-detail__error" data-testid="receipt-error">{{ receiptError() }}</p>
+            }
+          </div>
         }
       </div>
     </div>

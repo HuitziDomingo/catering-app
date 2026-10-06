@@ -16,3 +16,23 @@ export interface PaymentPreferenceResponse {
 export type PaymentReturnResult = 'success' | 'failure' | 'pending';
 
 export const PAYMENT_RETURN_RESULTS: PaymentReturnResult[] = ['success', 'failure', 'pending'];
+
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  visa: 'Visa',
+  master: 'Mastercard',
+  amex: 'American Express',
+  debvisa: 'Visa débito',
+  debmaster: 'Mastercard débito',
+  oxxo: 'OXXO',
+  spei: 'Transferencia SPEI',
+  account_money: 'Saldo de Mercado Pago',
+};
+
+/**
+ * payment_method_id de Mercado Pago → texto legible (o el id tal cual si no
+ * se conoce). Lo usan la app (detalle del pedido) y el recibo PDF de la API.
+ */
+export function formatPaymentMethod(paymentMethod: string | null | undefined): string | null {
+  if (!paymentMethod) return null;
+  return PAYMENT_METHOD_LABELS[paymentMethod] ?? paymentMethod;
+}

@@ -20,6 +20,7 @@ import { Order } from '../database/entities/order.entity';
 import { OrderItem } from '../database/entities/order-item.entity';
 import { User } from '../database/entities/user.entity';
 import { NotificationGateway } from '../notifications/notification.gateway';
+import { ReceiptsService } from '../pdf/receipts.service';
 import { WhatsAppService } from '../notifications/whatsapp/whatsapp.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import {
@@ -86,6 +87,7 @@ export class OrdersService {
     private readonly notificationGateway: NotificationGateway,
     private readonly whatsAppService: WhatsAppService,
     private readonly config: ConfigService,
+    private readonly receipts: ReceiptsService,
   ) {}
 
   /**
@@ -400,6 +402,9 @@ export class OrdersService {
    * recordPaymentResult) y el reintento de pago. Pasar al mismo status que ya
    * tiene es un no-op -- Mercado Pago reenvía webhooks, y un duplicado no
    * debe volver a mandar el WhatsApp al cliente (ADR-026).
+   *
+   * Al pasar a confirmed (pago aprobado o confirmación manual) genera el
+   * recibo PDF (ADR-028).
    */
   async updateStatus(id: string, status: OrderStatus): Promise<Order> {
     const order = await this.findById(id);
@@ -420,7 +425,30 @@ export class OrdersService {
 
     await this.notifyStatusChangeByWhatsApp(savedOrder);
 
+    if (savedOrder.status === OrderStatus.CONFIRMED) {
+      await this.generateReceiptSafely(savedOrder.id);
+    }
+
     return savedOrder;
+  }
+
+  /**
+   * Genera el recibo de un pedido recién confirmado (ADR-028). Se espera
+   * (no se deja corriendo en segundo plano) porque Cloud Run reduce la CPU al
+   * responder la petición. Un fallo no revierte la confirmación ni hace
+   * fallar el webhook de Mercado Pago (que lo reintentaría para siempre):
+   * se registra, y GET /orders/:id/receipt lo genera cuando se pida.
+   */
+  private async generateReceiptSafely(orderId: string): Promise<void> {
+    try {
+      await this.receipts.ensureReceipt(await this.findDetailById(orderId));
+    } catch (error) {
+      this.logger.error(
+        `No se pudo generar el recibo del pedido ${orderId}; se generará al pedirlo ` +
+          `(GET /orders/${orderId}/receipt): ${error}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+    }
   }
 
   /**

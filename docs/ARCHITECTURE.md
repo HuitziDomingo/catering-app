@@ -39,7 +39,7 @@ más tools MCP (reportes automáticos). Crear pedidos vía agente ya existe
 | UI dashboard | Angular ~21.0.9 + Taiga UI | ADR-009 (pin de Angular), ADR-012 |
 | Tiempo real | WebSockets (Socket.io) puntual, no GraphQL | ADR-004 |
 | Monorepo | Nx | ADR-005 |
-| Generación de PDF | pdfkit, dentro de un `PdfModule` del backend NestJS — **pendiente** (rama `feat/storage-images-receipts`) | ADR-007 |
+| Generación de PDF | pdfkit, dentro del `PdfModule` del backend NestJS (recibo del pedido) | ADR-007, ADR-028 (+ addendum 01) |
 | Notificaciones | WhatsApp vía Twilio (`WhatsAppService`) + WebSocket al dashboard | ADR-007, ADR-026 |
 | Pagos | Mercado Pago Checkout Pro | ADR-022, ADR-024 |
 | Almacenamiento de archivos | Supabase Storage (S3) en producción, SeaweedFS en desarrollo; procesado de imágenes con sharp | ADR-028 |
@@ -64,7 +64,7 @@ más tools MCP (reportes automáticos). Crear pedidos vía agente ya existe
 apps/
   dashboard/     # Angular + Taiga UI — panel de operación y super usuario
   mobile/        # React Native (Expo) + UI Kitten + Moti — app de clientes
-  api/           # NestJS: REST API + WebSocket Gateway + servidor MCP + AuthModule + StorageModule (PdfModule en progreso)
+  api/           # NestJS: REST API + WebSocket Gateway + servidor MCP + AuthModule + StorageModule + PdfModule
   landing/       # Astro + Pico.css — página pública
 libs/
   shared-types/  # DTOs e interfaces TypeScript compartidas entre apps
@@ -91,13 +91,16 @@ Tablas definidas en ADR-006: `roles`, `users`, `menu_categories`,
 
 **Implementadas hoy** (migraciones en `apps/api/src/database/migrations/`):
 `roles`, `users`, `menu_categories`, `menu_items`,
-`menu_item_price_history`, `orders`, `order_items`, `mcp_tool_logs`.
+`menu_item_price_history`, `orders`, `order_items`, `order_documents`,
+`mcp_tool_logs`.
 
-**Pendientes:** `order_documents` (llega con el recibo PDF y el
-almacenamiento en Supabase Storage, rama `feat/storage-images-receipts`) y
-`notifications` (hoy los envíos de WhatsApp solo quedan en los logs de la
-API). Existen como tipos en `libs/shared-types`, pero no como entidades ni
-tablas.
+`order_documents` guarda la llave del objeto en el bucket privado
+(`storage_key`), no una URL (ADR-028 y su addendum 01); un índice único
+parcial garantiza un recibo por pedido.
+
+**Pendiente:** `notifications` (hoy los envíos de WhatsApp solo quedan en
+los logs de la API). Existe como tipo en `libs/shared-types`, pero no como
+entidad ni tabla.
 
 Principios de diseño: UUID como PK, soft deletes en `users`, snapshots de
 precio en `order_items` para reportes históricamente correctos, JSONB para
@@ -139,13 +142,13 @@ parámetros, resultado, timestamp).
 5. WhatsApp (Twilio) al negocio y al cliente (ADR-026) — solo texto por ahora
 6. Pago: POST /payments/preferences → Checkout Pro → webhook re-consulta
    el pago, guarda su detalle y mueve el status (ADR-024, ADR-027)
-7. Staff gestiona el pedido desde el dashboard: status y revisión (ADR-027)
+7. Al pasar a confirmed (webhook o confirmación manual) se genera el
+   recibo PDF y se guarda en el bucket privado (ADR-028)
+8. Staff gestiona el pedido desde el dashboard: status y revisión (ADR-027)
 ```
 
-**Pendiente** (rama `feat/storage-images-receipts`): el `PdfModule` que
-genera el recibo, guardado en Supabase Storage y registrado en
-`order_documents`; el WhatsApp al cliente pasará a adjuntar su URL.
-Tampoco existe todavía la tabla `notifications`.
+**Pendiente:** el WhatsApp al cliente todavía no adjunta la URL del
+recibo, y no existe la tabla `notifications`.
 
 ## Gestión de pedidos (ADR-027)
 
@@ -174,7 +177,7 @@ Tampoco existe todavía la tabla `notifications`.
   adaptador S3. En local habla con SeaweedFS (`docker compose up -d`,
   puerto 8333); en producción con el endpoint S3 de Supabase Storage.
 - Buckets: `menu-images` (lectura pública) y `order-documents` (privado,
-  URLs firmadas; lo usarán los recibos PDF).
+  URLs firmadas: los recibos PDF).
 - Dos URLs configurables: `STORAGE_ENDPOINT` (lo que usa la API) y
   `STORAGE_PUBLIC_URL` (lo que reciben dashboard y app). Para probar en
   simulador, emulador o teléfono físico, ver la tabla de ADR-028 y
@@ -197,6 +200,27 @@ Tampoco existe todavía la tabla `notifications`.
   cargado por `menuItemId`; la URL guardada en la línea es solo respaldo,
   porque al reemplazar una imagen la API borra el objeto viejo.
 
+## Recibo PDF (ADR-028 + addendum 01)
+
+- `PdfModule` (`apps/api/src/pdf/`): `receipt-content.ts` arma el texto
+  del recibo (negocio, folio, cliente, platillos, total, pago, leyenda "no
+  es un comprobante fiscal (CFDI)") y `ReceiptPdfRenderer` lo dibuja con
+  pdfkit. `ReceiptsService` lo sube a `order-documents`
+  (`receipts/<orderId>/<uuid>.pdf`, `Cache-Control: private, no-store`) y
+  lo registra en `order_documents`.
+- Se genera al pasar el pedido a `confirmed` (`OrdersService.updateStatus`,
+  así que cubre el webhook y la confirmación manual). Es idempotente y su
+  fallo solo se registra: no revierte la confirmación ni hace fallar el
+  webhook.
+- `GET /orders/:id/receipt` → `{ url, expiresAt }`, URL firmada de 15
+  minutos. Dueño o staff/admin/superadmin (otro cliente: 403); si el pedido
+  está pagado (`isOrderPaid` de shared-types) y no tiene recibo, lo genera
+  al vuelo; sin pago, 409.
+- Datos del negocio por variables `BUSINESS_*` (`apps/api/.env.example`).
+- Dashboard: botón "Ver o descargar recibo (PDF)" en el detalle, abre la
+  URL en otra pestaña. Móvil: "Ver recibo" en el detalle del pedido, con
+  `expo-web-browser` (`openBrowserAsync`), sin módulos nativos nuevos.
+
 ## Pagos (ADR-022, ADR-024)
 
 Checkout Pro: la API crea la preferencia (`POST /payments/preferences`) y
@@ -217,18 +241,17 @@ status.
 - `apps/api`: `auth`, `menu` (incluye subir/quitar imagen), `orders`
   (creación, listados, status, revisión), `payments` (Checkout Pro +
   webhook), `mcp` (2 tools), `notifications` (WebSocket gateway +
-  WhatsApp), `storage` (ADR-028). Sin `PdfModule` todavía.
+  WhatsApp), `storage` y `pdf` (recibo del pedido, ADR-028).
 - `apps/dashboard`: features `auth`, `menu` (CRUD + imagen del platillo:
   selector con vista previa y validación previa con las reglas de
   shared-types, miniatura en la tabla), `notifications` (campanita
   con historial persistente) y `orders` (lista, detalle, status y
-  revisión). El PDF del comprobante en el detalle queda para
-  `feat/storage-images-receipts`.
+  revisión, recibo PDF).
 - `apps/mobile`: features `auth`, `menu`, `chat`, `session`, `theme`,
   `navigation`, `cart` (carrito persistido en AsyncStorage + checkout que
   crea un pedido con todos los platillos, con aviso de rango
   serves_min/serves_max), `orders` ("Mis pedidos": lista paginada y
-  detalle) y `payments` (Pagar → Checkout Pro con `expo-web-browser`, y
+  detalle con "Ver recibo") y `payments` (Pagar → Checkout Pro con `expo-web-browser`, y
   pantalla de regreso `/payment/<result>` que re-consulta el pedido).
 - `libs/shared-types`: enums, entidades, evento WebSocket y contratos de
   API (`src/api/`: paginación, orders, payments).

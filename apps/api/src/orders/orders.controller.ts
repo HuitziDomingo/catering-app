@@ -26,9 +26,11 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtPayload } from '../auth/jwt-payload.interface';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { ListOrdersQueryDto, MyOrdersQueryDto } from './dto/list-orders-query.dto';
+import { OrderReceiptResponseDto } from './dto/order-receipt-response.dto';
 import { OrderResponseDto, PaginatedOrdersResponseDto } from './dto/order-response.dto';
 import { ReviewOrderDto } from './dto/review-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { ReceiptsService } from '../pdf/receipts.service';
 import { StorageService } from '../storage/storage.service';
 import { toOrderResponse } from './order-response.mapper';
 import { OrdersService } from './orders.service';
@@ -42,6 +44,7 @@ export class OrdersController {
   constructor(
     private readonly orders: OrdersService,
     private readonly storage: StorageService,
+    private readonly receipts: ReceiptsService,
   ) {}
 
   @Post()
@@ -187,6 +190,50 @@ export class OrdersController {
       role: user.role,
     });
     return toOrderResponse(order, this.storage);
+  }
+
+  @Get(':id/receipt')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'URL firmada (15 minutos) del recibo PDF del pedido (ADR-028). El cliente ' +
+      'solo puede pedir el de sus propios pedidos; staff/admin/superadmin, ' +
+      'cualquiera. Si el pedido está pagado y todavía no tiene recibo, se ' +
+      'genera en ese momento.',
+  })
+  @ApiParam({ name: 'id', description: 'id (uuid) del pedido.' })
+  @ApiResponse({ status: HttpStatus.OK, type: OrderReceiptResponseDto })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Falta el access token o es inválido/expirado.',
+    type: ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'El pedido pertenece a otro cliente.',
+    type: ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'El pedido no existe.',
+    type: ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'El pedido todavía no está pagado (pending o payment_failed).',
+    type: ErrorResponseDto,
+  })
+  async getReceipt(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Req() req: Request,
+  ): Promise<OrderReceiptResponseDto> {
+    const user = req.user as JwtPayload;
+    const order = await this.orders.findByIdForRequester(id, {
+      userId: user.sub,
+      role: user.role,
+    });
+    return this.receipts.getReceiptUrl(order);
   }
 
   @Patch(':id/status')

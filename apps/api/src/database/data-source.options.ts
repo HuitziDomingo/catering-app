@@ -7,6 +7,7 @@ import { OrderItem } from './entities/order-item.entity';
 import { MenuCategory } from './entities/menu-category.entity';
 import { MenuItem } from './entities/menu-item.entity';
 import { MenuItemPriceHistory } from './entities/menu-item-price-history.entity';
+import { OrderDocument } from './entities/order-document.entity';
 import { InitRolesAndUsers1752537600000 } from './migrations/1752537600000-InitRolesAndUsers';
 import { AddMcpToolLogs1752537600001 } from './migrations/1752537600001-AddMcpToolLogs';
 import { AddOrders1752537600002 } from './migrations/1752537600002-AddOrders';
@@ -17,6 +18,7 @@ import { AddOrderNeedsReview1752537600006 } from './migrations/1752537600006-Add
 import { AddPaymentsToOrders1752537600007 } from './migrations/1752537600007-AddPaymentsToOrders';
 import { AddPaymentDetailsToOrders1752537600008 } from './migrations/1752537600008-AddPaymentDetailsToOrders';
 import { RenameMenuItemImageUrlToImageKey1752537600009 } from './migrations/1752537600009-RenameMenuItemImageUrlToImageKey';
+import { AddOrderDocuments1752537600010 } from './migrations/1752537600010-AddOrderDocuments';
 
 /**
  * Construye las opciones de conexión de TypeORM a partir de variables de
@@ -53,6 +55,7 @@ export function buildDataSourceOptions(
       MenuCategory,
       MenuItem,
       MenuItemPriceHistory,
+      OrderDocument,
     ],
     migrations: [
       InitRolesAndUsers1752537600000,
@@ -65,6 +68,7 @@ export function buildDataSourceOptions(
       AddPaymentsToOrders1752537600007,
       AddPaymentDetailsToOrders1752537600008,
       RenameMenuItemImageUrlToImageKey1752537600009,
+      AddOrderDocuments1752537600010,
     ],
     synchronize: false,
     migrationsRun: false,

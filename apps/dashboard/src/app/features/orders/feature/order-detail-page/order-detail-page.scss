@@ -85,6 +85,10 @@
     }
   }
 
+  &__receipt {
+    margin-top: 0.75rem;
+  }
+
   &__muted {
     margin: 0;
     color: var(--tui-text-tertiary);

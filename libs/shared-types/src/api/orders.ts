@@ -97,6 +97,35 @@ export function canTransitionOrderStatus(from: OrderStatus, to: OrderStatus): bo
   return ORDER_STATUS_TRANSITIONS[from]?.includes(to) ?? false;
 }
 
+/**
+ * Status en los que el pedido ya está pagado (por Mercado Pago o confirmado
+ * a mano por transferencia/efectivo, ADR-027) y sigue vigente.
+ */
+export const PAID_ORDER_STATUSES: OrderStatus[] = [
+  OrderStatus.CONFIRMED,
+  OrderStatus.PREPARING,
+  OrderStatus.DELIVERED,
+];
+
+/**
+ * El pedido tiene un pago que documentar con recibo (ADR-028): está en un
+ * status pagado, o tiene un pago aprobado de Mercado Pago aunque después se
+ * haya cancelado (el recibo es parte del rastro para el reembolso).
+ */
+export function isOrderPaid(order: {
+  status: OrderStatus;
+  paidAt?: string | Date | null;
+}): boolean {
+  return PAID_ORDER_STATUSES.includes(order.status) || order.paidAt != null;
+}
+
+/** Respuesta de GET /orders/:id/receipt: URL firmada del recibo PDF (ADR-028). */
+export interface OrderReceiptResponse {
+  url: string;
+  /** Momento en que la URL deja de funcionar (ISO 8601); 15 minutos después de pedirla. */
+  expiresAt: string;
+}
+
 export interface UpdateOrderStatusDto {
   status: OrderStatus;
 }

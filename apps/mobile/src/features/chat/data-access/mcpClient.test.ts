@@ -14,6 +14,7 @@ jest.mock('../../../core/http/sessionExpiry', () => ({
   notifySessionExpired: () => mockNotifySessionExpired(),
 }));
 
+import { API_BASE_URL } from '../../../core/http/apiClient';
 import {
   consultarPedidosPorCliente,
   crearPedido,
@@ -101,7 +102,9 @@ describe('consultarPedidosPorCliente', () => {
     expect(global.fetch).toHaveBeenCalledTimes(3);
 
     const [initUrl, initOptions] = (global.fetch as jest.Mock).mock.calls[0];
-    expect(initUrl).toBe('http://localhost:3000/api/mcp');
+    // Contra API_BASE_URL y no un host fijo: Nx carga apps/mobile/.env, y
+    // EXPO_PUBLIC_API_URL puede apuntar a la IP de la Mac (teléfono físico).
+    expect(initUrl).toBe(`${API_BASE_URL}/mcp`);
     expect(initOptions.headers.Authorization).toBe('Bearer token-123');
     expect(initOptions.headers.Accept).toBe('application/json, text/event-stream');
     expect(initOptions.headers['Mcp-Session-Id']).toBeUndefined();

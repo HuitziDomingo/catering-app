@@ -16,6 +16,15 @@ const BUCKET_ENV: Record<StorageBucket, { name: string; fallback: string }> = {
   documents: { name: 'STORAGE_DOCUMENTS_BUCKET', fallback: 'order-documents' },
 };
 
+const CACHE_CONTROL: Record<StorageBucket, string> = {
+  // La llave cambia en cada subida (ADR-028), así que el objeto nunca cambia
+  // de contenido y se puede cachear sin límite.
+  menuImages: 'public, max-age=31536000, immutable',
+  // Datos personales servidos por URL firmada de 15 minutos: ningún cache
+  // compartido (proxy, CDN) debe seguir sirviéndolo cuando la firma caduque.
+  documents: 'private, no-store',
+};
+
 /**
  * Adaptador S3 del puerto de almacenamiento (ver ADR-028). Hay dos clientes
  * porque la API y los clientes no ven la red igual:
@@ -51,9 +60,7 @@ export class S3StorageService extends StorageService {
         Key: key,
         Body: body,
         ContentType: contentType,
-        // La llave cambia en cada subida (ADR-028), así que el objeto nunca
-        // cambia de contenido y se puede cachear sin límite.
-        CacheControl: 'public, max-age=31536000, immutable',
+        CacheControl: CACHE_CONTROL[bucket],
       }),
     );
   }
