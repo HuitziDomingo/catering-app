@@ -7,6 +7,7 @@ import { ROLES_KEY } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtPayload } from '../auth/jwt-payload.interface';
+import { ReceiptsService } from '../pdf/receipts.service';
 import { StorageService } from '../storage/storage.service';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
@@ -23,9 +24,12 @@ describe('OrdersController', () => {
     reviewOrder: jest.Mock;
   };
 
+  let receiptsService: { getReceiptUrl: jest.Mock };
+
   const reflector = new Reflector();
 
   beforeEach(async () => {
+    receiptsService = { getReceiptUrl: jest.fn() };
     ordersService = {
       createOrder: jest.fn(),
       findByIdForRequester: jest.fn(),
@@ -41,6 +45,7 @@ describe('OrdersController', () => {
       providers: [
         { provide: OrdersService, useValue: ordersService },
         { provide: StorageService, useValue: { getPublicUrl: jest.fn() } },
+        { provide: ReceiptsService, useValue: receiptsService },
       ],
     }).compile();
 
@@ -88,6 +93,12 @@ describe('OrdersController', () => {
       },
     );
 
+    it('GET /orders/:id/receipt requiere solo JwtAuthGuard (la propiedad del pedido la valida el servicio)', () => {
+      const method = OrdersController.prototype.getReceipt;
+      expect(reflector.get<unknown[]>(GUARDS_METADATA, method)).toEqual([JwtAuthGuard]);
+      expect(reflector.get<string[]>(ROLES_KEY, method)).toBeUndefined();
+    });
+
     it('GET /orders/mine requiere solo JwtAuthGuard (cualquier usuario, sus propios pedidos)', () => {
       const method = OrdersController.prototype.findMine;
       expect(reflector.get<unknown[]>(GUARDS_METADATA, method)).toEqual([JwtAuthGuard]);
@@ -130,6 +141,22 @@ describe('OrdersController', () => {
         'order-1',
         { userId: 'user-1', role: 'staff' },
       );
+    });
+
+    it('getReceipt valida el acceso con findByIdForRequester antes de pedir la URL firmada', async () => {
+      const req = { user: { sub: 'user-1', email: 'c@example.com', role: 'customer' } } as unknown as Request;
+      const order = { id: 'order-1', customerId: 'user-1' };
+      const receipt = { url: 'http://storage/firmada', expiresAt: '2026-10-06T19:15:00.000Z' };
+      ordersService.findByIdForRequester.mockResolvedValue(order);
+      receiptsService.getReceiptUrl.mockResolvedValue(receipt);
+
+      await expect(controller.getReceipt('order-1', req)).resolves.toEqual(receipt);
+
+      expect(ordersService.findByIdForRequester).toHaveBeenCalledWith('order-1', {
+        userId: 'user-1',
+        role: 'customer',
+      });
+      expect(receiptsService.getReceiptUrl).toHaveBeenCalledWith(order);
     });
 
     it('findMine usa el sub del JWT y mapea cada pedido de la página', async () => {

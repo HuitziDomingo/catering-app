@@ -5,6 +5,7 @@ import { Order } from '../database/entities/order.entity';
 import { OrderItem } from '../database/entities/order-item.entity';
 import { User } from '../database/entities/user.entity';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { PdfModule } from '../pdf/pdf.module';
 import { StorageModule } from '../storage/storage.module';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
@@ -13,6 +14,7 @@ import { OrdersService } from './orders.service';
   imports: [
     TypeOrmModule.forFeature([Order, OrderItem, MenuItem, User]),
     NotificationsModule,
+    PdfModule,
     StorageModule,
   ],
   controllers: [OrdersController],
