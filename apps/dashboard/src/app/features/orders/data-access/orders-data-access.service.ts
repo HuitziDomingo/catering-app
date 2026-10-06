@@ -4,6 +4,7 @@ import type { Observable } from 'rxjs';
 import type {
   OrderDetail,
   OrderListQuery,
+  OrderReceiptResponse,
   OrderStatus,
   Paginated,
   ReviewOrderDto,
@@ -45,5 +46,10 @@ export class OrdersDataAccessService {
 
   review(id: string, dto: ReviewOrderDto): Observable<OrderDetail> {
     return this.http.patch<OrderDetail>(`${this.baseUrl}/${id}/review`, dto);
+  }
+
+  /** URL firmada (15 minutos) del recibo PDF; la API lo genera si falta (ADR-028). */
+  getReceipt(id: string): Observable<OrderReceiptResponse> {
+    return this.http.get<OrderReceiptResponse>(`${this.baseUrl}/${id}/receipt`);
   }
 }

@@ -6,11 +6,13 @@ import { TUI_CONFIRM } from '@taiga-ui/kit';
 import { PolymorpheusComponent } from '@taiga-ui/polymorpheus';
 import { filter, type Observable } from 'rxjs';
 import {
+  isOrderPaid,
   OrderStatus,
   ReviewOrderAction,
   type OrderDetail,
 } from '@catering-app/shared-types';
 import { extractErrorMessage } from '../../../../core/http/extract-error-message';
+import { OrdersDataAccessService } from '../../data-access/orders-data-access.service';
 import { OrdersStateService } from '../../state/orders-state.service';
 import {
   OrderAdjustForm,
@@ -27,8 +29,8 @@ import {
 
 /**
  * Detalle de un pedido (ADR-027): cliente, platillos con su precio snapshot,
- * pago, cambio manual de status y revisión de pedidos fuera de rango
- * (ADR-021). El PDF del comprobante queda para feat/storage-images-receipts.
+ * pago, cambio manual de status, revisión de pedidos fuera de rango
+ * (ADR-021) y recibo PDF de los pedidos pagados (ADR-028).
  */
 @Component({
   selector: 'app-order-detail-page',
@@ -39,11 +41,14 @@ import {
 export class OrderDetailPage {
   protected readonly state = inject(OrdersStateService);
   private readonly dialogs = inject(TuiDialogService);
+  private readonly ordersData = inject(OrdersDataAccessService);
 
   protected readonly selected = this.state.selected;
   protected readonly cancelled = OrderStatus.CANCELLED;
   protected readonly saving = signal(false);
   protected readonly actionError = signal<string | null>(null);
+  protected readonly openingReceipt = signal(false);
+  protected readonly receiptError = signal<string | null>(null);
 
   protected readonly nextStatuses = computed(() => {
     const order = this.selected();
@@ -56,6 +61,11 @@ export class OrderDetailPage {
   protected readonly paymentToRefund = computed(() => {
     const order = this.selected();
     return !!order && hasPaymentToRefund(order);
+  });
+
+  protected readonly hasReceipt = computed(() => {
+    const order = this.selected();
+    return !!order && isOrderPaid(order);
   });
 
   protected readonly actionLabels = ORDER_STATUS_ACTION_LABELS;
@@ -107,6 +117,34 @@ export class OrderDetailPage {
         data,
       })
       .subscribe();
+  }
+
+  /**
+   * Abre el recibo en otra pestaña, donde el visor de PDF del navegador
+   * permite verlo, imprimirlo o descargarlo. La pestaña se abre en el mismo
+   * click (antes de pedir la URL) para que el bloqueador de ventanas
+   * emergentes no la frene; si la API falla, se cierra.
+   */
+  protected openReceipt(order: OrderDetail): void {
+    const tab = window.open('', '_blank');
+    this.receiptError.set(null);
+    this.openingReceipt.set(true);
+    this.ordersData.getReceipt(order.id).subscribe({
+      next: ({ url }) => {
+        this.openingReceipt.set(false);
+        if (tab) {
+          tab.opener = null;
+          tab.location.href = url;
+        } else {
+          window.open(url, '_blank', 'noopener');
+        }
+      },
+      error: (err: unknown) => {
+        this.openingReceipt.set(false);
+        tab?.close();
+        this.receiptError.set(extractErrorMessage(err));
+      },
+    });
   }
 
   /** TUI_CONFIRM que solo emite si el staff confirma. */
