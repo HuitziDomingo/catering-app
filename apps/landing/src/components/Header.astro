@@ -1,0 +1,227 @@
+---
+import { business, nav, whatsappLink } from '../data/site';
+---
+
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="logo" href="#inicio" aria-label={`${business.name}, ir al inicio`}>
+      <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="6" />
+        <g>
+          {Array.from({ length: 8 }, (_, i) => (
+            <rect x="15" y="1.5" width="2" height="6" rx="1" transform={`rotate(${i * 45} 16 16)`} />
+          ))}
+        </g>
+      </svg>
+      <span>{business.name}</span>
+    </a>
+
+    <nav class="desktop-nav" aria-label="Principal">
+      <ul>
+        {nav.map((item) => (
+          <li><a href={item.href}>{item.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <a class="btn header-cta" role="button" href={whatsappLink()} target="_blank" rel="noopener">
+      Haz tu pedido
+    </a>
+
+    <details class="mobile-nav">
+      <summary aria-label="Abrir menú">
+        <span class="burger" aria-hidden="true"><span></span></span>
+      </summary>
+      <nav aria-label="Principal (móvil)">
+        <ul>
+          {nav.map((item) => (
+            <li><a href={item.href}>{item.label}</a></li>
+          ))}
+          <li>
+            <a class="btn" role="button" href={whatsappLink()} target="_blank" rel="noopener">
+              Haz tu pedido
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </details>
+  </div>
+</header>
+
+<script>
+  // Cierra el menú móvil al elegir una sección (sin esto, <details> queda abierto).
+  document.querySelectorAll<HTMLAnchorElement>('.mobile-nav a').forEach((link) =>
+    link.addEventListener('click', () => link.closest('details')?.removeAttribute('open')),
+  );
+</script>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    height: var(--ss-header-h);
+    background: rgb(250 246 240 / 0.86);
+    backdrop-filter: saturate(1.4) blur(14px);
+    -webkit-backdrop-filter: saturate(1.4) blur(14px);
+    border-bottom: 1px solid rgb(31 31 31 / 0.06);
+  }
+  .bar {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-right: auto;
+    font-family: var(--ss-font-display);
+    font-size: 1.45rem;
+    font-weight: 600;
+    font-variation-settings: 'SOFT' 100, 'WONK' 1;
+    letter-spacing: -0.02em;
+    color: var(--ss-carbon);
+    text-decoration: none;
+  }
+  .logo-mark {
+    width: 1.6rem;
+    height: 1.6rem;
+    fill: var(--ss-terracota);
+    transition: transform 0.6s var(--ss-ease);
+  }
+  .logo:hover .logo-mark {
+    transform: rotate(45deg);
+  }
+
+  .desktop-nav {
+    display: none;
+  }
+  .desktop-nav ul {
+    margin: 0;
+    padding: 0;
+    gap: 0.25rem;
+  }
+  .desktop-nav li {
+    padding: 0;
+  }
+  .desktop-nav a {
+    padding: 0.5rem 0.9rem;
+    margin: 0;
+    font-weight: 500;
+    color: var(--ss-carbon);
+    text-decoration: none;
+    border-radius: 999px;
+    transition: background-color 0.2s;
+  }
+  .desktop-nav a:hover {
+    background: var(--ss-arena);
+  }
+
+  .header-cta {
+    display: none;
+    padding: 0.7rem 1.3rem;
+    font-size: 0.95rem;
+  }
+
+  /* Móvil: <details> como menú desplegable, sin JavaScript. */
+  .mobile-nav {
+    margin: 0;
+    border: 0;
+  }
+  .mobile-nav summary {
+    list-style: none;
+    display: grid;
+    place-items: center;
+    width: 2.9rem;
+    height: 2.9rem;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--ss-arena);
+    cursor: pointer;
+  }
+  .mobile-nav summary::-webkit-details-marker,
+  .mobile-nav summary::after {
+    display: none;
+  }
+  .burger,
+  .burger span,
+  .burger::before,
+  .burger::after {
+    display: block;
+    width: 1.15rem;
+    height: 2px;
+    background: var(--ss-carbon);
+    border-radius: 2px;
+    transition: transform 0.3s var(--ss-ease), opacity 0.2s;
+  }
+  .burger {
+    position: relative;
+    background: none;
+  }
+  .burger::before,
+  .burger::after {
+    content: '';
+    position: absolute;
+    left: 0;
+  }
+  .burger::before {
+    top: -6px;
+  }
+  .burger::after {
+    top: 6px;
+  }
+  .mobile-nav[open] .burger span {
+    opacity: 0;
+  }
+  .mobile-nav[open] .burger::before {
+    transform: translateY(6px) rotate(45deg);
+  }
+  .mobile-nav[open] .burger::after {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+  .mobile-nav nav {
+    position: absolute;
+    top: var(--ss-header-h);
+    left: 0;
+    right: 0;
+    padding: 1rem 1rem 1.5rem;
+    background: var(--ss-crema);
+    border-bottom: 1px solid rgb(31 31 31 / 0.08);
+    box-shadow: var(--ss-shadow);
+  }
+  .mobile-nav ul {
+    flex-direction: column;
+    align-items: stretch;
+    margin: 0;
+    padding: 0;
+  }
+  .mobile-nav li {
+    padding: 0;
+  }
+  .mobile-nav li a:not(.btn) {
+    display: block;
+    padding: 0.85rem 0.5rem;
+    margin: 0;
+    font-family: var(--ss-font-display);
+    font-size: 1.4rem;
+    color: var(--ss-carbon);
+    text-decoration: none;
+    border-bottom: 1px solid rgb(31 31 31 / 0.08);
+  }
+  .mobile-nav .btn {
+    width: 100%;
+    margin-top: 1.25rem;
+  }
+
+  @media (min-width: 900px) {
+    .desktop-nav,
+    .header-cta {
+      display: flex;
+    }
+    .mobile-nav {
+      display: none;
+    }
+  }
+</style>

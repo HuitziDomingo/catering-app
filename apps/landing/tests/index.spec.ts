@@ -1,11 +1,11 @@
-import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { expect, test } from 'vitest';
 import Index from '../src/pages/index.astro';
+import { render, tags } from './render';
 
-test('homepage has App Store and Google Play download buttons', async () => {
-  const container = await AstroContainer.create();
-  const result = await container.renderToString(Index);
+test('la página es en español, tema claro y con enlace para saltar al contenido', async () => {
+  const html = await render(Index);
 
-  expect(result).toContain('<a href="#" role="button">Descargar en App Store</a>');
-  expect(result).toContain('<a href="#" role="button">Descargar en Google Play</a>');
+  expect(tags(html, 'html')[0]).toMatchObject({ lang: 'es', 'data-theme': 'light' });
+  expect(tags(html, 'a').some((a) => a.href === '#contenido')).toBe(true);
+  expect(tags(html, 'main')[0].id).toBe('contenido');
 });

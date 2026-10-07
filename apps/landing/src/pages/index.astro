@@ -1,31 +1,14 @@
 ---
-import '@picocss/pico/css/pico.min.css';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import { business } from '../data/site';
 ---
 
-<html lang="es">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Catering App</title>
-	</head>
-	<body>
-		<main class="container">
-			<section>
-				<hgroup>
-					<h1>Catering App</h1>
-					<p>
-						Pide desayunos, comidas y cenas para tu evento, y sigue tu
-						pedido en tiempo real.
-					</p>
-				</hgroup>
-				<div class="grid">
-					<a href="#" role="button">Descargar en App Store</a>
-					<a href="#" role="button">Descargar en Google Play</a>
-				</div>
-			</section>
-		</main>
-	</body>
-</html>
+<BaseLayout
+  title={`${business.name} · ${business.tagline}`}
+  description="Catering mexicano para eventos sociales, corporativos y bodas. Pide desde la app, paga con Mercado Pago y recibe tu confirmación por WhatsApp."
+>
+  <Header />
+  <main id="contenido">
+  </main>
+</BaseLayout>
