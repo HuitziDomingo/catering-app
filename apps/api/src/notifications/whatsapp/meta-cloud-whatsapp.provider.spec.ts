@@ -103,6 +103,24 @@ describe('MetaCloudWhatsAppProvider', () => {
       expect(logged).not.toContain('525512345678');
     });
 
+    it('un wa_id 521 del mismo número no se registra como otro destinatario', async () => {
+      // El mock responde wa_id 5215512345678 para to 525512345678 (como Meta).
+      const result = await build().sendTemplate('525512345678', { name: 'hello_world', languageCode: 'en_US' });
+
+      expect(result?.waId).toBe('5215512345678');
+      expect(logSpy.mock.calls.flat().join(' ')).not.toContain('wa_id');
+    });
+
+    it('un wa_id de otro número sí se registra (enmascarado)', async () => {
+      fetchMock.mockResolvedValue(
+        jsonResponse(200, { contacts: [{ wa_id: '5215599990000' }], messages: [{ id: 'wamid.X' }] }),
+      );
+
+      await build().sendTemplate('525512345678', { name: 'hello_world', languageCode: 'en_US' });
+
+      expect(logSpy.mock.calls.flat().join(' ')).toContain('wa_id •••••••••0000');
+    });
+
     it.each([
       [190, 401, 'caducó'],
       [131005, 403, 'usuario de sistema'],

@@ -238,9 +238,11 @@ quedan en los logs) y el webhook de WhatsApp para estados de entrega.
   (`jaspers_market_order_confirmation_v1`) hasta que se aprueben. En modo
   de prueba Meta solo entrega a la lista de destinatarios permitidos,
   incluido el número del negocio.
-- Números de México: `normalizeMexicanNumber` → `52` + 10 dígitos
-  (`WHATSAPP_MX_NUMBER_FORMAT=521` para el formato viejo; ver "El detalle
-  del 52 1" en ADR-029).
+- Números de México: se envían como `52` + 10 dígitos
+  (`normalizeMexicanNumber`; `WHATSAPP_MX_NUMBER_FORMAT=521` para el
+  formato viejo). Meta lo acepta pero devuelve el `wa_id` como `521` + 10
+  dígitos: los números se comparan con `isSameWhatsAppNumber`, nunca como
+  texto (ADR-029 y su addendum 01).
 - Recibo: el botón de `pedido_confirmado` apunta a `GET /receipts/:token`
   (público, JWT de 30 días con `RECEIPT_LINK_SECRET`), que genera una URL
   firmada nueva de 15 minutos y redirige al PDF.

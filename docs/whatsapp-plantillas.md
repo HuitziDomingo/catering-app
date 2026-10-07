@@ -29,6 +29,11 @@ una plantilla en Meta, cambia también ese archivo y este documento.
   API*). Agrega ahí tu número **y el del negocio**
   (`BUSINESS_WHATSAPP_NUMBER`): si no, el aviso de pedido nuevo falla con el
   error 131030.
+- **Formato de los números de México** (verificado el 2026-10-07, addendum
+  01 de ADR-029): la API manda `52` + 10 dígitos y Meta lo acepta, pero en
+  la respuesta devuelve el `wa_id` como `521` + 10 dígitos. Es el mismo
+  número: no lo compares como texto, usa `isSameWhatsAppNumber`. En la lista
+  de destinatarios permitidos, el número aparece como `52` + 10 dígitos.
 - `jaspers_market_order_confirmation_v1` está en inglés y tiene 3 variables:
   `{{1}}` nombre ("Hi {{1}}"), `{{2}}` número de pedido y `{{3}}` entrega
   estimada. La API las llena con nombre del cliente, folio y fecha del

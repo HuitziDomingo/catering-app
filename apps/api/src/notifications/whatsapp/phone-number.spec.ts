@@ -1,4 +1,11 @@
-import { maskPhone, normalizeMexicanNumber, toWhatsAppRecipient } from './phone-number';
+import {
+  canonicalWhatsAppNumber,
+  DEFAULT_MX_NUMBER_FORMAT,
+  isSameWhatsAppNumber,
+  maskPhone,
+  normalizeMexicanNumber,
+  toWhatsAppRecipient,
+} from './phone-number';
 
 describe('normalizeMexicanNumber', () => {
   it.each([
@@ -43,6 +50,55 @@ describe('toWhatsAppRecipient', () => {
   it('sin + ni forma mexicana no se puede saber el país → null', () => {
     expect(toWhatsAppRecipient('4155238886123')).toBeNull();
     expect(toWhatsAppRecipient('+123')).toBeNull();
+  });
+});
+
+describe('formatos 52 y 521 (ADR-029 addendum 01)', () => {
+  // Lo que pasó con la API real (2026-10-07): se mandó 52 + 10 dígitos, Meta
+  // lo aceptó y respondió con el wa_id en 521 + 10 dígitos.
+  const sent = '525512345678';
+  const waId = '5215512345678';
+
+  it('el formato de envío por default es 52 + 10 dígitos', () => {
+    expect(DEFAULT_MX_NUMBER_FORMAT).toBe('52');
+    expect(toWhatsAppRecipient('+52 1 55 1234 5678')).toBe(sent);
+  });
+
+  it('normalizeMexicanNumber da el mismo resultado para 52 y 521, en los dos formatos', () => {
+    expect(normalizeMexicanNumber(sent)).toBe(normalizeMexicanNumber(waId));
+    expect(normalizeMexicanNumber(sent, '521')).toBe(normalizeMexicanNumber(waId, '521'));
+  });
+
+  it('canonicalWhatsAppNumber deja los dos en 52 + 10 dígitos', () => {
+    expect(canonicalWhatsAppNumber(sent)).toBe(sent);
+    expect(canonicalWhatsAppNumber(waId)).toBe(sent);
+    expect(canonicalWhatsAppNumber('+52 1 55-1234-5678')).toBe(sent);
+  });
+
+  it.each([
+    [sent, waId],
+    [waId, sent],
+    ['55 1234 5678', waId],
+    ['+52 1 55 1234 5678', sent],
+    ['whatsapp:+5215512345678', '525512345678'],
+  ])('isSameWhatsAppNumber(%s, %s) → true', (a, b) => {
+    expect(isSameWhatsAppNumber(a, b)).toBe(true);
+  });
+
+  it.each([
+    [sent, '525512345679'],
+    [waId, '5215512345679'],
+    [sent, null],
+    [undefined, waId],
+    ['abc', 'abc'],
+  ])('isSameWhatsAppNumber(%s, %s) → false', (a, b) => {
+    expect(isSameWhatsAppNumber(a, b)).toBe(false);
+  });
+
+  it('los wa_id de otros países (sin +) se comparan por dígitos', () => {
+    expect(canonicalWhatsAppNumber('14155238886')).toBe('14155238886');
+    expect(isSameWhatsAppNumber('14155238886', '+1 (415) 523-8886')).toBe(true);
+    expect(isSameWhatsAppNumber('14155238886', '14155238887')).toBe(false);
   });
 });
 

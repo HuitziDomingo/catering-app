@@ -6,7 +6,7 @@ import {
   type WhatsAppSendResult,
   type WhatsAppTemplateMessage,
 } from './whatsapp-provider';
-import { maskPhone } from './phone-number';
+import { isSameWhatsAppNumber, maskPhone } from './phone-number';
 
 const GRAPH_API_BASE_URL = 'https://graph.facebook.com';
 /** Versión de la Graph API si no se define WHATSAPP_API_VERSION. */
@@ -127,7 +127,11 @@ export class MetaCloudWhatsAppProvider extends WhatsAppProvider {
     };
     this.logger.log(
       `Plantilla ${message.name} enviada a ${maskPhone(to)}` +
-        (result.waId && result.waId !== to ? ` (wa_id ${maskPhone(result.waId)})` : '') +
+        // Meta devuelve 521… para los celulares de México aunque se le mande
+        // 52…: solo se registra el wa_id si de verdad es otro número.
+        (result.waId && !isSameWhatsAppNumber(result.waId, to)
+          ? ` (wa_id ${maskPhone(result.waId)})`
+          : '') +
         ` [${result.messageId ?? 'sin id'}].`,
     );
     return result;
