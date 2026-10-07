@@ -1,0 +1,138 @@
+---
+import { menuHighlights, photoSrcset, photoUrl, whatsappLink } from '../data/site';
+
+const price = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
+---
+
+<section class="section menu" id="menu" aria-labelledby="menu-title">
+  <div class="wrap">
+    <header class="section-head reveal">
+      <p class="eyebrow">Menú destacado</p>
+      <h2 id="menu-title">Lo que más nos piden</h2>
+      <p>Una probadita del menú. En la app encuentras todo, con porciones por número de invitados.</p>
+    </header>
+
+    <ul class="dishes">
+      {menuHighlights.map((dish) => (
+        <li class="dish reveal">
+          <div class="dish-photo">
+            <img
+              src={photoUrl(dish.photo, 720, 540)}
+              srcset={photoSrcset(dish.photo, [480, 720, 960], 0.75)}
+              sizes="(min-width: 1000px) 24rem, (min-width: 640px) 45vw, 92vw"
+              width="720"
+              height="540"
+              alt={dish.photo.alt}
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="dish-body">
+            <h3>{dish.name}</h3>
+            <p>{dish.description}</p>
+            <p class="dish-price">
+              desde <strong>{price.format(dish.price)}</strong> <span>por persona</span>
+            </p>
+          </div>
+        </li>
+      ))}
+    </ul>
+
+    <div class="menu-foot reveal">
+      <p>Precios de referencia. El total exacto lo ves en la app antes de pagar.</p>
+      <a class="btn" role="button" href={whatsappLink('Hola, quiero ver el menú completo de Santo Sazón.')} target="_blank" rel="noopener">
+        Pedir el menú completo
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .menu {
+    background: var(--ss-arena);
+  }
+  .dishes {
+    display: grid;
+    gap: 2.5rem 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .dish {
+    margin: 0;
+    list-style: none;
+  }
+  .dish-photo {
+    aspect-ratio: 4 / 3;
+    border-radius: var(--ss-radius);
+    overflow: hidden;
+    background: var(--ss-crema);
+  }
+  .dish-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.9s var(--ss-ease);
+  }
+  .dish:hover .dish-photo img {
+    transform: scale(1.05);
+  }
+  .dish-body {
+    padding-top: 1.25rem;
+  }
+  h3 {
+    margin-bottom: 0.4rem;
+    font-size: 1.5rem;
+  }
+  .dish-body p {
+    margin-bottom: 0.75rem;
+    color: var(--ss-texto-suave);
+  }
+  .dish-price {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.9rem;
+    border: 1px solid rgb(180 80 47 / 0.35);
+    border-radius: 999px;
+  }
+  .dish-body .dish-price {
+    color: var(--ss-terracota-deep);
+  }
+  .dish-price strong {
+    font-size: 1.05rem;
+    color: var(--ss-terracota-deep);
+  }
+  .dish-price span {
+    color: var(--ss-texto-suave);
+  }
+
+  .menu-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    margin-top: clamp(3rem, 6vw, 4.5rem);
+    padding-top: 2rem;
+    border-top: 1px solid rgb(31 31 31 / 0.12);
+  }
+  .menu-foot p {
+    margin: 0;
+    color: var(--ss-texto-suave);
+  }
+
+  @media (min-width: 640px) {
+    .dishes {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1000px) {
+    .dishes {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3.5rem 2rem;
+    }
+  }
+</style>
