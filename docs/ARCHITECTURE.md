@@ -40,7 +40,7 @@ más tools MCP (reportes automáticos). Crear pedidos vía agente ya existe
 | Tiempo real | WebSockets (Socket.io) puntual, no GraphQL | ADR-004 |
 | Monorepo | Nx | ADR-005 |
 | Generación de PDF | pdfkit, dentro del `PdfModule` del backend NestJS (recibo del pedido) | ADR-007, ADR-028 (+ addendum 01) |
-| Notificaciones | WhatsApp vía Twilio (`WhatsAppService`) + WebSocket al dashboard | ADR-007, ADR-026 |
+| Notificaciones | WhatsApp vía Meta Cloud API, con plantillas (`WhatsAppService` + `MetaCloudWhatsAppProvider`) + WebSocket al dashboard | ADR-026 (eventos), ADR-029 (proveedor) |
 | Pagos | Mercado Pago Checkout Pro | ADR-022, ADR-024 |
 | Almacenamiento de archivos | Supabase Storage (S3) en producción, SeaweedFS en desarrollo; procesado de imágenes con sharp | ADR-028 |
 | ORM | TypeORM | ADR-007 |
@@ -139,16 +139,18 @@ parámetros, resultado, timestamp).
    (400 si no): misma regla para POST /orders y la tool MCP crear_pedido
    (`orders/scheduled-for.validation.ts`)
 4. API emite evento WebSocket `new-order` → dashboard Angular lo refleja en vivo
-5. WhatsApp (Twilio) al negocio y al cliente (ADR-026) — solo texto por ahora
+5. WhatsApp (Meta Cloud API, plantillas) al negocio y al cliente (ADR-029)
 6. Pago: POST /payments/preferences → Checkout Pro → webhook re-consulta
    el pago, guarda su detalle y mueve el status (ADR-024, ADR-027)
 7. Al pasar a confirmed (webhook o confirmación manual) se genera el
    recibo PDF y se guarda en el bucket privado (ADR-028)
-8. Staff gestiona el pedido desde el dashboard: status y revisión (ADR-027)
+8. Staff gestiona el pedido desde el dashboard: status y revisión (ADR-027).
+   Cada cambio de status con plantilla avisa al cliente por WhatsApp; el de
+   confirmed lleva el botón "Ver recibo" (link de 30 días, ADR-029)
 ```
 
-**Pendiente:** el WhatsApp al cliente todavía no adjunta la URL del
-recibo, y no existe la tabla `notifications`.
+**Pendiente:** la tabla `notifications` (los envíos de WhatsApp solo
+quedan en los logs) y el webhook de WhatsApp para estados de entrega.
 
 ## Gestión de pedidos (ADR-027)
 
@@ -221,6 +223,29 @@ recibo, y no existe la tabla `notifications`.
   URL en otra pestaña. Móvil: "Ver recibo" en el detalle del pedido, con
   `expo-web-browser` (`openBrowserAsync`), sin módulos nativos nuevos.
 
+## WhatsApp (ADR-029)
+
+- Proveedor: WhatsApp Cloud API de Meta, directo (sin Twilio ni
+  intermediarios). Puerto `WhatsAppProvider` con un adaptador,
+  `MetaCloudWhatsAppProvider` (`POST /{version}/{phone-number-id}/messages`
+  con `fetch`). Sin `WHATSAPP_PHONE_NUMBER_ID`/`WHATSAPP_ACCESS_TOKEN` la API
+  arranca y omite los envíos.
+- `WhatsAppService` elige plantilla y variables por evento: pedido recibido
+  y nuevo pedido (al negocio) al crear; confirmado, en preparación,
+  entregado, cancelado y pago rechazado al cambiar de status. Nunca lanza.
+- Plantillas propias en `docs/whatsapp-plantillas.md` (Utility, es_MX).
+  `WHATSAPP_TEMPLATE_MODE=test` (default) manda la de ejemplo de Meta
+  (`jaspers_market_order_confirmation_v1`) hasta que se aprueben. En modo
+  de prueba Meta solo entrega a la lista de destinatarios permitidos,
+  incluido el número del negocio.
+- Números de México: `normalizeMexicanNumber` → `52` + 10 dígitos
+  (`WHATSAPP_MX_NUMBER_FORMAT=521` para el formato viejo; ver "El detalle
+  del 52 1" en ADR-029).
+- Recibo: el botón de `pedido_confirmado` apunta a `GET /receipts/:token`
+  (público, JWT de 30 días con `RECEIPT_LINK_SECRET`), que genera una URL
+  firmada nueva de 15 minutos y redirige al PDF.
+- Prueba real: `pnpm run wa:smoke` (manda a `WHATSAPP_TEST_RECIPIENT`).
+
 ## Pagos (ADR-022, ADR-024)
 
 Checkout Pro: la API crea la preferencia (`POST /payments/preferences`) y
@@ -241,7 +266,9 @@ status.
 - `apps/api`: `auth`, `menu` (incluye subir/quitar imagen), `orders`
   (creación, listados, status, revisión), `payments` (Checkout Pro +
   webhook), `mcp` (2 tools), `notifications` (WebSocket gateway +
-  WhatsApp), `storage` y `pdf` (recibo del pedido, ADR-028).
+  WhatsApp vía Meta Cloud API), `storage` y `pdf` (recibo del pedido,
+  ADR-028, y su link de 30 días, ADR-029). `config/env.validation.ts`
+  valida las variables al arrancar.
 - `apps/dashboard`: features `auth`, `menu` (CRUD + imagen del platillo:
   selector con vista previa y validación previa con las reglas de
   shared-types, miniatura en la tabla), `notifications` (campanita

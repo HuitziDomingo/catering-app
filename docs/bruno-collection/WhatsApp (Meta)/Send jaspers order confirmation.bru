@@ -1,0 +1,49 @@
+meta {
+  name: Send jaspers order confirmation
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://graph.facebook.com/{{process.env.WHATSAPP_API_VERSION}}/{{process.env.WHATSAPP_PHONE_NUMBER_ID}}/messages
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{process.env.WHATSAPP_ACCESS_TOKEN}}
+}
+
+body:json {
+  {
+    "messaging_product": "whatsapp",
+    "to": "{{process.env.WHATSAPP_TEST_RECIPIENT}}",
+    "type": "template",
+    "template": {
+      "name": "jaspers_market_order_confirmation_v1",
+      "language": { "code": "en_US" },
+      "components": [
+        {
+          "type": "body",
+          "parameters": [
+            { "type": "text", "text": "Ana Pérez" },
+            { "type": "text", "text": "3F2A9B1C" },
+            { "type": "text", "text": "20 nov 2026, 2:00 p.m." }
+          ]
+        }
+      ]
+    }
+  }
+}
+
+tests {
+  test("Meta acepta el mensaje", function () {
+    expect(res.status).to.equal(200);
+  });
+}
+
+docs {
+  La plantilla que manda la API en `WHATSAPP_TEMPLATE_MODE=test` (ADR-029):
+  `{{1}}` nombre, `{{2}}` número de pedido (folio) y `{{3}}` entrega
+  estimada (fecha del evento). Mismo body que arma `buildTemplatePayload`.
+}

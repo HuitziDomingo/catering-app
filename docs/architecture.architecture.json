@@ -235,8 +235,8 @@
     {
       "id": "whatsapp",
       "type": "external",
-      "label": "Twilio WhatsApp",
-      "sublabel": "PENDIENTE (deshabilitado)",
+      "label": "WhatsApp Cloud API",
+      "sublabel": "Meta · plantillas",
       "brand": "whatsapp",
       "pos": [
         1180,
@@ -246,7 +246,7 @@
         170,
         64
       ],
-      "tag": "pendiente"
+      "tag": "ADR-029"
     },
     {
       "id": "objectstore",
@@ -386,8 +386,7 @@
       "id": "orders-whatsapp",
       "from": "orders",
       "to": "whatsapp",
-      "label": "texto",
-      "variant": "dashed",
+      "label": "plantillas",
       "fromSide": "top",
       "toSide": "bottom"
     }
@@ -408,15 +407,16 @@
       "items": [
         "Pedidos con transiciones validadas (ADR-027)",
         "Checkout Pro + webhook firmado + /payments/return",
-        "Recibo PDF al confirmar, URL firmada 15 min (ADR-028)"
+        "Recibo PDF al confirmar, URL firmada 15 min (ADR-028)",
+        "WhatsApp con plantillas y link al recibo de 30 días (ADR-029)"
       ]
     },
     {
       "dot": "amber",
       "title": "Pendiente",
       "items": [
-        "WhatsApp vía Twilio: deshabilitado hasta tener cuenta",
-        "WhatsApp aún no adjunta la URL del recibo"
+        "Plantillas propias en revisión de Meta (hoy modo test)",
+        "Webhook de estados de WhatsApp y tabla notifications"
       ]
     }
   ]

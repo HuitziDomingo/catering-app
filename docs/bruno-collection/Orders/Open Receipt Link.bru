@@ -1,0 +1,34 @@
+meta {
+  name: Open Receipt Link
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/receipts/{{receiptLinkToken}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("sigue el 302 y llega al PDF", function () {
+    expect(res.status).to.equal(200);
+    expect(res.headers["content-type"]).to.include("application/pdf");
+  });
+}
+
+docs {
+  Link al recibo de WhatsApp (ADR-029). Público, sin JWT (`auth: none`):
+  el token es la credencial. Valida el token (JWT de 30 días firmado con
+  `RECEIPT_LINK_SECRET`), genera una URL firmada nueva de 15 minutos y
+  responde 302 a ella. Bruno sigue el redirect, así que la respuesta final
+  es el PDF del almacenamiento.
+
+  - 404: token inválido (otro secreto, alterado o sin `RECEIPT_LINK_SECRET`).
+  - 410: el link caducó (30 días).
+  Los errores llegan como una página HTML corta, porque el link se abre en
+  el navegador del teléfono.
+
+  Usa `receiptLinkToken`, que llena Get Order Receipt (requiere
+  `API_PUBLIC_URL` y `RECEIPT_LINK_SECRET` en `apps/api/.env`).
+}
