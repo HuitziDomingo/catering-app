@@ -40,6 +40,7 @@ export const business = {
   name: 'Santo Sazón',
   tagline: 'Catering mexicano para tus mejores momentos',
   city: 'Ciudad de México',
+  cityShort: 'CDMX',
   phone: '55 0000 0000',
   email: 'hola@santosazon.mx',
   address: 'Calle Ejemplo 123, Col. Centro, Ciudad de México',

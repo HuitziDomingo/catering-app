@@ -56,9 +56,12 @@ import { business, nav, whatsappLink } from '../data/site';
 </script>
 
 <style>
+  /* Pico le da padding a body > header: aquí no aplica. */
   .site-header {
     position: fixed;
     inset: 0 0 auto;
+    margin: 0;
+    padding: 0;
     z-index: 50;
     height: var(--ss-header-h);
     background: rgb(250 246 240 / 0.86);
@@ -119,7 +122,7 @@ import { business, nav, whatsappLink } from '../data/site';
     background: var(--ss-arena);
   }
 
-  .header-cta {
+  .site-header .header-cta {
     display: none;
     padding: 0.7rem 1.3rem;
     font-size: 0.95rem;
@@ -217,7 +220,7 @@ import { business, nav, whatsappLink } from '../data/site';
 
   @media (min-width: 900px) {
     .desktop-nav,
-    .header-cta {
+    .site-header .header-cta {
       display: flex;
     }
     .mobile-nav {

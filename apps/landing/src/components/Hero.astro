@@ -1,0 +1,182 @@
+---
+import { business, photos, photoSrcset, photoUrl, whatsappLink } from '../data/site';
+import ChatIcon from './ChatIcon.astro';
+
+const photo = photos.heroTable;
+---
+
+<section class="hero on-dark" id="inicio" aria-labelledby="hero-title">
+  <img
+    class="hero-photo"
+    src={photoUrl(photo, 1600, 1000)}
+    srcset={photoSrcset(photo, [640, 960, 1280, 1600, 2200], 0.625)}
+    sizes="100vw"
+    width="1600"
+    height="1000"
+    alt={photo.alt}
+    fetchpriority="high"
+    decoding="async"
+  />
+  <div class="hero-shade" aria-hidden="true"></div>
+
+  <div class="wrap hero-content">
+    <p class="hero-kicker">Catering mexicano · {business.cityShort}</p>
+    <h1 id="hero-title">
+      El sazón de casa, <em>servido</em> para tu evento.
+    </h1>
+    <p class="hero-sub">
+      Cocinamos platillos mexicanos de temporada para reuniones, oficinas y bodas. Tú eliges en la app, nosotros
+      llevamos la mesa completa.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-light" role="button" href="#menu">Ver menú</a>
+      <a class="btn btn-ghost" role="button" href={whatsappLink()} target="_blank" rel="noopener">
+        <ChatIcon />
+        Pedir por WhatsApp
+      </a>
+    </div>
+    <ul class="hero-facts" aria-label="Lo esencial">
+      <li><strong>20 a 500</strong> invitados</li>
+      <li><strong>Pago seguro</strong> con Mercado Pago</li>
+      <li><strong>Recibo</strong> por WhatsApp</li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: flex-end;
+    min-height: 100svh;
+    padding-top: calc(var(--ss-header-h) + 2rem);
+    padding-bottom: clamp(2.5rem, 7vh, 5rem);
+    color: var(--ss-crema);
+    overflow: hidden;
+  }
+  .hero-photo {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform-origin: 50% 40%;
+  }
+  /* Degradado para que el texto crema tenga contraste AA sobre cualquier zona de la foto. */
+  .hero-shade {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(180deg, rgb(20 16 12 / 0.35) 0%, rgb(20 16 12 / 0.15) 30%, rgb(20 16 12 / 0.78) 78%, rgb(20 16 12 / 0.9) 100%),
+      linear-gradient(90deg, rgb(20 16 12 / 0.55) 0%, rgb(20 16 12 / 0) 70%);
+  }
+  .hero-content {
+    max-width: 76rem;
+  }
+  .hero-kicker {
+    display: inline-block;
+    margin-bottom: 1.25rem;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ss-carbon);
+    background: var(--ss-dorado);
+    border-radius: 999px;
+  }
+  h1 {
+    max-width: 14ch;
+    margin-bottom: 1.25rem;
+    font-size: clamp(2.6rem, min(8.5vw, 10.5vh), 5.6rem);
+    font-weight: 500;
+    line-height: 0.98;
+    color: var(--ss-crema);
+  }
+  h1 em {
+    font-style: italic;
+    font-variation-settings: 'SOFT' 100, 'WONK' 1;
+    color: var(--ss-dorado);
+  }
+  .hero-sub {
+    max-width: 36rem;
+    margin-bottom: 2rem;
+    font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+    color: rgb(250 246 240 / 0.92);
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+  }
+  .hero-actions .btn {
+    flex: 1 1 13rem;
+  }
+  .hero-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.75rem;
+    margin: clamp(1.5rem, 4vh, 2.5rem) 0 0;
+    padding: 1.25rem 0 0;
+    border-top: 1px solid rgb(250 246 240 / 0.25);
+    list-style: none;
+    font-size: 0.95rem;
+    color: rgb(250 246 240 / 0.88);
+  }
+  .hero-facts li {
+    margin: 0;
+    list-style: none;
+  }
+  .hero-facts strong {
+    color: var(--ss-crema);
+    font-weight: 600;
+  }
+
+  @media (min-width: 640px) {
+    .hero-actions .btn {
+      flex: 0 0 auto;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-photo {
+      animation: hero-zoom 14s var(--ss-ease) both;
+    }
+    .hero-content > * {
+      animation: hero-rise 0.9s var(--ss-ease) both;
+    }
+    .hero-content > :nth-child(2) {
+      animation-delay: 0.08s;
+    }
+    .hero-content > :nth-child(3) {
+      animation-delay: 0.16s;
+    }
+    .hero-content > :nth-child(4) {
+      animation-delay: 0.24s;
+    }
+    .hero-content > :nth-child(5) {
+      animation-delay: 0.32s;
+    }
+  }
+  @keyframes hero-zoom {
+    from {
+      transform: scale(1.08);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+  @keyframes hero-rise {
+    from {
+      opacity: 0;
+      transform: translateY(1.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

@@ -82,6 +82,12 @@ p {
   text-wrap: pretty;
 }
 
+/* Pico separa body > main/footer con padding; aquí cada sección maneja su aire. */
+body > main,
+body > footer {
+  padding-block: 0;
+}
+
 img {
   display: block;
   max-width: 100%;
