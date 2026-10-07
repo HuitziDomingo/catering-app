@@ -1,0 +1,135 @@
+---
+import { gallery, photoUrl } from '../data/site';
+
+// Tamaño de recorte de cada foto según su lugar en el mosaico.
+const shapes = [
+  { w: 900, h: 1200 },
+  { w: 800, h: 600 },
+  { w: 800, h: 600 },
+  { w: 800, h: 600 },
+  { w: 900, h: 1200 },
+  { w: 1400, h: 700 },
+];
+---
+
+<section class="section gallery" id="galeria" aria-labelledby="galeria-title">
+  <div class="wrap">
+    <header class="section-head reveal">
+      <p class="eyebrow">Galería</p>
+      <h2 id="galeria-title">Así se ven nuestras mesas</h2>
+      <p>Fotos de referencia mientras preparamos la sesión con nuestros propios eventos.</p>
+    </header>
+
+    <ul class="mosaic">
+      {gallery.map((photo, index) => (
+        <li class={`tile tile-${index + 1} reveal`}>
+          <img
+            src={photoUrl(photo, shapes[index].w, shapes[index].h)}
+            width={shapes[index].w}
+            height={shapes[index].h}
+            alt={photo.alt}
+            loading="lazy"
+            decoding="async"
+          />
+        </li>
+      ))}
+    </ul>
+
+    <aside class="reviews-placeholder reveal" aria-label="Espacio para opiniones de clientes">
+      <p class="reviews-tag">Placeholder del mockup</p>
+      <h3>Espacio para opiniones de clientes</h3>
+      <p>Aquí irán opiniones reales de clientes cuando las tengamos. No usamos reseñas inventadas.</p>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .mosaic {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-areas:
+      'a a'
+      'b c'
+      'd e'
+      'f f';
+    grid-auto-rows: 11rem;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tile {
+    margin: 0;
+    list-style: none;
+    overflow: hidden;
+    border-radius: var(--ss-radius-sm);
+    background: var(--ss-arena);
+  }
+  .tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1s var(--ss-ease);
+  }
+  .tile:hover img {
+    transform: scale(1.06);
+  }
+  .tile-1 {
+    grid-area: a;
+  }
+  .tile-2 {
+    grid-area: b;
+  }
+  .tile-3 {
+    grid-area: c;
+  }
+  .tile-4 {
+    grid-area: d;
+  }
+  .tile-5 {
+    grid-area: e;
+  }
+  .tile-6 {
+    grid-area: f;
+  }
+
+  .reviews-placeholder {
+    margin-top: clamp(3rem, 6vw, 4.5rem);
+    padding: clamp(1.75rem, 4vw, 2.75rem);
+    text-align: center;
+    border: 2px dashed rgb(31 31 31 / 0.22);
+    border-radius: var(--ss-radius);
+  }
+  .reviews-tag {
+    display: inline-block;
+    margin-bottom: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ss-carbon);
+    background: var(--ss-arena);
+    border-radius: 999px;
+  }
+  .reviews-placeholder h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+  }
+  .reviews-placeholder p:last-child {
+    margin: 0;
+    color: var(--ss-texto-suave);
+  }
+
+  @media (min-width: 760px) {
+    .mosaic {
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-areas:
+        'a b c'
+        'a d e'
+        'f f e';
+      grid-auto-rows: clamp(11rem, 18vw, 15rem);
+      gap: 1rem;
+    }
+  }
+</style>
