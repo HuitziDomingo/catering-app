@@ -13,6 +13,7 @@ import { NotificationGateway } from '../notifications/notification.gateway';
 import { WhatsAppService } from '../notifications/whatsapp/whatsapp.service';
 import { paidOrder } from '../pdf/receipt-fixtures';
 import { ReceiptPdfRenderer } from '../pdf/receipt-pdf.renderer';
+import { ReceiptLinkService } from '../pdf/receipt-link.service';
 import { ReceiptsService } from '../pdf/receipts.service';
 import { StorageService } from '../storage/storage.service';
 import { OrdersController } from './orders.controller';
@@ -76,13 +77,20 @@ describe('GET /orders/:id/receipt (integration)', () => {
         ReceiptsService,
         ReceiptPdfRenderer,
         {
+          provide: ReceiptLinkService,
+          useValue: { createToken: jest.fn(), buildShareUrl: jest.fn().mockReturnValue(null) },
+        },
+        {
           provide: getRepositoryToken(Order),
           useValue: { findOne: jest.fn(({ where }) => Promise.resolve(orders[where.id] ?? null)) },
         },
         { provide: getRepositoryToken(User), useValue: { findOne: jest.fn() } },
         { provide: getRepositoryToken(OrderDocument), useValue: documentsRepo },
         { provide: NotificationGateway, useValue: { emitNewOrder: jest.fn() } },
-        { provide: WhatsAppService, useValue: { sendMessage: jest.fn() } },
+        {
+          provide: WhatsAppService,
+          useValue: { notifyOrderCreated: jest.fn(), notifyStatusChanged: jest.fn() },
+        },
         { provide: ConfigService, useValue: { get: jest.fn() } },
         { provide: StorageService, useValue: storage },
       ],

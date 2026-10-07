@@ -30,6 +30,7 @@ import { OrderReceiptResponseDto } from './dto/order-receipt-response.dto';
 import { OrderResponseDto, PaginatedOrdersResponseDto } from './dto/order-response.dto';
 import { ReviewOrderDto } from './dto/review-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { ReceiptLinkService } from '../pdf/receipt-link.service';
 import { ReceiptsService } from '../pdf/receipts.service';
 import { StorageService } from '../storage/storage.service';
 import { toOrderResponse } from './order-response.mapper';
@@ -45,6 +46,7 @@ export class OrdersController {
     private readonly orders: OrdersService,
     private readonly storage: StorageService,
     private readonly receipts: ReceiptsService,
+    private readonly receiptLinks: ReceiptLinkService,
   ) {}
 
   @Post()
@@ -233,7 +235,10 @@ export class OrdersController {
       userId: user.sub,
       role: user.role,
     });
-    return this.receipts.getReceiptUrl(order);
+    return {
+      ...(await this.receipts.getReceiptUrl(order)),
+      shareUrl: this.receiptLinks.buildShareUrl(order.id),
+    };
   }
 
   @Patch(':id/status')

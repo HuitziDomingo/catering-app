@@ -8,6 +8,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
 import { PdfModule } from '../pdf/pdf.module';
 import { StorageModule } from '../storage/storage.module';
 import { OrdersController } from './orders.controller';
+import { ReceiptLinkController } from './receipt-link.controller';
 import { OrdersService } from './orders.service';
 
 @Module({
@@ -17,7 +18,7 @@ import { OrdersService } from './orders.service';
     PdfModule,
     StorageModule,
   ],
-  controllers: [OrdersController],
+  controllers: [OrdersController, ReceiptLinkController],
   providers: [OrdersService],
   exports: [OrdersService],
 })

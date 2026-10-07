@@ -124,6 +124,12 @@ export interface OrderReceiptResponse {
   url: string;
   /** Momento en que la URL deja de funcionar (ISO 8601); 15 minutos después de pedirla. */
   expiresAt: string;
+  /**
+   * Link de 30 días para compartir (el mismo del botón "Ver recibo" de
+   * WhatsApp, ADR-029): al abrirlo genera una URL firmada nueva. null si la
+   * API no tiene API_PUBLIC_URL o RECEIPT_LINK_SECRET.
+   */
+  shareUrl: string | null;
 }
 
 export interface UpdateOrderStatusDto {

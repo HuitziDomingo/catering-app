@@ -73,7 +73,10 @@ export class ReceiptsService {
    * pago responde 409. El control de acceso ya lo hizo quien llama
    * (OrdersService.findByIdForRequester).
    */
-  async getReceiptUrl(order: Order, now: Date = new Date()): Promise<OrderReceiptResponse> {
+  async getReceiptUrl(
+    order: Order,
+    now: Date = new Date(),
+  ): Promise<Omit<OrderReceiptResponse, 'shareUrl'>> {
     let receipt = await this.findReceipt(order.id);
     if (!receipt) {
       if (!isOrderPaid({ status: order.status as OrderStatus, paidAt: order.paidAt })) {

@@ -8,6 +8,7 @@ import { McpModule } from '../mcp/mcp.module';
 import { MenuModule } from '../menu/menu.module';
 import { OrdersModule } from '../orders/orders.module';
 import { PaymentsModule } from '../payments/payments.module';
+import { validateEnv } from '../config/env.validation';
 import { buildDataSourceOptions } from '../database/data-source.options';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -19,6 +20,8 @@ import { AppService } from './app.service';
       // En local se lee apps/api/.env; en Cloud Run las variables llegan del
       // entorno (el archivo simplemente no existe y se ignora).
       envFilePath: ['apps/api/.env'],
+      // Falla al arrancar si una variable tiene un valor inválido (ver env.validation.ts).
+      validate: validateEnv,
     }),
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
