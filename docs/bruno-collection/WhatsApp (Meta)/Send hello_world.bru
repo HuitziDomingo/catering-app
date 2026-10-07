@@ -1,0 +1,44 @@
+meta {
+  name: Send hello_world
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://graph.facebook.com/{{process.env.WHATSAPP_API_VERSION}}/{{process.env.WHATSAPP_PHONE_NUMBER_ID}}/messages
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{process.env.WHATSAPP_ACCESS_TOKEN}}
+}
+
+body:json {
+  {
+    "messaging_product": "whatsapp",
+    "to": "{{process.env.WHATSAPP_TEST_RECIPIENT}}",
+    "type": "template",
+    "template": { "name": "hello_world", "language": { "code": "en_US" } }
+  }
+}
+
+tests {
+  test("Meta acepta el mensaje", function () {
+    expect(res.status).to.equal(200);
+    expect(res.body.messages[0].id).to.be.a("string");
+  });
+}
+
+docs {
+  Plantilla de ejemplo `hello_world` (sin variables) al número de
+  `WHATSAPP_TEST_RECIPIENT`, que debe estar en la lista de destinatarios
+  permitidos del número de prueba.
+
+  `contacts[0].wa_id` de la respuesta es el identificador de WhatsApp del
+  destinatario: compáralo con el `to` para ver si Meta usa 52 o 521
+  (ADR-029, "El detalle del 52 1").
+
+  Errores frecuentes: 190 (token caducado), 131005 (el token no puede
+  enviar con este número), 131030 (destinatario no permitido).
+}

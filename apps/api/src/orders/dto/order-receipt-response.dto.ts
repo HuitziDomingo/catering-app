@@ -15,4 +15,13 @@ export class OrderReceiptResponseDto implements OrderReceiptResponse {
     example: '2026-10-06T19:15:00.000Z',
   })
   expiresAt!: string;
+
+  @ApiProperty({
+    nullable: true,
+    type: String,
+    description:
+      'Link de 30 días para compartir (el del botón "Ver recibo" de WhatsApp, ADR-029); ' +
+      'al abrirlo genera una URL firmada nueva. null sin API_PUBLIC_URL o RECEIPT_LINK_SECRET.',
+  })
+  shareUrl!: string | null;
 }

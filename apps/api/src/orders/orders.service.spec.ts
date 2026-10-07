@@ -13,6 +13,7 @@ import { Order } from '../database/entities/order.entity';
 import { User } from '../database/entities/user.entity';
 import { NotificationGateway } from '../notifications/notification.gateway';
 import { WhatsAppService } from '../notifications/whatsapp/whatsapp.service';
+import { ReceiptLinkService } from '../pdf/receipt-link.service';
 import { ReceiptsService } from '../pdf/receipts.service';
 import { OrdersService } from './orders.service';
 import { SCHEDULED_FOR_IN_PAST_MESSAGE } from './scheduled-for.validation';
@@ -38,7 +39,8 @@ describe('OrdersService', () => {
     save: jest.Mock;
   };
   let notificationGateway: { emitNewOrder: jest.Mock };
-  let whatsAppService: { sendMessage: jest.Mock };
+  let whatsAppService: { notifyOrderCreated: jest.Mock; notifyStatusChanged: jest.Mock };
+  let receiptLinks: { createToken: jest.Mock };
   let config: { get: jest.Mock };
   let receipts: { ensureReceipt: jest.Mock };
 
@@ -47,7 +49,6 @@ describe('OrdersService', () => {
   const menuItemId = '22222222-2222-2222-2222-222222222222';
   const missingMenuItemId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
   const orderId = '33333333-3333-3333-3333-333333333333';
-  const businessNumber = 'whatsapp:+14155238886';
 
   const customerWithWhatsApp = {
     id: customerId,
@@ -93,12 +94,12 @@ describe('OrdersService', () => {
 
     usersRepo = { findOne: jest.fn().mockResolvedValue(customerWithWhatsApp) };
     notificationGateway = { emitNewOrder: jest.fn() };
-    whatsAppService = { sendMessage: jest.fn().mockResolvedValue(undefined) };
-    config = {
-      get: jest.fn((key: string) =>
-        key === 'BUSINESS_WHATSAPP_NUMBER' ? businessNumber : undefined,
-      ),
+    whatsAppService = {
+      notifyOrderCreated: jest.fn().mockResolvedValue(undefined),
+      notifyStatusChanged: jest.fn().mockResolvedValue(undefined),
     };
+    receiptLinks = { createToken: jest.fn().mockReturnValue('token-del-recibo') };
+    config = { get: jest.fn() };
 
     receipts = { ensureReceipt: jest.fn().mockResolvedValue({ id: 'doc-1' }) };
 
@@ -111,6 +112,7 @@ describe('OrdersService', () => {
         { provide: WhatsAppService, useValue: whatsAppService },
         { provide: ConfigService, useValue: config },
         { provide: ReceiptsService, useValue: receipts },
+        { provide: ReceiptLinkService, useValue: receiptLinks },
       ],
     }).compile();
 
@@ -133,7 +135,7 @@ describe('OrdersService', () => {
 
       expect(ordersRepo.manager.transaction).not.toHaveBeenCalled();
       expect(notificationGateway.emitNewOrder).not.toHaveBeenCalled();
-      expect(whatsAppService.sendMessage).not.toHaveBeenCalled();
+      expect(whatsAppService.notifyOrderCreated).not.toHaveBeenCalled();
     });
   });
 
@@ -219,7 +221,7 @@ describe('OrdersService', () => {
     });
   });
 
-  describe('createOrder — notificaciones de WhatsApp (ADR-026)', () => {
+  describe('createOrder — avisos de WhatsApp (ADR-026, ADR-029)', () => {
     const menuItem = {
       id: menuItemId,
       name: 'Tacos al pastor',
@@ -229,7 +231,7 @@ describe('OrdersService', () => {
       servesMax: 10,
     } as unknown as MenuItem;
 
-    it('envía un mensaje al negocio y una confirmación al cliente', async () => {
+    it('avisa del pedido creado con el cliente y el resumen de platillos', async () => {
       manager.find.mockResolvedValue([menuItem]);
 
       const order = await service.createOrder(customerId, {
@@ -238,23 +240,18 @@ describe('OrdersService', () => {
         items: [{ menuItemId, quantity: 2 }],
       });
 
-      expect(whatsAppService.sendMessage).toHaveBeenCalledTimes(2);
-      expect(whatsAppService.sendMessage).toHaveBeenNthCalledWith(
-        1,
-        businessNumber,
-        expect.stringContaining('2x Tacos al pastor'),
-      );
-      expect(whatsAppService.sendMessage).toHaveBeenNthCalledWith(
-        2,
-        customerWithWhatsApp.whatsappNumber,
-        expect.stringContaining('2x Tacos al pastor'),
+      expect(whatsAppService.notifyOrderCreated).toHaveBeenCalledTimes(1);
+      expect(whatsAppService.notifyOrderCreated).toHaveBeenCalledWith(
+        expect.objectContaining({ id: orderId, needsReview: false }),
+        customerWithWhatsApp,
+        ['2x Tacos al pastor'],
       );
       expect(usersRepo.findOne).toHaveBeenCalledWith({
         where: { id: order.customerId },
       });
     });
 
-    it('incluye la nota de needsReview en el mensaje al negocio cuando aplica', async () => {
+    it('pasa needsReview para que el aviso al negocio lo marque', async () => {
       manager.find.mockResolvedValue([
         { ...menuItem, servesMin: 300, servesMax: 500 },
       ]);
@@ -265,46 +262,11 @@ describe('OrdersService', () => {
         items: [{ menuItemId, quantity: 1 }],
       });
 
-      expect(whatsAppService.sendMessage).toHaveBeenNthCalledWith(
-        1,
-        businessNumber,
-        expect.stringContaining('Requiere revisión manual'),
+      expect(whatsAppService.notifyOrderCreated).toHaveBeenCalledWith(
+        expect.objectContaining({ needsReview: true }),
+        expect.anything(),
+        ['1x Tacos al pastor'],
       );
-    });
-
-    it('omite (sin lanzar) la confirmación al cliente si no tiene whatsappNumber registrado', async () => {
-      manager.find.mockResolvedValue([menuItem]);
-      usersRepo.findOne.mockResolvedValueOnce({ ...customerWithWhatsApp, whatsappNumber: null });
-
-      await expect(
-        service.createOrder(customerId, {
-          peopleCount: 5,
-          scheduledFor: FUTURE_EVENT_ISO,
-          items: [{ menuItemId, quantity: 1 }],
-        }),
-      ).resolves.toBeDefined();
-
-      // Solo el mensaje al negocio -- el del cliente se omitió.
-      expect(whatsAppService.sendMessage).toHaveBeenCalledTimes(1);
-      expect(whatsAppService.sendMessage).toHaveBeenCalledWith(
-        businessNumber,
-        expect.any(String),
-      );
-    });
-
-    it('no bloquea ni falla la creación del pedido si Twilio rechaza el envío', async () => {
-      manager.find.mockResolvedValue([menuItem]);
-      whatsAppService.sendMessage.mockRejectedValue(new Error('Twilio down'));
-
-      const order = await service.createOrder(customerId, {
-        peopleCount: 5,
-        scheduledFor: FUTURE_EVENT_ISO,
-        items: [{ menuItemId, quantity: 1 }],
-      });
-
-      expect(order.id).toBe(orderId);
-      // Igual se intentaron ambos envíos, cada uno atrapando su propio error.
-      expect(whatsAppService.sendMessage).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -501,80 +463,57 @@ describe('OrdersService', () => {
     });
   });
 
-  describe('updateStatus — aviso de WhatsApp en confirmed/payment_failed (ADR-026, hook para Mercado Pago)', () => {
-    it('avisa al cliente por WhatsApp cuando el pedido pasa a confirmed', async () => {
-      ordersRepo.findOne.mockResolvedValue({
+  describe('updateStatus — avisos de WhatsApp (ADR-026, ADR-029)', () => {
+    const orderWithStatus = (status: OrderStatus) =>
+      ({
         id: orderId,
         customerId,
-        status: OrderStatus.PENDING,
+        status,
         scheduledFor: new Date(FUTURE_EVENT_ISO),
-      } as unknown as Order);
+      }) as unknown as Order;
+
+    it('al confirmar avisa al cliente con el token del link al recibo', async () => {
+      ordersRepo.findOne.mockResolvedValue(orderWithStatus(OrderStatus.PENDING));
 
       await service.updateStatus(orderId, OrderStatus.CONFIRMED);
 
-      expect(whatsAppService.sendMessage).toHaveBeenCalledWith(
-        customerWithWhatsApp.whatsappNumber,
-        expect.stringContaining('confirmado'),
+      expect(receiptLinks.createToken).toHaveBeenCalledWith(orderId);
+      expect(whatsAppService.notifyStatusChanged).toHaveBeenCalledWith(
+        expect.objectContaining({ status: OrderStatus.CONFIRMED }),
+        customerWithWhatsApp,
+        { receiptLinkToken: 'token-del-recibo' },
       );
     });
 
-    it('avisa al cliente por WhatsApp cuando el pedido pasa a payment_failed', async () => {
-      ordersRepo.findOne.mockResolvedValue({
-        id: orderId,
-        customerId,
-        status: OrderStatus.PENDING,
-        scheduledFor: new Date(FUTURE_EVENT_ISO),
-      } as unknown as Order);
+    it('sin RECEIPT_LINK_SECRET (token null) avisa igual, sin link', async () => {
+      ordersRepo.findOne.mockResolvedValue(orderWithStatus(OrderStatus.PENDING));
+      receiptLinks.createToken.mockReturnValue(null);
 
-      await service.updateStatus(orderId, OrderStatus.PAYMENT_FAILED);
+      await service.updateStatus(orderId, OrderStatus.CONFIRMED);
 
-      expect(whatsAppService.sendMessage).toHaveBeenCalledWith(
-        customerWithWhatsApp.whatsappNumber,
-        expect.stringContaining('no pudimos procesar el pago'),
+      expect(whatsAppService.notifyStatusChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        customerWithWhatsApp,
+        { receiptLinkToken: undefined },
       );
     });
 
-    it('no envía nada para estados que no son confirmed/payment_failed', async () => {
-      ordersRepo.findOne.mockResolvedValue({
-        id: orderId,
-        customerId,
-        status: OrderStatus.CONFIRMED,
-        scheduledFor: new Date(FUTURE_EVENT_ISO),
-      } as unknown as Order);
+    it.each([
+      [OrderStatus.PENDING, OrderStatus.PAYMENT_FAILED],
+      [OrderStatus.CONFIRMED, OrderStatus.PREPARING],
+      [OrderStatus.PREPARING, OrderStatus.DELIVERED],
+      [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
+    ])('%s → %s avisa al cliente sin link al recibo', async (from, to) => {
+      ordersRepo.findOne.mockResolvedValue(orderWithStatus(from));
 
-      await service.updateStatus(orderId, OrderStatus.PREPARING);
+      await service.updateStatus(orderId, to);
 
-      expect(whatsAppService.sendMessage).not.toHaveBeenCalled();
-    });
-
-    it('omite (sin lanzar) el aviso si el cliente no tiene whatsappNumber registrado', async () => {
-      ordersRepo.findOne.mockResolvedValue({
-        id: orderId,
-        customerId,
-        status: OrderStatus.PENDING,
-        scheduledFor: new Date(FUTURE_EVENT_ISO),
-      } as unknown as Order);
-      usersRepo.findOne.mockResolvedValueOnce({ ...customerWithWhatsApp, whatsappNumber: null });
-
-      await expect(
-        service.updateStatus(orderId, OrderStatus.CONFIRMED),
-      ).resolves.toBeDefined();
-
-      expect(whatsAppService.sendMessage).not.toHaveBeenCalled();
-    });
-
-    it('no lanza si Twilio rechaza el envío del aviso de cambio de estado', async () => {
-      ordersRepo.findOne.mockResolvedValue({
-        id: orderId,
-        customerId,
-        status: OrderStatus.PENDING,
-        scheduledFor: new Date(FUTURE_EVENT_ISO),
-      } as unknown as Order);
-      whatsAppService.sendMessage.mockRejectedValue(new Error('Twilio down'));
-
-      await expect(
-        service.updateStatus(orderId, OrderStatus.CONFIRMED),
-      ).resolves.toBeDefined();
+      expect(receiptLinks.createToken).not.toHaveBeenCalled();
+      expect(whatsAppService.notifyStatusChanged).toHaveBeenCalledWith(
+        expect.objectContaining({ status: to }),
+        customerWithWhatsApp,
+        {},
+      );
     });
   });
 
@@ -685,7 +624,7 @@ describe('OrdersService', () => {
       await service.updateStatus(orderId, OrderStatus.CONFIRMED);
 
       expect(ordersRepo.save).not.toHaveBeenCalled();
-      expect(whatsAppService.sendMessage).not.toHaveBeenCalled();
+      expect(whatsAppService.notifyStatusChanged).not.toHaveBeenCalled();
     });
 
     it('lanza NotFoundException si el pedido no existe', async () => {
@@ -802,7 +741,7 @@ describe('OrdersService', () => {
       expect(ordersRepo.save).toHaveBeenCalledWith(
         expect.objectContaining({ status: OrderStatus.CANCELLED, paymentId: '123456789' }),
       );
-      expect(whatsAppService.sendMessage).not.toHaveBeenCalled();
+      expect(whatsAppService.notifyStatusChanged).not.toHaveBeenCalled();
     });
 
     it('un pago rechazado no pisa un paidAt previo', async () => {

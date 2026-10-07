@@ -1,0 +1,26 @@
+meta {
+  name: WhatsApp (Meta)
+  seq: 7
+}
+
+docs {
+  Llamadas directas a la Graph API de Meta (ADR-029), sin pasar por
+  nuestra API: sirven para revisar la configuración de WhatsApp. No son
+  endpoints de `apps/api`; la API manda lo mismo desde
+  `MetaCloudWhatsAppProvider`.
+
+  Leen las credenciales de `process.env`, que Bruno carga del archivo
+  `docs/bruno-collection/.env` (ignorado por git; nunca lo commitees).
+  Créalo con:
+
+  ```
+  WHATSAPP_API_VERSION=v25.0
+  WHATSAPP_PHONE_NUMBER_ID=...
+  WHATSAPP_ACCESS_TOKEN=...
+  WHATSAPP_TEST_RECIPIENT=52XXXXXXXXXX
+  WHATSAPP_BUSINESS_ACCOUNT_ID=...
+  ```
+
+  Mismos valores que `apps/api/.env`. Alternativa sin Bruno:
+  `pnpm run wa:smoke` (ver su ayuda).
+}

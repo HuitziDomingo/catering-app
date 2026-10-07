@@ -17,7 +17,7 @@ para agentes de IA, y un servidor MCP propio como pieza central del backend.
 - **Backend:** NestJS (REST API + WebSocket Gateway + servidor MCP), TypeORM, PostgreSQL (Supabase)
 - **Dashboard:** Angular + Taiga UI
 - **App móvil:** React Native (Expo) + UI Kitten + Moti, Zustand, axios
-- **Notificaciones:** WhatsApp vía Twilio
+- **Notificaciones:** WhatsApp vía Meta Cloud API (plantillas, ADR-029)
 - **PDF:** pdfkit
 - **Monorepo:** Nx + pnpm
 - **Testing:** Jest (unitarias e integración), Cypress (E2E dashboard)

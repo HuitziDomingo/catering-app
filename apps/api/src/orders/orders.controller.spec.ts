@@ -7,6 +7,7 @@ import { ROLES_KEY } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtPayload } from '../auth/jwt-payload.interface';
+import { ReceiptLinkService } from '../pdf/receipt-link.service';
 import { ReceiptsService } from '../pdf/receipts.service';
 import { StorageService } from '../storage/storage.service';
 import { OrdersController } from './orders.controller';
@@ -46,6 +47,10 @@ describe('OrdersController', () => {
         { provide: OrdersService, useValue: ordersService },
         { provide: StorageService, useValue: { getPublicUrl: jest.fn() } },
         { provide: ReceiptsService, useValue: receiptsService },
+        {
+          provide: ReceiptLinkService,
+          useValue: { buildShareUrl: jest.fn().mockReturnValue('https://api.test/api/receipts/tok') },
+        },
       ],
     }).compile();
 
@@ -150,7 +155,10 @@ describe('OrdersController', () => {
       ordersService.findByIdForRequester.mockResolvedValue(order);
       receiptsService.getReceiptUrl.mockResolvedValue(receipt);
 
-      await expect(controller.getReceipt('order-1', req)).resolves.toEqual(receipt);
+      await expect(controller.getReceipt('order-1', req)).resolves.toEqual({
+        ...receipt,
+        shareUrl: 'https://api.test/api/receipts/tok',
+      });
 
       expect(ordersService.findByIdForRequester).toHaveBeenCalledWith('order-1', {
         userId: 'user-1',

@@ -6,7 +6,6 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import {
@@ -20,6 +19,7 @@ import { Order } from '../database/entities/order.entity';
 import { OrderItem } from '../database/entities/order-item.entity';
 import { User } from '../database/entities/user.entity';
 import { NotificationGateway } from '../notifications/notification.gateway';
+import { ReceiptLinkService } from '../pdf/receipt-link.service';
 import { ReceiptsService } from '../pdf/receipts.service';
 import { WhatsAppService } from '../notifications/whatsapp/whatsapp.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -30,19 +30,6 @@ import {
 } from './dto/list-orders-query.dto';
 import { ReviewOrderDto } from './dto/review-order.dto';
 import { assertScheduledForInFuture } from './scheduled-for.validation';
-
-/** Estados de pedido que disparan un aviso de WhatsApp al cliente (ver ADR-026). */
-const CUSTOMER_NOTIFIABLE_STATUSES: string[] = [
-  OrderStatus.CONFIRMED,
-  OrderStatus.PAYMENT_FAILED,
-];
-
-function formatScheduledFor(date: Date): string {
-  return date.toLocaleString('es-MX', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
-}
 
 export interface FindByCustomerFilters {
   status?: OrderStatus;
@@ -86,8 +73,8 @@ export class OrdersService {
     private readonly usersRepository: Repository<User>,
     private readonly notificationGateway: NotificationGateway,
     private readonly whatsAppService: WhatsAppService,
-    private readonly config: ConfigService,
     private readonly receipts: ReceiptsService,
+    private readonly receiptLinks: ReceiptLinkService,
   ) {}
 
   /**
@@ -219,68 +206,21 @@ export class OrdersService {
       needsReview: order.needsReview,
     });
 
-    await this.notifyOrderCreatedByWhatsApp(order, itemSummaries);
+    await this.whatsAppService.notifyOrderCreated(
+      order,
+      await this.findCustomer(order.customerId),
+      itemSummaries,
+    );
 
     return order;
   }
 
   /**
-   * Avisa por WhatsApp al negocio y al cliente de un pedido recién creado
-   * (ver ADR-026). Un fallo de Twilio (o falta de whatsappNumber del
-   * cliente) nunca debe deshacer ni bloquear la creación del pedido -- ya
-   * quedó guardado -- por eso cada envío atrapa sus propios errores.
+   * Cliente para los avisos de WhatsApp (ADR-026, ADR-029). WhatsAppService
+   * nunca lanza, así que un fallo de WhatsApp no deshace ni bloquea el pedido.
    */
-  private async notifyOrderCreatedByWhatsApp(
-    order: Order,
-    itemSummaries: string[],
-  ): Promise<void> {
-    const itemsText = itemSummaries.join(', ');
-    const scheduledForText = formatScheduledFor(order.scheduledFor);
-
-    const businessNumber = this.config.get<string>('BUSINESS_WHATSAPP_NUMBER');
-    if (!businessNumber) {
-      this.logger.warn(
-        `BUSINESS_WHATSAPP_NUMBER no está configurado, se omite el aviso al negocio del pedido ${order.id}.`,
-      );
-    } else {
-      const reviewNote = order.needsReview
-        ? ' Requiere revisión manual (cantidad de personas fuera de rango).'
-        : '';
-      try {
-        await this.whatsAppService.sendMessage(
-          businessNumber,
-          `Nuevo pedido: ${itemsText}. Para ${order.peopleCount} personas, ` +
-            `programado para ${scheduledForText}.${reviewNote}`,
-        );
-      } catch (error) {
-        this.logger.warn(
-          `No se pudo notificar al negocio por WhatsApp del pedido ${order.id}: ${error}`,
-        );
-      }
-    }
-
-    const customer = await this.usersRepository.findOne({
-      where: { id: order.customerId },
-    });
-    if (!customer?.whatsappNumber) {
-      this.logger.warn(
-        `Pedido ${order.id}: el cliente no tiene whatsappNumber registrado, se omite la confirmación por WhatsApp.`,
-      );
-      return;
-    }
-
-    try {
-      await this.whatsAppService.sendMessage(
-        customer.whatsappNumber,
-        `Hola ${customer.fullName}, recibimos tu pedido: ${itemsText}, para ` +
-          `${order.peopleCount} personas el ${scheduledForText}. Te avisaremos ` +
-          'cuando esté confirmado.',
-      );
-    } catch (error) {
-      this.logger.warn(
-        `No se pudo enviar la confirmación de WhatsApp al cliente para el pedido ${order.id}: ${error}`,
-      );
-    }
+  private findCustomer(customerId: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { id: customerId } });
   }
 
   /**
@@ -423,7 +363,13 @@ export class OrdersService {
     order.status = status;
     const savedOrder = await this.ordersRepository.save(order);
 
-    await this.notifyStatusChangeByWhatsApp(savedOrder);
+    await this.whatsAppService.notifyStatusChanged(
+      savedOrder,
+      await this.findCustomer(savedOrder.customerId),
+      savedOrder.status === OrderStatus.CONFIRMED
+        ? { receiptLinkToken: this.receiptLinks.createToken(savedOrder.id) ?? undefined }
+        : {},
+    );
 
     if (savedOrder.status === OrderStatus.CONFIRMED) {
       await this.generateReceiptSafely(savedOrder.id);
@@ -549,38 +495,6 @@ export class OrdersService {
 
     await this.ordersRepository.save(order);
     return this.findDetailById(id);
-  }
-
-  /** Avisa por WhatsApp al cliente cuando su pedido pasa a confirmed/payment_failed. */
-  private async notifyStatusChangeByWhatsApp(order: Order): Promise<void> {
-    if (!CUSTOMER_NOTIFIABLE_STATUSES.includes(order.status)) {
-      return;
-    }
-
-    const customer = await this.usersRepository.findOne({
-      where: { id: order.customerId },
-    });
-    if (!customer?.whatsappNumber) {
-      this.logger.warn(
-        `Pedido ${order.id}: el cliente no tiene whatsappNumber registrado, se omite el aviso de cambio de estado por WhatsApp.`,
-      );
-      return;
-    }
-
-    const message =
-      order.status === OrderStatus.CONFIRMED
-        ? `Hola ${customer.fullName}, tu pedido fue confirmado y el pago fue ` +
-          `aprobado. Te esperamos el ${formatScheduledFor(order.scheduledFor)}.`
-        : `Hola ${customer.fullName}, no pudimos procesar el pago de tu ` +
-          'pedido. Por favor intenta nuevamente o contáctanos.';
-
-    try {
-      await this.whatsAppService.sendMessage(customer.whatsappNumber, message);
-    } catch (error) {
-      this.logger.warn(
-        `No se pudo enviar el aviso de WhatsApp de cambio de estado para el pedido ${order.id}: ${error}`,
-      );
-    }
   }
 
   /**

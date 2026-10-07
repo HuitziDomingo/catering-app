@@ -10,6 +10,14 @@ get {
   auth: inherit
 }
 
+script:post-response {
+  // shareUrl = link de 30 días (ADR-029). Se guarda solo el token, para
+  // abrirlo contra baseUrl aunque API_PUBLIC_URL sea un túnel.
+  if (res.body && res.body.shareUrl) {
+    bru.setVar("receiptLinkToken", res.body.shareUrl.split("/").pop());
+  }
+}
+
 tests {
   test("200 con URL firmada de 15 minutos", function () {
     expect(res.status).to.equal(200);
@@ -24,6 +32,11 @@ docs {
   una URL firmada del bucket privado `order-documents` que caduca a los 15
   minutos. Se abre sin header Authorization (pegala en el navegador); pasado
   ese tiempo, el almacenamiento responde 403 y hay que volver a pedirla.
+
+  `shareUrl` es el link de 30 días que va en el botón "Ver recibo" de
+  WhatsApp (ADR-029): `{API_PUBLIC_URL}/api/receipts/<token>`. Es `null`
+  si la API no tiene `API_PUBLIC_URL` o `RECEIPT_LINK_SECRET`. El script
+  guarda el token en `receiptLinkToken` para Open Receipt Link.
 
   Permisos: el cliente dueño del pedido, o staff/admin/superadmin. Otro
   cliente recibe 403 (mismo criterio que Get Order By Id).

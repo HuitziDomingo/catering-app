@@ -1,0 +1,22 @@
+meta {
+  name: List Templates
+  type: http
+  seq: 3
+}
+
+get {
+  url: https://graph.facebook.com/{{process.env.WHATSAPP_API_VERSION}}/{{process.env.WHATSAPP_BUSINESS_ACCOUNT_ID}}/message_templates?fields=name,language,status,category,components&limit=100
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{process.env.WHATSAPP_ACCESS_TOKEN}}
+}
+
+docs {
+  Plantillas de la cuenta de WhatsApp Business con su estado (APPROVED,
+  PENDING, REJECTED) y sus componentes. Úsalo para ver si Meta ya aprobó
+  las de `docs/whatsapp-plantillas.md` y qué variables tienen. Para una
+  sola: agrega `&name=<nombre>`.
+}

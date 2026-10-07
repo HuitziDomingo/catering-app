@@ -8,6 +8,7 @@ import { Order } from '../database/entities/order.entity';
 import { User } from '../database/entities/user.entity';
 import { NotificationGateway } from '../notifications/notification.gateway';
 import { WhatsAppService } from '../notifications/whatsapp/whatsapp.service';
+import { ReceiptLinkService } from '../pdf/receipt-link.service';
 import { ReceiptsService } from '../pdf/receipts.service';
 import { StorageService } from '../storage/storage.service';
 import { OrdersController } from './orders.controller';
@@ -44,10 +45,14 @@ describe('POST /orders — scheduledFor futura (integration)', () => {
         { provide: getRepositoryToken(Order), useValue: { manager: { transaction } } },
         { provide: getRepositoryToken(User), useValue: { findOne: jest.fn().mockResolvedValue(null) } },
         { provide: NotificationGateway, useValue: { emitNewOrder: jest.fn() } },
-        { provide: WhatsAppService, useValue: { sendMessage: jest.fn() } },
+        {
+          provide: WhatsAppService,
+          useValue: { notifyOrderCreated: jest.fn(), notifyStatusChanged: jest.fn() },
+        },
         { provide: ConfigService, useValue: { get: jest.fn() } },
         { provide: StorageService, useValue: { getPublicUrl: jest.fn() } },
         { provide: ReceiptsService, useValue: { ensureReceipt: jest.fn() } },
+        { provide: ReceiptLinkService, useValue: { createToken: jest.fn() } },
       ],
     })
       // Sin JWT real: el guard inyecta un cliente autenticado.

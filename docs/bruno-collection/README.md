@@ -29,6 +29,7 @@ docs/bruno-collection/
   Orders/     crear, ver, "mis pedidos"; lista, status y revisión (staff, ADR-027)
   MCP/        handshake JSON-RPC completo (1 a 5, correr en orden)
   Payments/   preferencia de Checkout Pro, webhook (documentado), back_url /return
+  WhatsApp (Meta)/  llamadas directas a la Graph API (no son de apps/api; leen .env local)
   Health/     GET /api
 ```
 
@@ -45,6 +46,11 @@ docs/bruno-collection/
 | `orderId` | Orders > Create Order | Get Order, status, review, Create Preference, Payment Return |
 | `mcpSessionId` | MCP > 1 - Initialize | Header `Mcp-Session-Id` del resto del handshake |
 | `checkoutUrl` | Payments > Create Preference | URL de Checkout Pro para pagar en el navegador |
+| `receiptLinkToken` | Orders > Get Order Receipt | Token del link de 30 días al recibo (Open Receipt Link, ADR-029) |
+
+La carpeta **WhatsApp (Meta)** lee sus credenciales de `process.env`, que
+Bruno carga de `docs/bruno-collection/.env`: ese archivo está ignorado por
+git y es el único lugar de la colección donde va el token de Meta.
 
 Los scripts usan `bru.setVar` (variable **runtime**, en memoria) y no
 `bru.setEnvVar`: así nunca se escriben tokens en `environments/Local.bru`,

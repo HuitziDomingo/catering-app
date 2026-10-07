@@ -7,7 +7,8 @@
     "migration:run": "pnpm run typeorm migration:run",
     "migration:revert": "pnpm run typeorm migration:revert",
     "migration:show": "pnpm run typeorm migration:show",
-    "mp:smoke": "TS_NODE_PROJECT=apps/api/tsconfig.typeorm.json ts-node apps/api/scripts/mp-smoke.ts"
+    "mp:smoke": "TS_NODE_PROJECT=apps/api/tsconfig.typeorm.json ts-node apps/api/scripts/mp-smoke.ts",
+    "wa:smoke": "TS_NODE_PROJECT=apps/api/tsconfig.typeorm.json ts-node apps/api/scripts/wa-smoke.ts"
   },
   "private": true,
   "devDependencies": {
@@ -127,7 +128,6 @@
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "taiga-ui": "^5.15.0",
-    "twilio": "^6.1.1",
     "typeorm": "^1.1.0",
     "zod": "^3.24.1"
   },
