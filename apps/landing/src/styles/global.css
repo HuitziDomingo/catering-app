@@ -1,0 +1,267 @@
+/*
+ * Santo Sazón: sistema de diseño de la landing.
+ * Pico.css es la base (ADR-018); aquí se redefinen sus variables con la
+ * paleta propia y se agregan utilidades. Los estilos de cada sección viven
+ * en su componente (<style> con alcance de Astro).
+ */
+
+:root {
+  /* Paleta: cálida, mexicana contemporánea. */
+  --ss-terracota: #c65d3b; /* decorativo y títulos grandes (3.9:1 sobre crema) */
+  --ss-terracota-ink: #b4502f; /* texto y botones: 5.1:1 con blanco, 4.7:1 sobre crema */
+  --ss-terracota-deep: #8f3d22;
+  --ss-crema: #faf6f0;
+  --ss-arena: #f3e9dc;
+  --ss-verde: #2f4a3a;
+  --ss-verde-deep: #233a2d;
+  --ss-carbon: #1f1f1f;
+  --ss-texto-suave: #5a524a; /* 7.1:1 sobre crema */
+  --ss-dorado: #d9b26a; /* sobre verde o carbón; decorativo sobre crema */
+  --ss-blanco: #ffffff;
+
+  --ss-font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --ss-font-body: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --ss-radius: 1.25rem;
+  --ss-radius-sm: 0.75rem;
+  --ss-shadow: 0 1px 2px rgb(31 31 31 / 0.06), 0 12px 32px -12px rgb(31 31 31 / 0.18);
+  --ss-section-y: clamp(4.5rem, 10vw, 8rem);
+  --ss-header-h: 4.5rem;
+  --ss-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Pico: variables propias en tema claro (la landing no tiene modo oscuro). */
+[data-theme='light'],
+:root:not([data-theme='dark']) {
+  --pico-font-family: var(--ss-font-body);
+  --pico-font-family-sans-serif: var(--ss-font-body);
+  --pico-background-color: var(--ss-crema);
+  --pico-color: var(--ss-carbon);
+  --pico-muted-color: var(--ss-texto-suave);
+  --pico-h1-color: var(--ss-carbon);
+  --pico-h2-color: var(--ss-carbon);
+  --pico-h3-color: var(--ss-carbon);
+  --pico-primary: var(--ss-terracota-ink);
+  --pico-primary-background: var(--ss-terracota-ink);
+  --pico-primary-border: var(--ss-terracota-ink);
+  --pico-primary-underline: rgb(180 80 47 / 0.5);
+  --pico-primary-hover: var(--ss-terracota-deep);
+  --pico-primary-hover-background: var(--ss-terracota-deep);
+  --pico-primary-hover-border: var(--ss-terracota-deep);
+  --pico-primary-focus: rgb(180 80 47 / 0.35);
+  --pico-primary-inverse: var(--ss-blanco);
+  --pico-border-radius: 999px;
+  --pico-spacing: 1rem;
+  --pico-line-height: 1.6;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--ss-header-h) + 1rem);
+}
+
+body {
+  background: var(--ss-crema);
+  font-feature-settings: 'ss01';
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+.display {
+  font-family: var(--ss-font-display);
+  font-weight: 500;
+  font-variation-settings: 'SOFT' 50, 'WONK' 0;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* Pico separa body > main/footer con padding; aquí cada sección maneja su aire. */
+body > main,
+body > footer {
+  padding-block: 0;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Foco visible y consistente (AA): anillo dorado oscuro sobre cualquier fondo. */
+:focus-visible {
+  outline: 3px solid var(--ss-terracota-ink);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.on-dark :focus-visible,
+.on-dark:focus-visible {
+  outline-color: var(--ss-dorado);
+}
+
+/* Saltar al contenido (visible solo con teclado). */
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  background: var(--ss-carbon);
+  color: var(--ss-crema);
+  border-radius: var(--ss-radius-sm);
+  text-decoration: none;
+  transition: top 0.2s;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* Contenedor propio: más aire que el de Pico. */
+.wrap {
+  width: min(100% - 2rem, 76rem);
+  margin-inline: auto;
+}
+
+.section {
+  padding-block: var(--ss-section-y);
+}
+
+/* Encabezado de sección: rótulo pequeño + título serif. */
+p.eyebrow,
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ss-terracota-ink);
+}
+.eyebrow::before {
+  content: '';
+  width: 2rem;
+  height: 1px;
+  background: currentColor;
+}
+.section-head {
+  max-width: 40rem;
+  margin-bottom: clamp(2.5rem, 6vw, 4rem);
+}
+.section-head h2 {
+  font-size: clamp(2.1rem, 5vw, 3.4rem);
+  margin-bottom: 1rem;
+}
+.section-head p {
+  font-size: 1.1rem;
+  color: var(--ss-texto-suave);
+  margin: 0;
+}
+.section-head.centered {
+  margin-inline: auto;
+  text-align: center;
+}
+
+/* Botones: los de Pico con forma de píldora y variantes propias. */
+.btn,
+a[role='button'].btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.95rem 1.6rem;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.2;
+  border-radius: 999px;
+  text-decoration: none;
+  transition:
+    transform 0.25s var(--ss-ease),
+    background-color 0.25s,
+    box-shadow 0.25s;
+}
+.btn:hover {
+  transform: translateY(-2px);
+}
+.btn-light,
+a[role='button'].btn-light {
+  background: var(--ss-crema);
+  border-color: var(--ss-crema);
+  color: var(--ss-carbon);
+}
+.btn-light:hover {
+  background: var(--ss-blanco);
+  border-color: var(--ss-blanco);
+  color: var(--ss-carbon);
+}
+.btn-ghost,
+a[role='button'].btn-ghost {
+  background: transparent;
+  border: 1.5px solid currentColor;
+  color: inherit;
+}
+.btn-ghost:hover {
+  background: rgb(250 246 240 / 0.12);
+  color: inherit;
+}
+.btn svg {
+  width: 1.2em;
+  height: 1.2em;
+  flex: none;
+}
+
+/* Aparición al hacer scroll: solo CSS (scroll-driven animations). Sin
+   soporte, o con prefers-reduced-motion, el contenido se ve normal. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: ss-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 28%;
+    }
+  }
+}
+
+@keyframes ss-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(2.5rem) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

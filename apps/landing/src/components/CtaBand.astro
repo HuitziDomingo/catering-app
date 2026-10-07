@@ -1,0 +1,124 @@
+---
+import { whatsappLink } from '../data/site';
+import ChatIcon from './ChatIcon.astro';
+
+const stores = ['App Store', 'Google Play'];
+---
+
+<section class="cta on-dark" aria-labelledby="cta-title">
+  <div class="wrap cta-inner reveal">
+    <div class="cta-copy">
+      <h2 id="cta-title">¿Tienes un evento?</h2>
+      <p>Cuéntanos la fecha, cuántos invitados y qué se te antoja. Te respondemos el mismo día con una propuesta.</p>
+      <a class="btn btn-light" role="button" href={whatsappLink('Hola, tengo un evento y quiero cotizar con Santo Sazón.')} target="_blank" rel="noopener">
+        <ChatIcon />
+        Escríbenos por WhatsApp
+      </a>
+    </div>
+
+    <ul class="stores" aria-label="Apps móviles (próximamente)">
+      {stores.map((store) => (
+        <li class="store-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+            <rect x="6" y="2.5" width="12" height="19" rx="2.5"></rect>
+            <path d="M10.5 18.5h3"></path>
+          </svg>
+          <span>
+            <small>Próximamente en</small>
+            {store}
+          </span>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .cta {
+    padding-block: clamp(1.5rem, 4vw, 3rem);
+  }
+  .cta-inner {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+    padding: clamp(2.5rem, 7vw, 5rem) clamp(1.5rem, 6vw, 4.5rem);
+    color: var(--ss-blanco);
+    background: var(--ss-terracota-ink);
+    border-radius: calc(var(--ss-radius) * 1.6);
+    overflow: hidden;
+  }
+  /* Textura sutil de círculos, como mosaico de barro. */
+  .cta-inner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(circle at 92% 18%, rgb(217 178 106 / 0.35) 0 5rem, transparent 5.05rem),
+      radial-gradient(circle at 80% 105%, rgb(143 61 34 / 0.75) 0 11rem, transparent 11.05rem),
+      radial-gradient(circle at 100% 70%, rgb(255 255 255 / 0.07) 0 7rem, transparent 7.05rem);
+  }
+  h2 {
+    margin-bottom: 1rem;
+    font-size: clamp(2.3rem, 6vw, 4rem);
+    color: var(--ss-blanco);
+  }
+  .cta-copy p {
+    max-width: 32rem;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+    color: var(--ss-blanco);
+  }
+  .stores {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .store-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0.7rem 1.2rem 0.7rem 0.9rem;
+    list-style: none;
+    font-weight: 600;
+    font-size: 1.05rem;
+    line-height: 1.15;
+    color: var(--ss-blanco);
+    background: rgb(31 31 31 / 0.55);
+    border: 1px solid rgb(255 255 255 / 0.25);
+    border-radius: var(--ss-radius-sm);
+  }
+  .store-badge svg {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+  .store-badge small {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    opacity: 0.9;
+  }
+
+  @media (max-width: 639px) {
+    .cta-copy .btn {
+      width: 100%;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .cta-inner {
+      grid-template-columns: 1.5fr 1fr;
+    }
+    .stores {
+      flex-direction: column;
+      align-items: flex-end;
+    }
+  }
+</style>

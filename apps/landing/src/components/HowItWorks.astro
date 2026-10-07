@@ -1,0 +1,139 @@
+---
+import { steps, whatsappLink } from '../data/site';
+import ChatIcon from './ChatIcon.astro';
+
+// Íconos de línea propios (sin librerías): app, pago seguro, confirmación.
+const icons = [
+  '<rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10 18.5h4"/><path d="M9.5 8.5h5M9.5 12h3"/>',
+  '<rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/><path d="M6.5 15h3"/><path d="m15 14.5 1.5 1.5 3-3"/>',
+  '<path d="M20 11.5a8 8 0 0 1-11.8 7L4 19.6l1.1-4A8 8 0 1 1 20 11.5Z"/><path d="m8.5 11.5 2.2 2.2 4.8-4.7"/>',
+];
+---
+
+<section class="section how on-dark" id="como-funciona" aria-labelledby="como-funciona-title">
+  <div class="wrap">
+    <header class="section-head reveal">
+      <p class="eyebrow">Cómo funciona</p>
+      <h2 id="como-funciona-title">Pedir es así de fácil</h2>
+      <p>Así funciona hoy nuestra app: tú eliges, pagas en línea y te avisamos de todo por WhatsApp.</p>
+    </header>
+
+    <ol class="steps">
+      {steps.map((step, index) => (
+        <li class="step reveal">
+          <div class="step-top">
+            <span class="step-number" aria-hidden="true">{index + 1}</span>
+            <svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={icons[index]} />
+          </div>
+          <h3>{step.title}</h3>
+          <p>{step.text}</p>
+        </li>
+      ))}
+    </ol>
+
+    <p class="how-note reveal">
+      La app llega pronto a las tiendas. Mientras tanto,
+      <a href={whatsappLink()} target="_blank" rel="noopener"><ChatIcon /> haz tu pedido por WhatsApp</a>.
+    </p>
+  </div>
+</section>
+
+<style>
+  .how {
+    position: relative;
+    overflow: hidden;
+    background: var(--ss-verde);
+    color: var(--ss-crema);
+  }
+  /* Halo cálido decorativo. */
+  .how::before {
+    content: '';
+    position: absolute;
+    right: -15rem;
+    top: -15rem;
+    width: 40rem;
+    height: 40rem;
+    background: radial-gradient(circle, rgb(217 178 106 / 0.22), transparent 65%);
+    pointer-events: none;
+  }
+  .how .eyebrow {
+    color: var(--ss-dorado);
+  }
+  .how h2 {
+    color: var(--ss-crema);
+  }
+  .how .section-head p {
+    color: rgb(250 246 240 / 0.82);
+  }
+  .steps {
+    position: relative;
+    display: grid;
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: none;
+  }
+  .step {
+    margin: 0;
+    padding: 2rem 1.75rem;
+    list-style: none;
+    background: rgb(250 246 240 / 0.06);
+    border: 1px solid rgb(250 246 240 / 0.14);
+    border-radius: var(--ss-radius);
+  }
+  .step-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+  }
+  .step-number {
+    font-family: var(--ss-font-display);
+    font-style: italic;
+    font-size: 3.5rem;
+    line-height: 1;
+    font-variation-settings: 'SOFT' 100, 'WONK' 1;
+    color: var(--ss-dorado);
+  }
+  .step-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0.6rem;
+    color: var(--ss-verde);
+    background: var(--ss-dorado);
+    border-radius: 50%;
+  }
+  .step h3 {
+    margin-bottom: 0.6rem;
+    font-size: 1.5rem;
+    color: var(--ss-crema);
+  }
+  .step p {
+    margin: 0;
+    color: rgb(250 246 240 / 0.82);
+  }
+  .how-note {
+    margin: 2.5rem 0 0;
+    color: rgb(250 246 240 / 0.82);
+  }
+  .how-note a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--ss-dorado);
+    font-weight: 600;
+    text-underline-offset: 4px;
+  }
+  .how-note a :global(svg) {
+    width: 1.1em;
+    height: 1.1em;
+  }
+
+  @media (min-width: 860px) {
+    .steps {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+  }
+</style>

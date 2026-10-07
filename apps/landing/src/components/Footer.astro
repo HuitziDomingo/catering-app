@@ -1,0 +1,158 @@
+---
+import { allPhotos, business, whatsappLink } from '../data/site';
+
+const year = 2026;
+// Unsplash pide enlazar al perfil con estos parámetros de referencia.
+const unsplashRef = 'utm_source=santo_sazon_landing&utm_medium=referral';
+---
+
+<footer class="site-footer on-dark" id="contacto" aria-labelledby="contacto-title">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="brand">
+        <p class="footer-logo">{business.name}</p>
+        <p>{business.tagline}.</p>
+        <a class="btn btn-light" role="button" href={whatsappLink()} target="_blank" rel="noopener">Haz tu pedido</a>
+      </div>
+
+      <div>
+        <h2 id="contacto-title">Contacto</h2>
+        <address>
+          <a href={`tel:+52${business.phone.replace(/\D/g, '')}`}>{business.phone}</a><br />
+          <a href={`mailto:${business.email}`}>{business.email}</a><br />
+          {business.address}
+        </address>
+      </div>
+
+      <div>
+        <h2>Horario</h2>
+        <dl class="hours">
+          {business.hours.map((h) => (
+            <div>
+              <dt>{h.days}</dt>
+              <dd>{h.time}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <div>
+        <h2>Redes</h2>
+        <ul class="social">
+          {business.social.map((s) => (
+            <li><a href={s.href}>{s.name}</a></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <div class="credits">
+      <p>
+        <strong>Fotos temporales</strong> de <a href={`https://unsplash.com/?${unsplashRef}`}>Unsplash</a>, se reemplazarán por fotos
+        reales del negocio:{' '}
+        {allPhotos.map((photo, index) => (
+          <>
+            <a href={`https://unsplash.com/@${photo.username}?${unsplashRef}`}>{photo.author}</a>{index < allPhotos.length - 1 ? ', ' : '.'}
+          </>
+        ))}
+      </p>
+      <p>© {year} {business.name}. Mockup con contenido de relleno.</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    padding-block: clamp(4rem, 9vw, 6rem) 2.5rem;
+    color: rgb(250 246 240 / 0.86);
+    background: var(--ss-carbon);
+  }
+  /* Pico le pone color de texto directo a p, address y dd: aquí heredan el claro. */
+  .site-footer :where(p, address, dd, small) {
+    color: inherit;
+  }
+  .footer-grid {
+    display: grid;
+    gap: 2.5rem;
+  }
+  .footer-logo {
+    margin-bottom: 0.5rem;
+    font-family: var(--ss-font-display);
+    font-size: 2rem;
+    font-variation-settings: 'SOFT' 100, 'WONK' 1;
+    color: var(--ss-crema);
+  }
+  .brand p:not(.footer-logo) {
+    max-width: 18rem;
+    margin-bottom: 1.5rem;
+  }
+  h2 {
+    margin-bottom: 1rem;
+    font-family: var(--ss-font-body);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ss-dorado);
+  }
+  address {
+    margin: 0;
+    font-style: normal;
+    line-height: 1.9;
+  }
+  a:not(.btn) {
+    color: var(--ss-crema);
+    text-decoration-color: rgb(250 246 240 / 0.35);
+    text-underline-offset: 3px;
+  }
+  a:not(.btn):hover {
+    color: var(--ss-dorado);
+  }
+  .hours {
+    margin: 0;
+  }
+  .hours div {
+    margin-bottom: 0.6rem;
+  }
+  dt {
+    font-weight: 600;
+    color: var(--ss-crema);
+  }
+  .hours dd {
+    margin: 0;
+    color: rgb(250 246 240 / 0.86);
+  }
+  .social {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .social li {
+    margin-bottom: 0.5rem;
+    list-style: none;
+  }
+  .credits {
+    margin-top: 3.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgb(250 246 240 / 0.15);
+    font-size: 0.85rem;
+    color: rgb(250 246 240 / 0.72);
+  }
+  .credits p {
+    margin-bottom: 0.75rem;
+  }
+  .credits strong {
+    color: var(--ss-crema);
+  }
+
+  @media (min-width: 640px) {
+    .footer-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1000px) {
+    .footer-grid {
+      grid-template-columns: 1.4fr 1fr 1fr 0.7fr;
+    }
+  }
+</style>
