@@ -134,6 +134,7 @@ img {
 }
 
 /* Encabezado de sección: rótulo pequeño + título serif. */
+p.eyebrow,
 .eyebrow {
   display: inline-flex;
   align-items: center;
