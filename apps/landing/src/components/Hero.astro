@@ -52,9 +52,9 @@ const photo = photos.heroTable;
     min-height: 100svh;
     padding-top: calc(var(--ss-header-h) + 2rem);
     padding-bottom: clamp(2.5rem, 7vh, 5rem);
-    color: var(--ss-crema);
+    color: var(--ss-surface-alt);
     /* Respaldo oscuro: si la foto no carga, el texto claro sigue legible. */
-    background-color: #2a211a;
+    background-color: var(--ss-text);
     overflow: hidden;
   }
   .hero-photo {
@@ -72,8 +72,8 @@ const photo = photos.heroTable;
     inset: 0;
     z-index: -1;
     background:
-      linear-gradient(180deg, rgb(20 16 12 / 0.35) 0%, rgb(20 16 12 / 0.15) 30%, rgb(20 16 12 / 0.78) 78%, rgb(20 16 12 / 0.9) 100%),
-      linear-gradient(90deg, rgb(20 16 12 / 0.55) 0%, rgb(20 16 12 / 0) 70%);
+      linear-gradient(180deg, color-mix(in srgb, var(--ss-text) 35%, transparent) 0%, color-mix(in srgb, var(--ss-text) 15%, transparent) 30%, color-mix(in srgb, var(--ss-text) 78%, transparent) 78%, color-mix(in srgb, var(--ss-text) 90%, transparent) 100%),
+      linear-gradient(90deg, color-mix(in srgb, var(--ss-text) 55%, transparent) 0%, color-mix(in srgb, var(--ss-text) 0%, transparent) 70%);
   }
   .hero-content {
     max-width: 76rem;
@@ -86,8 +86,8 @@ const photo = photos.heroTable;
     font-weight: 600;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--ss-carbon);
-    background: var(--ss-dorado);
+    color: var(--ss-text);
+    background: var(--ss-primary-soft);
     border-radius: 999px;
   }
   h1 {
@@ -96,18 +96,17 @@ const photo = photos.heroTable;
     font-size: clamp(2.6rem, min(8.5vw, 10.5vh), 5.6rem);
     font-weight: 500;
     line-height: 0.98;
-    color: var(--ss-crema);
+    color: var(--ss-surface-alt);
   }
   h1 em {
     font-style: italic;
-    font-variation-settings: 'SOFT' 100, 'WONK' 1;
-    color: var(--ss-dorado);
+    color: var(--ss-primary-soft);
   }
   .hero-sub {
     max-width: 36rem;
     margin-bottom: 2rem;
     font-size: clamp(1.05rem, 2.2vw, 1.25rem);
-    color: rgb(250 246 240 / 0.92);
+    color: color-mix(in srgb, var(--ss-surface-alt) 92%, transparent);
   }
   .hero-actions {
     display: flex;
@@ -123,17 +122,17 @@ const photo = photos.heroTable;
     gap: 0.5rem 1.75rem;
     margin: clamp(1.5rem, 4vh, 2.5rem) 0 0;
     padding: 1.25rem 0 0;
-    border-top: 1px solid rgb(250 246 240 / 0.25);
+    border-top: 1px solid color-mix(in srgb, var(--ss-surface-alt) 25%, transparent);
     list-style: none;
     font-size: 0.95rem;
-    color: rgb(250 246 240 / 0.88);
+    color: color-mix(in srgb, var(--ss-surface-alt) 88%, transparent);
   }
   .hero-facts li {
     margin: 0;
     list-style: none;
   }
   .hero-facts strong {
-    color: var(--ss-crema);
+    color: var(--ss-surface-alt);
     font-weight: 600;
   }
 

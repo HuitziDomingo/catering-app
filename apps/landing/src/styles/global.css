@@ -6,25 +6,24 @@
  */
 
 :root {
-  /* Paleta: cálida, mexicana contemporánea. */
-  --ss-terracota: #c65d3b; /* decorativo y títulos grandes (3.9:1 sobre crema) */
-  --ss-terracota-ink: #b4502f; /* texto y botones: 5.1:1 con blanco, 4.7:1 sobre crema */
-  --ss-terracota-deep: #8f3d22;
-  --ss-crema: #faf6f0;
-  --ss-arena: #f3e9dc;
-  --ss-verde: #2f4a3a;
-  --ss-verde-deep: #233a2d;
-  --ss-carbon: #1f1f1f;
-  --ss-texto-suave: #5a524a; /* 7.1:1 sobre crema */
-  --ss-dorado: #d9b26a; /* sobre verde o carbón; decorativo sobre crema */
-  --ss-blanco: #ffffff;
+  /* Paleta de marca, sacada del logo (contraste AA verificado). */
+  --ss-brand: #009cde; /* fondos, bandas, íconos, bordes; texto blanco encima solo grande (3.1:1) */
+  --ss-primary: #0077b0; /* botones con texto blanco, links, activos (4.9:1 sobre blanco) */
+  --ss-primary-dark: #005a87; /* hover/pressed; fondo oscuro con texto claro (7.5:1) */
+  --ss-primary-soft: #e6f5fc; /* fondos suaves, chips; texto claro sobre primary-dark */
+  --ss-brand-gray: #a4a4aa; /* líneas y separadores, nunca texto */
+  --ss-text: #2b2d33;
+  --ss-text-secondary: #6e6e76; /* 4.8:1 sobre surface-alt */
+  --ss-surface: #ffffff;
+  --ss-surface-alt: #f7f8fa;
+  --ss-white: #ffffff;
 
-  --ss-font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
-  --ss-font-body: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ss-font-display: 'Libre Baskerville', 'Iowan Old Style', Georgia, serif;
+  --ss-font-body: 'Lato', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --ss-radius: 1.25rem;
   --ss-radius-sm: 0.75rem;
-  --ss-shadow: 0 1px 2px rgb(31 31 31 / 0.06), 0 12px 32px -12px rgb(31 31 31 / 0.18);
+  --ss-shadow: 0 1px 2px color-mix(in srgb, var(--ss-text) 6%, transparent), 0 12px 32px -12px color-mix(in srgb, var(--ss-text) 18%, transparent);
   --ss-section-y: clamp(4.5rem, 10vw, 8rem);
   --ss-header-h: 4.5rem;
   --ss-ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -35,21 +34,21 @@
 :root:not([data-theme='dark']) {
   --pico-font-family: var(--ss-font-body);
   --pico-font-family-sans-serif: var(--ss-font-body);
-  --pico-background-color: var(--ss-crema);
-  --pico-color: var(--ss-carbon);
-  --pico-muted-color: var(--ss-texto-suave);
-  --pico-h1-color: var(--ss-carbon);
-  --pico-h2-color: var(--ss-carbon);
-  --pico-h3-color: var(--ss-carbon);
-  --pico-primary: var(--ss-terracota-ink);
-  --pico-primary-background: var(--ss-terracota-ink);
-  --pico-primary-border: var(--ss-terracota-ink);
-  --pico-primary-underline: rgb(180 80 47 / 0.5);
-  --pico-primary-hover: var(--ss-terracota-deep);
-  --pico-primary-hover-background: var(--ss-terracota-deep);
-  --pico-primary-hover-border: var(--ss-terracota-deep);
-  --pico-primary-focus: rgb(180 80 47 / 0.35);
-  --pico-primary-inverse: var(--ss-blanco);
+  --pico-background-color: var(--ss-surface-alt);
+  --pico-color: var(--ss-text);
+  --pico-muted-color: var(--ss-text-secondary);
+  --pico-h1-color: var(--ss-text);
+  --pico-h2-color: var(--ss-text);
+  --pico-h3-color: var(--ss-text);
+  --pico-primary: var(--ss-primary);
+  --pico-primary-background: var(--ss-primary);
+  --pico-primary-border: var(--ss-primary);
+  --pico-primary-underline: color-mix(in srgb, var(--ss-primary) 50%, transparent);
+  --pico-primary-hover: var(--ss-primary-dark);
+  --pico-primary-hover-background: var(--ss-primary-dark);
+  --pico-primary-hover-border: var(--ss-primary-dark);
+  --pico-primary-focus: color-mix(in srgb, var(--ss-primary) 35%, transparent);
+  --pico-primary-inverse: var(--ss-white);
   --pico-border-radius: 999px;
   --pico-spacing: 1rem;
   --pico-line-height: 1.6;
@@ -61,8 +60,7 @@ html {
 }
 
 body {
-  background: var(--ss-crema);
-  font-feature-settings: 'ss01';
+  background: var(--ss-surface-alt);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -71,10 +69,9 @@ h2,
 h3,
 .display {
   font-family: var(--ss-font-display);
-  font-weight: 500;
-  font-variation-settings: 'SOFT' 50, 'WONK' 0;
-  letter-spacing: -0.02em;
-  line-height: 1.08;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
   text-wrap: balance;
 }
 
@@ -94,16 +91,16 @@ img {
   height: auto;
 }
 
-/* Foco visible y consistente (AA): anillo dorado oscuro sobre cualquier fondo. */
+/* Foco visible y consistente (AA): anillo azul sobre cualquier fondo. */
 :focus-visible {
-  outline: 3px solid var(--ss-terracota-ink);
+  outline: 3px solid var(--ss-primary);
   outline-offset: 3px;
   border-radius: 6px;
 }
 
 .on-dark :focus-visible,
 .on-dark:focus-visible {
-  outline-color: var(--ss-dorado);
+  outline-color: var(--ss-primary-soft);
 }
 
 /* Saltar al contenido (visible solo con teclado). */
@@ -113,8 +110,8 @@ img {
   top: -4rem;
   z-index: 100;
   padding: 0.75rem 1.25rem;
-  background: var(--ss-carbon);
-  color: var(--ss-crema);
+  background: var(--ss-text);
+  color: var(--ss-surface-alt);
   border-radius: var(--ss-radius-sm);
   text-decoration: none;
   transition: top 0.2s;
@@ -144,7 +141,7 @@ p.eyebrow,
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--ss-terracota-ink);
+  color: var(--ss-primary);
 }
 .eyebrow::before {
   content: '';
@@ -162,7 +159,7 @@ p.eyebrow,
 }
 .section-head p {
   font-size: 1.1rem;
-  color: var(--ss-texto-suave);
+  color: var(--ss-text-secondary);
   margin: 0;
 }
 .section-head.centered {
@@ -193,14 +190,14 @@ a[role='button'].btn {
 }
 .btn-light,
 a[role='button'].btn-light {
-  background: var(--ss-crema);
-  border-color: var(--ss-crema);
-  color: var(--ss-carbon);
+  background: var(--ss-surface-alt);
+  border-color: var(--ss-surface-alt);
+  color: var(--ss-text);
 }
 .btn-light:hover {
-  background: var(--ss-blanco);
-  border-color: var(--ss-blanco);
-  color: var(--ss-carbon);
+  background: var(--ss-white);
+  border-color: var(--ss-white);
+  color: var(--ss-text);
 }
 .btn-ghost,
 a[role='button'].btn-ghost {
@@ -209,7 +206,7 @@ a[role='button'].btn-ghost {
   color: inherit;
 }
 .btn-ghost:hover {
-  background: rgb(250 246 240 / 0.12);
+  background: color-mix(in srgb, var(--ss-surface-alt) 12%, transparent);
   color: inherit;
 }
 .btn svg {

@@ -64,10 +64,10 @@ import { business, nav, whatsappLink } from '../data/site';
     padding: 0;
     z-index: 50;
     height: var(--ss-header-h);
-    background: rgb(250 246 240 / 0.86);
+    background: color-mix(in srgb, var(--ss-surface-alt) 86%, transparent);
     backdrop-filter: saturate(1.4) blur(14px);
     -webkit-backdrop-filter: saturate(1.4) blur(14px);
-    border-bottom: 1px solid rgb(31 31 31 / 0.06);
+    border-bottom: 1px solid color-mix(in srgb, var(--ss-text) 6%, transparent);
   }
   .bar {
     height: 100%;
@@ -83,15 +83,14 @@ import { business, nav, whatsappLink } from '../data/site';
     font-family: var(--ss-font-display);
     font-size: 1.45rem;
     font-weight: 600;
-    font-variation-settings: 'SOFT' 100, 'WONK' 1;
     letter-spacing: -0.02em;
-    color: var(--ss-carbon);
+    color: var(--ss-text);
     text-decoration: none;
   }
   .logo-mark {
     width: 1.6rem;
     height: 1.6rem;
-    fill: var(--ss-terracota);
+    fill: var(--ss-brand);
     transition: transform 0.6s var(--ss-ease);
   }
   .logo:hover .logo-mark {
@@ -113,13 +112,13 @@ import { business, nav, whatsappLink } from '../data/site';
     padding: 0.5rem 0.9rem;
     margin: 0;
     font-weight: 500;
-    color: var(--ss-carbon);
+    color: var(--ss-text);
     text-decoration: none;
     border-radius: 999px;
     transition: background-color 0.2s;
   }
   .desktop-nav a:hover {
-    background: var(--ss-arena);
+    background: var(--ss-primary-soft);
   }
 
   .site-header .header-cta {
@@ -141,7 +140,7 @@ import { business, nav, whatsappLink } from '../data/site';
     height: 2.9rem;
     padding: 0;
     border-radius: 50%;
-    background: var(--ss-arena);
+    background: var(--ss-primary-soft);
     cursor: pointer;
   }
   .mobile-nav summary::-webkit-details-marker,
@@ -155,7 +154,7 @@ import { business, nav, whatsappLink } from '../data/site';
     display: block;
     width: 1.15rem;
     height: 2px;
-    background: var(--ss-carbon);
+    background: var(--ss-text);
     border-radius: 2px;
     transition: transform 0.3s var(--ss-ease), opacity 0.2s;
   }
@@ -190,8 +189,8 @@ import { business, nav, whatsappLink } from '../data/site';
     left: 0;
     right: 0;
     padding: 1rem 1rem 1.5rem;
-    background: var(--ss-crema);
-    border-bottom: 1px solid rgb(31 31 31 / 0.08);
+    background: var(--ss-surface-alt);
+    border-bottom: 1px solid color-mix(in srgb, var(--ss-text) 8%, transparent);
     box-shadow: var(--ss-shadow);
   }
   .mobile-nav ul {
@@ -213,9 +212,9 @@ import { business, nav, whatsappLink } from '../data/site';
     border-radius: 0;
     font-family: var(--ss-font-display);
     font-size: 1.4rem;
-    color: var(--ss-carbon);
+    color: var(--ss-text);
     text-decoration: none;
-    border-bottom: 1px solid rgb(31 31 31 / 0.08);
+    border-bottom: 1px solid color-mix(in srgb, var(--ss-text) 8%, transparent);
   }
   .mobile-nav .btn {
     width: 100%;
