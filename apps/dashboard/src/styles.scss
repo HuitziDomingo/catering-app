@@ -1,1 +1,43 @@
-/* You can add global styles to this file, and also import other style files */
+/*
+ * Paleta de marca del dashboard: único lugar donde se definen colores.
+ * Se sobreescriben las variables del tema de Taiga UI (palette.less), así
+ * los componentes solo consumen --tui-* y no llevan colores sueltos.
+ */
+
+:root {
+  --cat-brand: #009cde; /* fondos, bandas, íconos; texto blanco encima solo grande */
+  --cat-primary: #0077b0; /* botones con texto blanco, links, activos (4.9:1) */
+  --cat-primary-dark: #005a87; /* hover/pressed */
+  --cat-primary-soft: #e6f5fc; /* fondos suaves, chips, seleccionados */
+  --cat-brand-gray: #a4a4aa; /* líneas y separadores, nunca texto */
+  --cat-text: #2b2d33;
+  --cat-text-secondary: #6e6e76;
+  --cat-surface: #ffffff;
+  --cat-surface-alt: #f7f8fa;
+
+  --tui-typography-family-text: 'Lato', system-ui, sans-serif;
+  --tui-typography-family-display: 'Libre Baskerville', Georgia, serif;
+}
+
+:root,
+[tuiTheme='light'] {
+  --tui-background-base: var(--cat-surface);
+  --tui-background-base-alt: var(--cat-surface-alt);
+  --tui-background-accent-1: var(--cat-primary);
+  --tui-background-accent-1-hover: var(--cat-primary-dark);
+  --tui-background-accent-1-pressed: var(--cat-primary-dark);
+  --tui-text-primary: var(--cat-text);
+  --tui-text-secondary: var(--cat-text-secondary);
+  --tui-text-action: var(--cat-primary);
+  --tui-text-action-hover: var(--cat-primary-dark);
+  --tui-border-focus: var(--cat-brand);
+}
+
+/* Modo oscuro: solo el acento; el resto queda como lo define Taiga. */
+[tuiTheme='dark'] {
+  --tui-background-accent-1: var(--cat-primary);
+  --tui-background-accent-1-hover: var(--cat-primary-dark);
+  --tui-background-accent-1-pressed: var(--cat-primary-dark);
+  --tui-text-action: var(--cat-brand);
+  --tui-text-action-hover: var(--cat-primary-soft);
+}
