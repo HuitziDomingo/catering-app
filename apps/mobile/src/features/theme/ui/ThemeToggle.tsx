@@ -26,9 +26,6 @@ export const ThemeToggle = () => {
         testID="theme-toggle-icon"
         from={{ opacity: 0, rotate: '-90deg' }}
         animate={{ opacity: 1, rotate: '0deg' }}
-        // @ts-expect-error -- ver AppProviders.tsx: moti@0.30.0's types
-        // import RN's per-axis transform interfaces by name from
-        // 'react-native', which react-native@0.85.3 no longer exports.
         transition={{ type: 'timing', duration: 300 }}
       >
         <Icon
