@@ -53,8 +53,14 @@ jobs:
       - name: Lint affected projects
         run: pnpm exec nx affected -t lint
 
+      # --parallel=1: one project's tests at a time. Each Jest run already
+      # spreads across all runner cores with its own workers; with Nx's
+      # default of 3 parallel tasks, api/dashboard/mobile Jest processes
+      # oversubscribe the 4-vCPU runner and mobile's heavier screen tests
+      # (ChatScreen, MenuScreen) hit random 5s/30s timeouts. Every suite
+      # passes reliably when run alone.
       - name: Test affected projects
-        run: pnpm exec nx affected -t test
+        run: pnpm exec nx affected -t test --parallel=1
 
       # Excludes mobile: its inferred "build" target is @nx/expo:build
       # (EAS cloud build, needs credentials/macOS signing we don't have
