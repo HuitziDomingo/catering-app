@@ -3,6 +3,11 @@ import {
   isFutureDate,
   SCHEDULED_FOR_IN_PAST_MESSAGE,
 } from '../../orders/scheduled-for.validation';
+import {
+  MAX_ORDER_ITEMS,
+  MAX_ORDER_ITEMS_MESSAGE,
+  MIN_ORDER_ITEMS_MESSAGE,
+} from '../../orders/order-items.validation';
 
 /**
  * MCP Tool: crear_pedido (ADR-023)
@@ -24,8 +29,9 @@ export const crearPedidoInputSchema = z.object({
         quantity: z.number().int().min(1).describe('Cantidad solicitada del platillo'),
       }),
     )
-    .min(1)
-    .describe('Platillos solicitados para el pedido'),
+    .min(1, { message: MIN_ORDER_ITEMS_MESSAGE })
+    .max(MAX_ORDER_ITEMS, { message: MAX_ORDER_ITEMS_MESSAGE })
+    .describe(`Platillos solicitados para el pedido (de 1 a ${MAX_ORDER_ITEMS})`),
   peopleCount: z
     .number()
     .int()

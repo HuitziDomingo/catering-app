@@ -1,5 +1,9 @@
 import { crearPedidoTool } from './crear-pedido.tool';
 import { SCHEDULED_FOR_IN_PAST_MESSAGE } from '../../orders/scheduled-for.validation';
+import {
+  MAX_ORDER_ITEMS,
+  MAX_ORDER_ITEMS_MESSAGE,
+} from '../../orders/order-items.validation';
 
 describe('crearPedidoInputSchema (crear_pedido tool input validation)', () => {
   const menuItemId = '22222222-2222-2222-2222-222222222222';
@@ -32,6 +36,31 @@ describe('crearPedidoInputSchema (crear_pedido tool input validation)', () => {
       items: [],
     });
     expect(result.success).toBe(false);
+  });
+
+  it(`accepts exactly ${MAX_ORDER_ITEMS} items`, () => {
+    const result = crearPedidoTool.inputSchema.safeParse({
+      ...validInput(),
+      items: Array.from({ length: MAX_ORDER_ITEMS }, () => ({
+        menuItemId,
+        quantity: 1,
+      })),
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it(`rejects ${MAX_ORDER_ITEMS + 1} items with the same message as CreateOrderDto (shared rule)`, () => {
+    const result = crearPedidoTool.inputSchema.safeParse({
+      ...validInput(),
+      items: Array.from({ length: MAX_ORDER_ITEMS + 1 }, () => ({
+        menuItemId,
+        quantity: 1,
+      })),
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues.map((issue) => issue.message)).toContain(
+      MAX_ORDER_ITEMS_MESSAGE,
+    );
   });
 
   it('rejects an item with a non-uuid menuItemId', () => {

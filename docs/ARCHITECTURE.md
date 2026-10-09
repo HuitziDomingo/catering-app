@@ -137,7 +137,8 @@ parámetros, resultado, timestamp).
    fuera del rango serves_min/serves_max de todos los platillos, se crea
    igual con needsReview = true (ADR-023). scheduledFor debe ser futura
    (400 si no): misma regla para POST /orders y la tool MCP crear_pedido
-   (`orders/scheduled-for.validation.ts`)
+   (`orders/scheduled-for.validation.ts`). Igual con items: de 1 a 50
+   platillos por pedido en ambos lados (`orders/order-items.validation.ts`)
 4. API emite evento WebSocket `new-order` → dashboard Angular lo refleja en vivo
 5. WhatsApp (Meta Cloud API, plantillas) al negocio y al cliente (ADR-029)
 6. Pago: POST /payments/preferences → Checkout Pro → webhook re-consulta
