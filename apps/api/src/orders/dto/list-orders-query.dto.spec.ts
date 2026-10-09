@@ -1,7 +1,7 @@
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { OrderStatus } from '@catering-app/shared-types';
-import { ListOrdersQueryDto } from './list-orders-query.dto';
+import { ListOrdersQueryDto, MAX_STATUS_FILTERS } from './list-orders-query.dto';
 
 // Mismo pipeline que el ValidationPipe global de main.ts ({ transform: true }):
 // la query string llega como strings y se transforma antes de validar.
@@ -30,6 +30,12 @@ describe('ListOrdersQueryDto', () => {
 
   it('rechaza un status que no existe', async () => {
     const { errors } = await parse({ status: 'pending,shipped' });
+    expect(errors.map((e) => e.property)).toContain('status');
+  });
+
+  it(`rechaza más de ${MAX_STATUS_FILTERS} valores de status`, async () => {
+    const status = Array.from({ length: MAX_STATUS_FILTERS + 1 }, () => 'pending').join(',');
+    const { errors } = await parse({ status });
     expect(errors.map((e) => e.property)).toContain('status');
   });
 

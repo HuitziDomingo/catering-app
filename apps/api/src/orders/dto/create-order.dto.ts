@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   ArrayMinSize,
   IsArray,
   IsDateString,
@@ -11,6 +12,11 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { CreateOrderItemDto } from './create-order-item.dto';
+import {
+  MAX_ORDER_ITEMS,
+  MAX_ORDER_ITEMS_MESSAGE,
+  MIN_ORDER_ITEMS_MESSAGE,
+} from '../order-items.validation';
 
 /**
  * `customerId` no es parte del DTO: se toma del `sub` del JWT autenticado
@@ -40,9 +46,12 @@ export class CreateOrderDto {
       'Platillos solicitados. El precio de cada línea se toma del base_price ' +
       'vigente del platillo al momento del pedido (snapshot, ver ADR-006).',
     type: [CreateOrderItemDto],
+    minItems: 1,
+    maxItems: MAX_ORDER_ITEMS,
   })
   @IsArray()
-  @ArrayMinSize(1)
+  @ArrayMinSize(1, { message: MIN_ORDER_ITEMS_MESSAGE })
+  @ArrayMaxSize(MAX_ORDER_ITEMS, { message: MAX_ORDER_ITEMS_MESSAGE })
   @ValidateNested({ each: true })
   @Type(() => CreateOrderItemDto)
   items!: CreateOrderItemDto[];
