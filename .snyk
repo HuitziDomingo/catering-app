@@ -1,0 +1,75 @@
+# Snyk (https://snyk.io) policy file.
+#
+# Solo se ignoran vulnerabilidades sin corrección disponible (o que no se
+# pueden forzar con pnpm.overrides) en dependencias que se verificó que NO
+# corren en producción: herramientas de build/dev/test. Cada ignore expira a
+# los 60 días para volver a revisarlo.
+#
+# zod (SNYK-JS-ZOD-20510278) NO se ignora a propósito: corre en producción en
+# la API (SDK de MCP y tools en apps/api/src/mcp/tools/) y no tiene parche.
+version: v1.25.0
+ignore:
+  SNYK-JS-BRACES-19963945:
+    - '*':
+        reason: >-
+          Sin versión corregida. Solo de build: lo trae micromatch vía
+          metro-file-map (bundler de Expo en la máquina de build/EAS); no
+          está en el bundle de la app ni en el runtime de la API.
+        expires: 2026-12-08T00:00:00.000Z
+        created: 2026-10-09T00:00:00.000Z
+  SNYK-JS-DEEPMERGE-19964053:
+    - '*':
+        reason: >-
+          Sin versión corregida. Solo de dev/build: lo usa @expo/config dentro
+          de @expo/cli (prebuild, export, dev server); no está en el bundle de
+          la app ni en el runtime de la API.
+        expires: 2026-12-08T00:00:00.000Z
+        created: 2026-10-09T00:00:00.000Z
+  SNYK-JS-NODEFORGE-19635204:
+    - '*':
+        reason: >-
+          Sin versión corregida. Solo de dev: lo usa @expo/cli (certificados
+          de code signing y dev server); no está en el bundle de la app ni en
+          el runtime de la API.
+        expires: 2026-12-08T00:00:00.000Z
+        created: 2026-10-09T00:00:00.000Z
+  SNYK-JS-HTTPCACHESEMANTICS-19964068:
+    - '*':
+        reason: >-
+          Sin versión corregida. Solo de build: lo usa astro al generar la
+          landing estática (sin adaptador SSR); no corre en producción.
+        expires: 2026-12-08T00:00:00.000Z
+        created: 2026-10-09T00:00:00.000Z
+  SNYK-JS-HTTPCACHESEMANTICS-19964064:
+    - '*':
+        reason: >-
+          Sin versión corregida. Solo de build: lo usa astro al generar la
+          landing estática (sin adaptador SSR); no corre en producción.
+        expires: 2026-12-08T00:00:00.000Z
+        created: 2026-10-09T00:00:00.000Z
+  SNYK-JS-CSSOM-19964070:
+    - '*':
+        reason: >-
+          Sin versión corregida. Solo de test: lo trae jsdom vía
+          jest-environment-jsdom de jest-expo; no corre en producción.
+        expires: 2026-12-08T00:00:00.000Z
+        created: 2026-10-09T00:00:00.000Z
+  SNYK-JS-IMAGESIZE-17295816:
+    - '*':
+        reason: >-
+          Corregido en 2.0.3 (salto de versión mayor) pero no se puede forzar:
+          Metro 0.84 llama imageSize() con una ruta de archivo y la v2 solo
+          acepta bytes, así que el bundle de Expo truena. Solo de build: Metro
+          (1.2.1) y less vía vite/astro (0.5.5); no corre en producción.
+        expires: 2026-12-08T00:00:00.000Z
+        created: 2026-10-09T00:00:00.000Z
+  SNYK-JS-IMAGESIZE-17295814:
+    - '*':
+        reason: >-
+          Corregido en 2.0.3 (salto de versión mayor) pero no se puede forzar:
+          Metro 0.84 llama imageSize() con una ruta de archivo y la v2 solo
+          acepta bytes, así que el bundle de Expo truena. Solo de build: Metro
+          (1.2.1) y less vía vite/astro (0.5.5); no corre en producción.
+        expires: 2026-12-08T00:00:00.000Z
+        created: 2026-10-09T00:00:00.000Z
+patch: {}

@@ -25,9 +25,6 @@ export const MenuItemList = ({ items, onItemPress }: MenuItemListProps) => (
     style={styles.flex}
     from={{ opacity: 0 }}
     animate={{ opacity: 1 }}
-    // @ts-expect-error -- ver AppProviders.tsx: moti@0.30.0's types import
-    // RN's per-axis transform interfaces by name from 'react-native', which
-    // react-native@0.85.3 no longer exports.
     transition={{ type: 'timing', duration: 500 }}
   >
     <FlatList
