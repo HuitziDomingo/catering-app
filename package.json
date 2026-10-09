@@ -120,7 +120,22 @@
       "engine.io": "^6.6.10",
       "hono": "^4.13.5",
       "@hono/node-server@1": "^1.19.17",
-      "axios@1": "^1.20.0"
+      "axios@1": "^1.20.0",
+      "shell-quote": "^1.11.0",
+      "@xmldom/xmldom@0.8": "^0.8.15",
+      "@xmldom/xmldom@0.9": "^0.9.12",
+      "fast-uri": "^3.1.7",
+      "browserslist": "^4.28.7",
+      "compression": "^1.8.2",
+      "brace-expansion@1": "^1.1.20",
+      "brace-expansion@2": "^2.1.6",
+      "brace-expansion@5": "^5.0.11",
+      "js-yaml@3": "^3.15.2",
+      "js-yaml@4": "^4.3.2",
+      "nanoid@3": "^3.3.17",
+      "devalue": "^5.9.3",
+      "sharp": "^0.35.5",
+      "smol-toml": "^1.7.1"
     }
   }
 }
