@@ -92,9 +92,14 @@ jobs:
       # automatically start blocking again once a fix ships upstream.
       # Transitive runtime deps we can patch without a major bump are pinned
       # via "pnpm.overrides" in the root package.json.
+      # --policy-path=.snyk: Snyk applies a .snyk file only to projects found
+      # on its own path, and --all-projects detects apps/mobile and
+      # apps/landing as separate projects -- point every project at the
+      # single root policy explicitly (Snyk's documented approach for a
+      # centralized policy in a monorepo).
       - name: Snyk dependency vulnerability scan
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --all-projects --severity-threshold=high --exclude=dist,.nx --fail-on=all
+          args: --all-projects --severity-threshold=high --exclude=dist,.nx --fail-on=all --policy-path=.snyk
