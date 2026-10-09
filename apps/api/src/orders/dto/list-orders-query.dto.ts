@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   IsBoolean,
   IsDateString,
   IsEnum,
@@ -19,6 +20,9 @@ import {
 
 export const DEFAULT_PAGE_SIZE = 20;
 export const MAX_PAGE_SIZE = 100;
+
+/** Como mucho un filtro por cada status que existe (ya se validan contra el enum). */
+export const MAX_STATUS_FILTERS = Object.values(OrderStatus).length;
 
 /** `?status=pending,confirmed` o `?status=pending&status=confirmed` → OrderStatus[]. */
 export function toStatusArray({ value }: { value: unknown }): unknown {
@@ -64,6 +68,9 @@ export class MyOrdersQueryDto extends PaginationQueryDto {
   @IsOptional()
   @Transform(toStatusArray)
   @IsEnum(OrderStatus, { each: true })
+  @ArrayMaxSize(MAX_STATUS_FILTERS, {
+    message: `status admite como máximo ${MAX_STATUS_FILTERS} valores.`,
+  })
   status?: OrderStatus[];
 }
 
