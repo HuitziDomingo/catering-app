@@ -44,8 +44,8 @@ const stores = ['App Store', 'Google Play'];
     gap: 2.5rem;
     align-items: center;
     padding: clamp(2.5rem, 7vw, 5rem) clamp(1.5rem, 6vw, 4.5rem);
-    color: var(--ss-blanco);
-    background: var(--ss-terracota-ink);
+    color: var(--ss-white);
+    background: var(--ss-primary);
     border-radius: calc(var(--ss-radius) * 1.6);
     overflow: hidden;
   }
@@ -56,20 +56,20 @@ const stores = ['App Store', 'Google Play'];
     inset: 0;
     z-index: -1;
     background:
-      radial-gradient(circle at 92% 18%, rgb(217 178 106 / 0.35) 0 5rem, transparent 5.05rem),
-      radial-gradient(circle at 80% 105%, rgb(143 61 34 / 0.75) 0 11rem, transparent 11.05rem),
-      radial-gradient(circle at 100% 70%, rgb(255 255 255 / 0.07) 0 7rem, transparent 7.05rem);
+      radial-gradient(circle at 92% 18%, color-mix(in srgb, var(--ss-brand) 35%, transparent) 0 5rem, transparent 5.05rem),
+      radial-gradient(circle at 80% 105%, color-mix(in srgb, var(--ss-brand) 75%, transparent) 0 11rem, transparent 11.05rem),
+      radial-gradient(circle at 100% 70%, color-mix(in srgb, var(--ss-white) 7%, transparent) 0 7rem, transparent 7.05rem);
   }
   h2 {
     margin-bottom: 1rem;
     font-size: clamp(2.3rem, 6vw, 4rem);
-    color: var(--ss-blanco);
+    color: var(--ss-white);
   }
   .cta-copy p {
     max-width: 32rem;
     margin-bottom: 2rem;
     font-size: 1.1rem;
-    color: var(--ss-blanco);
+    color: var(--ss-white);
   }
   .stores {
     display: flex;
@@ -89,9 +89,9 @@ const stores = ['App Store', 'Google Play'];
     font-weight: 600;
     font-size: 1.05rem;
     line-height: 1.15;
-    color: var(--ss-blanco);
-    background: rgb(31 31 31 / 0.55);
-    border: 1px solid rgb(255 255 255 / 0.25);
+    color: var(--ss-white);
+    background: color-mix(in srgb, var(--ss-text) 55%, transparent);
+    border: 1px solid color-mix(in srgb, var(--ss-white) 25%, transparent);
     border-radius: var(--ss-radius-sm);
   }
   .store-badge svg {

@@ -42,8 +42,8 @@ const icons = [
   .how {
     position: relative;
     overflow: hidden;
-    background: var(--ss-verde);
-    color: var(--ss-crema);
+    background: var(--ss-primary-dark);
+    color: var(--ss-surface-alt);
   }
   /* Halo cálido decorativo. */
   .how::before {
@@ -53,17 +53,17 @@ const icons = [
     top: -15rem;
     width: 40rem;
     height: 40rem;
-    background: radial-gradient(circle, rgb(217 178 106 / 0.22), transparent 65%);
+    background: radial-gradient(circle, color-mix(in srgb, var(--ss-brand) 22%, transparent), transparent 65%);
     pointer-events: none;
   }
   .how .eyebrow {
-    color: var(--ss-dorado);
+    color: var(--ss-primary-soft);
   }
   .how h2 {
-    color: var(--ss-crema);
+    color: var(--ss-surface-alt);
   }
   .how .section-head p {
-    color: rgb(250 246 240 / 0.82);
+    color: color-mix(in srgb, var(--ss-surface-alt) 82%, transparent);
   }
   .steps {
     position: relative;
@@ -78,8 +78,8 @@ const icons = [
     margin: 0;
     padding: 2rem 1.75rem;
     list-style: none;
-    background: rgb(250 246 240 / 0.06);
-    border: 1px solid rgb(250 246 240 / 0.14);
+    background: color-mix(in srgb, var(--ss-surface-alt) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--ss-surface-alt) 14%, transparent);
     border-radius: var(--ss-radius);
   }
   .step-top {
@@ -93,35 +93,34 @@ const icons = [
     font-style: italic;
     font-size: 3.5rem;
     line-height: 1;
-    font-variation-settings: 'SOFT' 100, 'WONK' 1;
-    color: var(--ss-dorado);
+    color: var(--ss-primary-soft);
   }
   .step-icon {
     width: 2.75rem;
     height: 2.75rem;
     padding: 0.6rem;
-    color: var(--ss-verde);
-    background: var(--ss-dorado);
+    color: var(--ss-primary-dark);
+    background: var(--ss-primary-soft);
     border-radius: 50%;
   }
   .step h3 {
     margin-bottom: 0.6rem;
     font-size: 1.5rem;
-    color: var(--ss-crema);
+    color: var(--ss-surface-alt);
   }
   .step p {
     margin: 0;
-    color: rgb(250 246 240 / 0.82);
+    color: color-mix(in srgb, var(--ss-surface-alt) 82%, transparent);
   }
   .how-note {
     margin: 2.5rem 0 0;
-    color: rgb(250 246 240 / 0.82);
+    color: color-mix(in srgb, var(--ss-surface-alt) 82%, transparent);
   }
   .how-note a {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    color: var(--ss-dorado);
+    color: var(--ss-primary-soft);
     font-weight: 600;
     text-underline-offset: 4px;
   }

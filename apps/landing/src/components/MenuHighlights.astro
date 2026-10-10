@@ -49,7 +49,7 @@ const price = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN
 
 <style>
   .menu {
-    background: var(--ss-arena);
+    background: var(--ss-primary-soft);
   }
   .dishes {
     display: grid;
@@ -66,7 +66,7 @@ const price = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN
     aspect-ratio: 4 / 3;
     border-radius: var(--ss-radius);
     overflow: hidden;
-    background: var(--ss-crema);
+    background: var(--ss-surface-alt);
   }
   .dish-photo img {
     width: 100%;
@@ -86,7 +86,7 @@ const price = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN
   }
   .dish-body p {
     margin-bottom: 0.75rem;
-    color: var(--ss-texto-suave);
+    color: var(--ss-text-secondary);
   }
   .dish-price {
     display: inline-flex;
@@ -95,18 +95,18 @@ const price = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN
     margin: 0;
     padding: 0.35rem 0.85rem;
     font-size: 0.9rem;
-    border: 1px solid rgb(180 80 47 / 0.35);
+    border: 1px solid color-mix(in srgb, var(--ss-primary) 35%, transparent);
     border-radius: 999px;
   }
   .dish-body .dish-price {
-    color: var(--ss-terracota-deep);
+    color: var(--ss-primary-dark);
   }
   .dish-price strong {
     font-size: 1.05rem;
-    color: var(--ss-terracota-deep);
+    color: var(--ss-primary-dark);
   }
   .dish-price span {
-    color: var(--ss-texto-suave);
+    color: var(--ss-text-secondary);
   }
 
   .menu-foot {
@@ -117,11 +117,11 @@ const price = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN
     gap: 1.25rem;
     margin-top: clamp(3rem, 6vw, 4.5rem);
     padding-top: 2rem;
-    border-top: 1px solid rgb(31 31 31 / 0.12);
+    border-top: 1px solid color-mix(in srgb, var(--ss-text) 12%, transparent);
   }
   .menu-foot p {
     margin: 0;
-    color: var(--ss-texto-suave);
+    color: var(--ss-text-secondary);
   }
 
   @media (min-width: 640px) {
